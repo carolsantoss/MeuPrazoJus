@@ -6,7 +6,7 @@ class DeadlineManager {
     private $deadlines = [];
 
     public function __construct() {
-        $this->file = __DIR__ . '/../deadlines.json';
+        $this->file = __DIR__ . '/../data/deadlines.json';
         if (file_exists($this->file)) {
             $this->deadlines = json_decode(file_get_contents($this->file), true) ?? [];
         }

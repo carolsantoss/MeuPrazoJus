@@ -6,7 +6,7 @@ class UserManager {
     private $users = [];
 
     public function __construct() {
-        $this->file = __DIR__ . '/../users.json';
+        $this->file = __DIR__ . '/../data/users.json';
         if (file_exists($this->file)) {
             $this->users = json_decode(file_get_contents($this->file), true) ?? [];
         }
