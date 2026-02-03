@@ -79,6 +79,7 @@ nav {
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(to right, #818cf8, #f472b6);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -114,13 +115,14 @@ nav {
 }
 
 /* Main Content */
+/* Main Content */
 main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1rem;
+    /* Removed align-items: center to allow full width dashboard */
+    /* Removed justify-content: center */
+    padding: 2rem;
 }
 
 h1 {
@@ -135,20 +137,24 @@ p.subtitle {
     color: var(--text-muted);
     font-size: 1.25rem;
     text-align: center;
-    margin-bottom: 3rem;
+    margin: 0 auto 3rem auto;
     max-width: 600px;
 }
 
-/* Calculator Card */
+/* Cards */
+.card,
 .calculator-card {
     background: var(--glass);
     border: 1px solid var(--glass-border);
     border-radius: 1.5rem;
     padding: 2.5rem;
     width: 100%;
-    max-width: 500px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
+}
+
+.calculator-card {
+    max-width: 500px;
 }
 
 .form-group {
@@ -385,6 +391,10 @@ select:focus {
     flex-direction: column;
     align-items: center;
     width: 100%;
+    margin: 0 auto;
+    /* Keep landing centered */
+    max-width: 1200px;
+    /* Limit landing width */
 }
 
 .features-row {
@@ -397,12 +407,13 @@ select:focus {
 }
 
 .feature-box {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass);
     border: 1px solid var(--glass-border);
     padding: 1.5rem;
     border-radius: 1rem;
     max-width: 250px;
     text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 .feature-box h3 {
@@ -419,11 +430,14 @@ select:focus {
 .dashboard-container {
     display: flex;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 2rem;
-    padding: 0 1rem;
-    min-height: 60vh;
+    /* Removed max-width limit to filling screen or set very high */
+    max-width: 100%;
+    margin: 0;
+    /* Align to left */
+    gap: 3rem;
+    /* Increase gap for better separation */
+    padding: 0;
+    min-height: 80vh;
 }
 
 .sidebar {
@@ -453,6 +467,8 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    align-items: stretch;
+    width: 100%;
 }
 
 .nav-item {
@@ -483,7 +499,26 @@ select:focus {
 
 .dash-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
 }
+
+.dash-content.centered {
+    align-items: center;
+}
+
+.content-wrapper {
+    width: 100%;
+    max-width: 800px;
+    /* Optional: limit width of content area for better readability */
+}
+
+.dash-content.centered .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 .dash-section {
     animation: fadeIn 0.3s ease-out;
@@ -579,4 +614,80 @@ select:focus {
     background: rgba(255, 255, 255, 0.05);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
+}
+
+/* Custom Tables */
+.glass-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.glass-table th,
+.glass-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.glass-table th {
+    font-weight: 600;
+    color: white;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.glass-table td {
+    color: var(--text-muted);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Document Requests specific glass styles */
+.glass-checkbox-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.glass-checkbox-card:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.request-item-glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.req-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.status-completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
 }

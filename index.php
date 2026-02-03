@@ -140,7 +140,9 @@
                     <nav class="side-nav">
                         <button class="nav-item active" onclick="showSection('dashboard')">📊 Visão Geral</button>
                         <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
-                        <a href="https://calendar.google.com" target="_blank" class="nav-item">📅 Google Agenda</a>
+                        <a href="fees.php" class="nav-item">💰 Honorários</a>
+                        <a href="doc_requests.php" class="nav-item">📂 Documentos</a>
+                        <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                     </nav>
                 </aside>
 
