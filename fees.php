@@ -229,6 +229,7 @@ function generateGCalLink(date, val, current, total) {
 }
 </script>
 
+    <?php include 'src/footer.php'; ?>
     <script src="assets/script.js"></script>
 </body>
 </html>

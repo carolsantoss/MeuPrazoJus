@@ -114,5 +114,6 @@
             }
         });
     </script>
+    <?php include 'src/footer.php'; ?>
 </body>
 </html>

@@ -248,6 +248,7 @@
         <?php endif; ?>
     </main>
 
+    <?php include 'src/footer.php'; ?>
     <script src="assets/script.js"></script>
 </body>
 </html>

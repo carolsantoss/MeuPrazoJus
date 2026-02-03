@@ -723,3 +723,54 @@ select:focus {
     justify-content: center;
     padding: 2rem;
 }
+
+/* Footer styles */
+.main-footer {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--glass-border);
+    padding: 2rem 0;
+    margin-top: auto;
+    width: 100%;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.footer-brand .logo {
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+.footer-brand .tagline {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.footer-copy {
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.footer-copy .credits {
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-copy {
+        text-align: center;
+    }
+}
