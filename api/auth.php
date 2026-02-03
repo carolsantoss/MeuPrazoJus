@@ -6,22 +6,28 @@ header('Content-Type: application/json');
 require_once '../src/UserManager.php';
 
 $action = $_GET['action'] ?? '';
-$data = json_decode(file_get_contents('php://input'), true);
+
+// Support both JSON input and traditional POST (FormData)
+$json = json_decode(file_get_contents('php://input'), true) ?? [];
+$data = array_merge($json, $_POST);
 
 $userManager = new UserManager();
 
 if ($action === 'register') {
     $email = $data['email'] ?? '';
     $password = $data['password'] ?? '';
+    $name = $data['name'] ?? '';
+    $phone = $data['phone'] ?? '';
     
     if (!$email || !$password) {
         echo json_encode(['error' => 'Preencha todos os campos']);
         exit;
     }
 
-    $user = $userManager->register($email, $password);
+    $user = $userManager->register($email, $password, $name, $phone);
     if ($user) {
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'] ?? '';
         $_SESSION['is_subscribed'] = ($user['subscription_status'] === 'premium');
         echo json_encode(['success' => true]);
     } else {
@@ -35,6 +41,7 @@ if ($action === 'register') {
     $user = $userManager->login($email, $password);
     if ($user) {
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'] ?? '';
         $_SESSION['is_subscribed'] = ($user['subscription_status'] === 'premium');
         echo json_encode(['success' => true]);
     } else {

@@ -16,7 +16,7 @@ class UserManager {
         file_put_contents($this->file, json_encode($this->users, JSON_PRETTY_PRINT));
     }
 
-    public function register($email, $password) {
+    public function register($email, $password, $name = '', $phone = '') {
         foreach ($this->users as $u) {
             if ($u['email'] === $email) {
                 return false; // Exists
@@ -26,6 +26,8 @@ class UserManager {
         $newUser = [
             'id' => uniqid(),
             'email' => $email,
+            'name' => $name,
+            'phone' => $phone,
             'password' => password_hash($password, PASSWORD_DEFAULT),
             'subscription_status' => 'free', // 'free' or 'premium'
             'calculations_count' => 0

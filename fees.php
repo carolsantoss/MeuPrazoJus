@@ -7,18 +7,42 @@
     <title>Calculadora de Honorários | MeuPrazoJus</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="max-w-7xl">
+            <nav>
+                <div class="logo">MeuPrazoJus</div>
+                <div>
+                   <?php if(isset($_SESSION['user_id'])): ?>
+                       <a href="subscription.php" class="btn btn-ghost">Planos</a>
+                       <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
+                   <?php else: ?>
+                       <a href="login.php" class="btn btn-ghost">Entrar</a>
+                       <a href="subscription.php" class="btn btn-primary">Assinar Agora</a>
+                   <?php endif; ?>
+                </div>
+            </nav>
+        </div>
+    </header>
+
     <main>
         <div class="dashboard-container">
             <!-- Sidebar -->
             <aside class="sidebar">
                 <div class="user-info">
-                    <h3>Bem-vindo!</h3>
+                    <?php 
+                        $fullName = $_SESSION['user_name'] ?? 'Usuário';
+                        $firstName = explode(' ', trim($fullName))[0];
+                    ?>
+                    <h3>Olá, <?= htmlspecialchars($firstName) ?>!</h3>
                     <p>Gerencie seus prazos.</p>
                 </div>
                 <nav class="side-nav">
                     <a href="index.php" class="nav-item">📊 Prazos</a>
+                    <a href="index.php?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
                     <a href="fees.php" class="nav-item active">💰 Honorários</a>
-                    <a href="doc_requests.php" class="nav-item">📂 Documentos</a>
                     <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                 </nav>
             </aside>
@@ -35,8 +59,8 @@
                         <form id="fee-form">
                             <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
                                 <div class="form-group" style="flex: 1;">
-                                    <label>Valor Total (R$)</label>
-                                    <input type="number" id="fee-total" step="0.01" required placeholder="Ex: 5000,00">
+                                    <label>Valor Total</label>
+                                    <input type="text" id="fee-total" required placeholder="R$ 0,00">
                                 </div>
                                 <div class="form-group" style="flex: 1;">
                                     <label>Nº Parcelas</label>
@@ -50,9 +74,21 @@
                                     <input type="date" id="fee-start-date" required>
                                 </div>
                                 <div class="form-group" style="flex: 1;">
-                                    <label>Dividir entre (Advogados)</label>
-                                    <input type="number" id="fee-split" min="1" value="1" required>
+                                    <!-- Dynamic lawyers will go here -->
                                 </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label style="display: flex; justify-content: space-between; align-items: center;">
+                                    Advogados Participantes
+                                    <button type="button" class="btn btn-ghost" id="add-lawyer-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">+ Adicionar Advogado</button>
+                                </label>
+                                <div id="lawyers-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                                    <div class="lawyer-input-group" style="display: flex; gap: 0.5rem;">
+                                        <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;">
+                                    </div>
+                                </div>
+                            </div>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-block">Calcular Parcelas</button>
@@ -89,6 +125,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set default date to today
     document.getElementById('fee-start-date').valueAsDate = new Date();
 
+    // Currency Mask
+    const feeInput = document.getElementById('fee-total');
+    feeInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, "");
+        value = (value / 100).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+        e.target.value = value;
+    });
+
+    // Add Lawyer
+    document.getElementById('add-lawyer-btn').addEventListener('click', () => {
+        const container = document.getElementById('lawyers-list');
+        const div = document.createElement('div');
+        div.className = 'lawyer-input-group';
+        div.style.display = 'flex';
+        div.style.gap = '0.5rem';
+        div.innerHTML = `
+            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;">
+            <button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>
+        `;
+        container.appendChild(div);
+
+        div.querySelector('.remove-lawyer').addEventListener('click', () => div.remove());
+    });
+
     document.getElementById('fee-form').addEventListener('submit', (e) => {
         e.preventDefault();
         calculateFees();
@@ -96,10 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function calculateFees() {
-    const total = parseFloat(document.getElementById('fee-total').value);
+    const rawValue = document.getElementById('fee-total').value;
+    const total = parseFloat(rawValue.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
     const installments = parseInt(document.getElementById('fee-installments').value);
     const startDateStr = document.getElementById('fee-start-date').value;
-    const splitCount = parseInt(document.getElementById('fee-split').value);
+    
+    const lawyerInputs = document.querySelectorAll('.lawyer-name');
+    const lawyers = Array.from(lawyerInputs).map(i => i.value).filter(v => v.trim() !== "");
+    const splitCount = lawyers.length || 1;
 
     if (isNaN(total) || total <= 0) {
         alert("Digite um valor válido.");
@@ -130,7 +197,7 @@ function calculateFees() {
             <td>${i}x</td>
             <td>${dateFmt}</td>
             <td>${formatCurrency(installValue)}</td>
-            <td>${formatCurrency(perPerson)} ${splitCount > 1 ? '<small class="text-muted">(cada)</small>' : ''}</td>
+            <td>${formatCurrency(perPerson)} <br><small style="font-size: 0.75rem; color: var(--text-muted)">p/ ${lawyers.join(', ') || 'Advogado'}</small></td>
             <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
         `;
         tbody.appendChild(row);
@@ -162,5 +229,6 @@ function generateGCalLink(date, val, current, total) {
 }
 </script>
 
+    <script src="assets/script.js"></script>
 </body>
 </html>

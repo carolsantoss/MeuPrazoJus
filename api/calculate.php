@@ -3,9 +3,9 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once '../config.php';
-require_once '../src/DeadlineCalculator.php';
-require_once '../src/UserManager.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../src/DeadlineCalculator.php';
+require_once __DIR__ . '/../src/UserManager.php';
 
 // Simple file-based "DB" for users/trials if SQLite fails or just for simplicity here
 // In a real app, use the PDO connection from config.php.
@@ -63,7 +63,7 @@ try {
         $usageCount = $userManager->incrementUsage($user['id']);
         
         // SAVE DEADLINE for Dashboard
-        require_once '../src/DeadlineManager.php';
+        require_once __DIR__ . '/../src/DeadlineManager.php';
         $dlManager = new DeadlineManager();
         $dlManager->save($user['id'], [
             'start_date' => $startDate,

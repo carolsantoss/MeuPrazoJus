@@ -251,6 +251,29 @@ select:focus {
     display: none;
 }
 
+/* Password Toggle */
+.password-field-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: white;
+}
+
 .gcal-btn {
     display: inline-flex;
     align-items: center;
@@ -690,4 +713,13 @@ select:focus {
 .status-completed {
     background: rgba(16, 185, 129, 0.1);
     color: #10b981;
+}
+
+/* Auth Centering */
+.auth-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
 }

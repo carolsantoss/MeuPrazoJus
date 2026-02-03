@@ -1,12 +1,16 @@
 // Basic Navigation
 function showSection(id) {
     document.querySelectorAll('.dash-section').forEach(el => el.style.display = 'none');
-    document.getElementById('section-' + id).style.display = 'block';
+    const target = document.getElementById('section-' + id);
+    if (target) target.style.display = 'block';
 
     // Update active nav
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    // Simplification for demo: assuming order
-    if (id === 'dashboard') document.getElementById('nav-dash')?.classList.add('active'); // Needs ID in HTML or querySelector update
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('onclick')?.includes(`'${id}'`)) {
+            el.classList.add('active');
+        }
+    });
 
     if (id === 'dashboard') loadDeadlines();
 }
@@ -104,6 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadJurisdictions();
     setupCalculator('calc-form', '');
     setupCalculator('calc-form-dash', '-dash');
+
+    // Handle Deep Linking
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section');
+    if (section) {
+        showSection(section);
+    }
 });
 
 function setupCalculator(formId, suffix) {
@@ -261,3 +272,16 @@ function setupGoogleCalendar(data, suffix = '') {
     const linkEl = document.getElementById('gcal-link' + suffix);
     if (linkEl) linkEl.href = link;
 }
+
+async function logout() {
+    try {
+        const res = await fetch('api/auth.php?action=logout');
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = 'login.php';
+        }
+    } catch (e) {
+        console.error('Logout error', e);
+    }
+}
+

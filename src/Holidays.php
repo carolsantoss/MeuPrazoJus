@@ -79,7 +79,17 @@ class Holidays {
         return false;
     }
 
-    // ... (recess logic remains)
+    public static function isForensicRecess($date) {
+        $m = (int)date('m', strtotime($date));
+        $d = (int)date('d', strtotime($date));
+        
+        // Dec 20 to Dec 31
+        if ($m == 12 && $d >= 20) return true;
+        // Jan 1 to Jan 20
+        if ($m == 1 && $d <= 20) return true;
+        
+        return false;
+    }
 
     public static function isWeekend($date) {
         $w = date('w', strtotime($date));

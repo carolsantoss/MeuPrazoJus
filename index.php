@@ -134,14 +134,17 @@
                 <!-- Sidebar -->
                 <aside class="sidebar">
                     <div class="user-info">
-                        <h3>Bem-vindo!</h3>
+                        <?php 
+                            $fullName = $_SESSION['user_name'] ?? 'Usuário';
+                            $firstName = explode(' ', trim($fullName))[0];
+                        ?>
+                        <h3>Olá, <?= htmlspecialchars($firstName) ?>!</h3>
                         <p>Gerencie seus prazos.</p>
                     </div>
                     <nav class="side-nav">
-                        <button class="nav-item active" onclick="showSection('dashboard')">📊 Visão Geral</button>
+                        <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
                         <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
                         <a href="fees.php" class="nav-item">💰 Honorários</a>
-                        <a href="doc_requests.php" class="nav-item">📂 Documentos</a>
                         <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                     </nav>
                 </aside>
@@ -218,11 +221,11 @@
                                     <label>Tipo de Contagem</label>
                                     <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
                                         <label style="color: white; cursor: pointer;">
-                                            <input type="radio" name="type" value="working" id="type-working-dash" checked> 
+                                            <input type="radio" name="type-dash" value="working" id="type-working-dash" checked> 
                                             Dias Úteis
                                         </label>
                                         <label style="color: white; cursor: pointer;">
-                                            <input type="radio" name="type" value="calendar" id="type-calendar-dash"> 
+                                            <input type="radio" name="type-dash" value="calendar" id="type-calendar-dash"> 
                                             Dias Corridos
                                         </label>
                                     </div>

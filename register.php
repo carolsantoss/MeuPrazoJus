@@ -20,44 +20,97 @@
         </div>
     </header>
 
-    <main>
-        <div class="auth-container">
-            <div class="auth-card">
-                <h2 class="auth-title">Criar Conta</h2>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" required>
+    <main class="auth-wrapper">
+        <div class="card" style="max-width: 400px; width: 100%;">
+            <h2 style="text-align: center; color: white; margin-bottom: 2rem;">Criar Conta</h2>
+            
+            <form id="reg-form">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="name" name="name" required placeholder="Seu nome">
+                </div>
+                
+                <div class="form-group">
+                    <label>WhatsApp / Telefone</label>
+                    <input type="text" id="phone" name="phone" required placeholder="(00) 00000-0000">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Senha</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="password" name="password" required>
+                        <span class="password-toggle" id="toggle-password">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </span>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Senha</label>
-                        <input type="password" id="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Confirmar Cadastro</button>
-                    <div id="msg" style="margin-top:1rem; text-align:center; color: #f87171;"></div>
-                </form>
-                <span class="link-text">Já tem conta? <a href="login.php">Entrar</a></span>
-            </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Confirmar Cadastro</button>
+            </form>
+
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+                Já tem conta? <a href="login.php" style="color: var(--primary); text-decoration: none;">Entrar</a>
+            </p>
         </div>
     </main>
 
     <script>
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        const toggleBtn = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+
+        toggleBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
             
+            // Toggle Icon
+            if (type === 'text') {
+                toggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+            } else {
+                toggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+            }
+        });
+
+        const phoneInput = document.getElementById('phone');
+        
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+            if (value.length > 11) value = value.slice(0, 11); // Limit to 11 digits
+            
+            // Apply mask
+            if (value.length > 10) {
+                // (xx) xxxxx-xxxx
+                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+            } else if (value.length > 6) {
+                // (xx) xxxx...
+                value = value.replace(/^(\d{2})(\d{4,5})(\d{0,4}).*/, "($1) $2-$3");
+            } else if (value.length > 2) {
+                // (xx) ...
+                value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+            } else {
+                // (x...
+                value = value.replace(/^(\d*)/, "($1");
+            }
+            
+            e.target.value = value;
+        });
+
+        document.getElementById('reg-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
             const res = await fetch('api/auth.php?action=register', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, password})
+                body: formData
             });
             const data = await res.json();
             if(data.success) {
-                alert('Conta criada!');
-                window.location.href = 'index.php'; // or login
+                window.location.href = 'index.php';
             } else {
-                document.getElementById('msg').innerText = data.error;
+                alert(data.error || 'Erro ao criar conta');
             }
         });
     </script>
