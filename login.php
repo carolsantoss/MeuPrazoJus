@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PrazoLegal</title>
+    <title>Login - MeuPrazoJus</title>
     <link rel="stylesheet" href="assets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -12,7 +12,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">PrazoLegal</div>
+                <div class="logo">MeuPrazoJus</div>
                 <div>
                    <a href="index.php" class="btn btn-ghost">Voltar</a>
                 </div>

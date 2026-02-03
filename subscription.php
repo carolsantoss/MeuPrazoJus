@@ -1,9 +1,10 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planos - PrazoLegal</title>
+    <title>Planos - MeuPrazoJus</title>
     <link rel="stylesheet" href="assets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -12,10 +13,10 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">PrazoLegal</div>
+                <div class="logo">MeuPrazoJus</div>
                 <div>
                    <a href="index.php" class="btn btn-ghost">Calculadora</a>
-                   <?php session_start(); if(isset($_SESSION['user_id'])): ?>
+                   <?php if(isset($_SESSION['user_id'])): ?>
                        <a href="#" class="btn btn-ghost" onclick="logout()">Sair</a>
                    <?php else: ?>
                        <a href="login.php" class="btn btn-ghost">Entrar</a>
@@ -45,7 +46,7 @@
             <!-- Premium -->
             <div class="pricing-card featured">
                 <h3>Anual</h3>
-                <div class="price">R$ 197</div>
+                <div class="price">R$ 50</div>
                 <div class="period">por ano</div>
                 <ul class="features-list">
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>

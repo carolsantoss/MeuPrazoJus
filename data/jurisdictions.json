@@ -1,0 +1,199 @@
+{
+    "states": [
+        {
+            "id": "AC",
+            "name": "Acre"
+        },
+        {
+            "id": "AL",
+            "name": "Alagoas"
+        },
+        {
+            "id": "AP",
+            "name": "Amapá"
+        },
+        {
+            "id": "AM",
+            "name": "Amazonas"
+        },
+        {
+            "id": "BA",
+            "name": "Bahia"
+        },
+        {
+            "id": "CE",
+            "name": "Ceará"
+        },
+        {
+            "id": "DF",
+            "name": "Distrito Federal"
+        },
+        {
+            "id": "ES",
+            "name": "Espírito Santo"
+        },
+        {
+            "id": "GO",
+            "name": "Goiás"
+        },
+        {
+            "id": "MA",
+            "name": "Maranhão"
+        },
+        {
+            "id": "MT",
+            "name": "Mato Grosso"
+        },
+        {
+            "id": "MS",
+            "name": "Mato Grosso do Sul"
+        },
+        {
+            "id": "MG",
+            "name": "Minas Gerais"
+        },
+        {
+            "id": "PA",
+            "name": "Pará"
+        },
+        {
+            "id": "PB",
+            "name": "Paraíba"
+        },
+        {
+            "id": "PR",
+            "name": "Paraná"
+        },
+        {
+            "id": "PE",
+            "name": "Pernambuco"
+        },
+        {
+            "id": "PI",
+            "name": "Piauí"
+        },
+        {
+            "id": "RJ",
+            "name": "Rio de Janeiro"
+        },
+        {
+            "id": "RN",
+            "name": "Rio Grande do Norte"
+        },
+        {
+            "id": "RS",
+            "name": "Rio Grande do Sul"
+        },
+        {
+            "id": "RO",
+            "name": "Rondônia"
+        },
+        {
+            "id": "RR",
+            "name": "Roraima"
+        },
+        {
+            "id": "SC",
+            "name": "Santa Catarina"
+        },
+        {
+            "id": "SP",
+            "name": "São Paulo"
+        },
+        {
+            "id": "SE",
+            "name": "Sergipe"
+        },
+        {
+            "id": "TO",
+            "name": "Tocantins"
+        }
+    ],
+    "cities": {
+        "AC": [
+            {
+                "id": "RIO_BRANCO",
+                "name": "Rio Branco"
+            },
+            {
+                "id": "BRASILEIA",
+                "name": "Brasiléia"
+            },
+            {
+                "id": "CRUZEIRO_DO_SUL",
+                "name": "Cruzeiro do Sul"
+            }
+        ],
+        "SP": [
+            {
+                "id": "SAO_PAULO",
+                "name": "São Paulo"
+            },
+            {
+                "id": "CAMPINAS",
+                "name": "Campinas"
+            },
+            {
+                "id": "RIBEIRAO_PRETO",
+                "name": "Ribeirão Preto"
+            }
+        ],
+        "RJ": [
+            {
+                "id": "RIO_DE_JANEIRO",
+                "name": "Rio de Janeiro"
+            },
+            {
+                "id": "NITEROI",
+                "name": "Niterói"
+            }
+        ]
+    },
+    "matters": [
+        {
+            "id": "CIVIL",
+            "name": "Cível",
+            "default_type": "working"
+        },
+        {
+            "id": "CRIMINAL",
+            "name": "Criminal",
+            "default_type": "calendar"
+        },
+        {
+            "id": "LABOR",
+            "name": "Trabalhista",
+            "default_type": "working"
+        },
+        {
+            "id": "TAX",
+            "name": "Tributário",
+            "default_type": "working"
+        }
+    ],
+    "holidays": {
+        "AC": [
+            "2026-06-15",
+            "2026-08-06",
+            "2026-09-05",
+            "2024-11-17"
+        ],
+        "BRASILEIA": [
+            "2026-07-03"
+        ],
+        "SP": [
+            "2026-07-09"
+        ],
+        "SAO_PAULO": [
+            "2026-01-25",
+            "2026-11-20"
+        ],
+        "RJ": [
+            "2026-04-23",
+            "2026-11-20"
+        ],
+        "RIO_DE_JANEIRO": [
+            "2026-01-20"
+        ]
+    }
+}

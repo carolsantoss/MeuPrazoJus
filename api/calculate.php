@@ -18,9 +18,16 @@ if (!$data) {
     exit;
 }
 
-$startDate = $data['startDate'] ?? date('Y-m-d');
+$startDate = $data['startDate'] ?? null;
 $days = intval($data['days'] ?? 0);
 $type = $data['type'] ?? 'working';
+$state = $data['state'] ?? null;
+$city = $data['city'] ?? null;
+
+if (!$startDate || $days <= 0) {
+    echo json_encode(['error' => 'Dados inválidos']);
+    exit;
+}
 
 // --- Trial Logic ---
 $userManager = new UserManager();
@@ -43,17 +50,30 @@ if (isset($_SESSION['user_id'])) {
 if (!$isSubscribed && $usageCount >= 5) {
     echo json_encode([
         'error' => 'upgrade_required',
-        'message' => 'Seu período de teste gratuito expirou (limite de 5 cálculos). Assine para continuar.'
+        'message' => 'Você atingiu o limite de 5 cálculos gratuitos. Assine para continuar.'
     ]);
     exit;
 }
 
 try {
-    $result = DeadlineCalculator::calculate($startDate, $days, $type);
+    $result = DeadlineCalculator::calculate($startDate, $days, $type, $state, $city);
     
     // Increment counter
     if ($user) {
         $usageCount = $userManager->incrementUsage($user['id']);
+        
+        // SAVE DEADLINE for Dashboard
+        require_once '../src/DeadlineManager.php';
+        $dlManager = new DeadlineManager();
+        $dlManager->save($user['id'], [
+            'start_date' => $startDate,
+            'days' => $days,
+            'type' => $type,
+            'end_date' => $result['end_date'],
+            'description' => $result['description'],
+            'location' => $result['location'] ?? ''
+        ]);
+
     } else {
         $_SESSION['calculations']++;
         $usageCount = $_SESSION['calculations'];

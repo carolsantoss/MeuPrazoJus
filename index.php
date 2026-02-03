@@ -1,9 +1,10 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrazoLegal - Calculadora de Prazos Processuais</title>
+    <title>MeuPrazoJus - Calculadora de Prazos Processuais</title>
     <link rel="stylesheet" href="assets/style.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,9 +14,9 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">PrazoLegal</div>
+                <div class="logo">MeuPrazoJus</div>
                 <div>
-                   <?php session_start(); if(isset($_SESSION['user_id'])): ?>
+                   <?php if(isset($_SESSION['user_id'])): ?>
                        <a href="subscription.php" class="btn btn-ghost">Planos</a>
                        <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
                    <?php else: ?>
@@ -35,61 +36,211 @@
     </script>
 
     <main>
-        <h1>Domine seus Prazos</h1>
-        <p class="subtitle">Calculadora de prazos processuais atualizada conforme o Novo CPC e recesso forense.</p>
-
-        <div class="calculator-card">
-            <form id="calc-form">
-                <div class="form-group">
-                    <label for="start_date">Data da Publicação / Intimação</label>
-                    <input type="date" id="start_date" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
-                </div>
-
-                <div class="form-group">
-                    <label for="days">Prazo (em dias)</label>
-                    <input type="number" id="days" name="days" placeholder="Ex: 5, 10, 15" required min="1">
-                </div>
-
-                <div class="form-group">
-                    <label>Tipo de Contagem</label>
-                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                        <label style="color: white; cursor: pointer;">
-                            <input type="radio" name="type" value="working" checked> 
-                            Dias Úteis (Novo CPC)
-                        </label>
-                        <label style="color: white; cursor: pointer;">
-                            <input type="radio" name="type" value="calendar"> 
-                            Dias Corridos
-                        </label>
+        <?php if(!isset($_SESSION['user_id'])): ?>
+            <!-- LANDING PAGE (Guest) -->
+            <div class="landing-hero">
+                <h1>Domine seus Prazos</h1>
+                <p class="subtitle">Calculadora de prazos processuais atualizada conforme o Novo CPC e recesso forense.</p>
+                
+                <div class="features-row">
+                    <div class="feature-box">
+                        <h3>📅 Novo CPC</h3>
+                        <p>Contagem em dias úteis com suspensão automática no recesso.</p>
+                    </div>
+                     <div class="feature-box">
+                        <h3>⚖️ Dias Corridos</h3>
+                        <p>Opção para prazos penais e materiais.</p>
+                    </div>
+                     <div class="feature-box">
+                        <h3>🔒 Segurança</h3>
+                        <p>Seus dados salvos e acessíveis de qualquer lugar.</p>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block">Calcular Prazo</button>
-            </form>
+                <div class="calculator-card">
+                    <h3 style="text-align:center; color:white; margin-bottom:1rem;">Faça uma simulação gratuita</h3>
+                    <form id="calc-form">
+                        <!-- Jurisdiction Fields -->
+                        <div class="form-group">
+                            <label for="state">Estado (UF)</label>
+                            <select id="state" name="state">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="city-group" style="display:none;">
+                            <label for="city">Município (Feriados Locais)</label>
+                            <select id="city" name="city">
+                                <option value="">Selecione o Estado primeiro</option>
+                            </select>
+                        </div>
 
-            <div class="limit-alert"></div>
+                        <div class="form-group">
+                            <label for="matter">Matéria / Área</label>
+                            <select id="matter" name="matter">
+                                <option value="">Geral</option>
+                            </select>
+                        </div>
 
-            <div id="results-area">
-                <div class="result-main">
-                    <div class="result-label">Prazo Final</div>
-                    <div class="result-date" id="result-date">...</div>
+                        <div class="form-group">
+                            <label for="start_date">Data da Publicação / Intimação</label>
+                            <input type="date" id="start_date" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="days">Prazo (em dias)</label>
+                            <input type="number" id="days" name="days" placeholder="Ex: 5, 10, 15" required min="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo de Contagem</label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <label style="color: white; cursor: pointer;">
+                                    <input type="radio" name="type" value="working" id="type-working" checked> 
+                                    Dias Úteis (Novo CPC)
+                                </label>
+                                <label style="color: white; cursor: pointer;">
+                                    <input type="radio" name="type" value="calendar" id="type-calendar"> 
+                                    Dias Corridos
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Calcular Prazo</button>
+                    </form>
+
+                    <div class="limit-alert"></div>
+
+                    <div id="results-area">
+                        <div class="result-main">
+                            <div class="result-label">Prazo Final</div>
+                            <div class="result-date" id="result-date">...</div>
+                        </div>
+                        
+                        <div class="log-container" id="log-details">
+                            <!-- Steps go here -->
+                        </div>
+                        
+                         <a href="#" target="_blank" id="gcal-link" class="btn gcal-btn">
+                            Adicionar ao Google Agenda
+                        </a>
+                    </div>
                 </div>
-                
-                <div class="log-container" id="log-details">
-                    <!-- Steps go here -->
-                </div>
-
-                <a href="#" target="_blank" id="gcal-link" class="btn gcal-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M16 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M8 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Adicionar ao Google Agenda
-                </a>
             </div>
-        </div>
+
+        <?php else: ?>
+            <!-- DASHBOARD (Logged In) -->
+            <div class="dashboard-container">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="user-info">
+                        <h3>Bem-vindo!</h3>
+                        <p>Gerencie seus prazos.</p>
+                    </div>
+                    <nav class="side-nav">
+                        <button class="nav-item active" onclick="showSection('dashboard')">📊 Visão Geral</button>
+                        <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
+                        <a href="https://calendar.google.com" target="_blank" class="nav-item">📅 Google Agenda</a>
+                    </nav>
+                </aside>
+
+                <!-- Main Dashboard Area -->
+                <div class="dash-content">
+                    
+                    <!-- Section: Overview -->
+                    <div id="section-dashboard" class="dash-section">
+                        <h2>Meus Prazos</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Pendentes</h3>
+                                <span class="stat-value" id="count-pending">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Finalizados</h3>
+                                <span class="stat-value" id="count-finalized">0</span>
+                            </div>
+                        </div>
+
+                        <div class="lists-grid">
+                            <div class="list-card">
+                                <h3>⏳ Pendentes</h3>
+                                <ul class="deadline-list" id="list-pending">
+                                    <li>Carregando...</li>
+                                </ul>
+                            </div>
+                            <div class="list-card">
+                                <h3>✅ Finalizados</h3>
+                                <ul class="deadline-list" id="list-finalized">
+                                    <li>Carregando...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: New Deadline (The Calculator) -->
+                    <div id="section-new-deadline" class="dash-section" style="display:none">
+                        <h2>Cadastrar Novo Prazo</h2>
+                        <div class="calculator-card" style="margin: 0 auto;">
+                            <form id="calc-form-dash">
+                                <!-- Jurisdiction Fields -->
+                                <div class="form-group">
+                                    <label for="state-dash">Estado (UF)</label>
+                                    <select id="state-dash" name="state">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="city-group-dash" style="display:none;">
+                                    <label for="city-dash">Município (Feriados Locais)</label>
+                                    <select id="city-dash" name="city">
+                                        <option value="">Selecione o Estado primeiro</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="matter-dash">Matéria / Área</label>
+                                    <select id="matter-dash" name="matter">
+                                        <option value="">Geral</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="start_date-dash">Data da Publicação / Intimação</label>
+                                    <input type="date" id="start_date-dash" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="days-dash">Prazo (em dias)</label>
+                                    <input type="number" id="days-dash" name="days" placeholder="Ex: 5, 10, 15" required min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo de Contagem</label>
+                                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                        <label style="color: white; cursor: pointer;">
+                                            <input type="radio" name="type" value="working" id="type-working-dash" checked> 
+                                            Dias Úteis
+                                        </label>
+                                        <label style="color: white; cursor: pointer;">
+                                            <input type="radio" name="type" value="calendar" id="type-calendar-dash"> 
+                                            Dias Corridos
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Calcular e Salvar</button>
+                            </form>
+                            <div id="results-area-dash" style="display:none;">
+                                <div class="result-main">
+                                    <div class="result-label">Prazo Final</div>
+                                    <div class="result-date" id="result-date-dash">...</div>
+                                </div>
+                                <div class="log-container" id="log-details-dash"></div>
+                                <a href="#" target="_blank" id="gcal-link-dash" class="btn gcal-btn">Adicionar ao Google Agenda</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        <?php endif; ?>
     </main>
 
     <script src="assets/script.js"></script>

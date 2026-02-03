@@ -9,33 +9,28 @@ class DeadlineCalculator {
      * Calculate legal deadline
      * @param string $startDate Y-m-d (Data da Publicação/Intimação)
      * @param int $days Number of days
-     * @param string $type 'working' or 'calendar'
+     * @param string|null $state UF (e.g., 'SP')
+     * @param string|null $city City ID (e.g., 'SAO_PAULO')
      * @return array Result details
      */
-    public static function calculate($startDate, $days, $type = 'working') {
+    public static function calculate($startDate, $days, $type = 'working', $state = null, $city = null) {
         $clientDate = new DateTime($startDate);
         $log = [];
         
         // 1. Determine Start of Count (Termo Inicial)
-        // Rule: Exclude the start day, start counting next business day.
-        
         $currentDate = clone $clientDate;
         $log[] = "Publicação: " . $currentDate->format('d/m/Y');
 
         // Step 1: Advance one day (Day 0 + 1)
         $currentDate->modify('+1 day');
         
-        // Rule: If the resulting day is not a business day, keep advancing until it is.
-        // Note: For "Calendar Days" (Prazos Materiais/Corridos), usually it DOES start on next day even if weekend?
-        // Actually, typically in Law:
-        // "O prazo começa a correr a partir do primeiro dia útil após a publicação."
-        // This applies to both types usually implies the 'Termo Inicial' must be a handy day for the lawyer to see it.
-        // Let's assume standard procedural rule for start date for both.
-        
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true)) {
+        // Wait for business day to start counting
+        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true, $state, $city)) {
              $reason = '';
+             $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
+             
              if (Holidays::isWeekend($currentDate->format('Y-m-d'))) $reason = 'Fim de semana';
-             elseif (Holidays::isHoliday($currentDate->format('Y-m-d'))) $reason = 'Feriado';
+             elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
              elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) $reason = 'Recesso';
              
              $log[] = "Pula " . $currentDate->format('d/m/Y') . " ($reason)";
@@ -46,22 +41,11 @@ class DeadlineCalculator {
         $log[] = "Início da contagem: " . $termStart->format('d/m/Y');
 
         // 2. Count the days
-        // We already positioned $currentDate at the first valid 'Termo Inicial' (Start Day).
-        // So this day MUST count as Day 1 (if working days logic applies).
-        
         $daysCounted = 0;
         
         // Check Day 1 (TermStart)
-        if ($type === 'working') {
-             // We know TermStart is a business day because of the loop above? 
-             // Yes, unless days=0 (edge case).
-             if ($days > 0) {
-                 $daysCounted = 1; 
-             }
-        } else {
-             if ($days > 0) {
-                 $daysCounted = 1;
-             }
+        if ($days > 0) {
+            $daysCounted = 1; 
         }
 
         // Loop for remaining days
@@ -70,21 +54,42 @@ class DeadlineCalculator {
             $dateStr = $currentDate->format('Y-m-d');
             
             if ($type === 'working') {
-                if (Holidays::isBusinessDay($dateStr, true)) {
+                if (Holidays::isBusinessDay($dateStr, true, $state, $city)) {
                     $daysCounted++;
+                } else {
+                     $reason = '';
+                     $hol = Holidays::isHoliday($dateStr, $state, $city);
+                     if (Holidays::isWeekend($dateStr)) $reason = 'Fim de semana';
+                     elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
+                     elseif (Holidays::isForensicRecess($dateStr)) $reason = 'Recesso';
+                     
+                     // Optional: Add to log for clarity on skipped days (only if verbose)
+                     // $log[] = "Dia " . $currentDate->format('d/m/Y') . " não contado ($reason)";
                 }
             } else {
-                $daysCounted++;
+                // Calendar days: check for recess if needed?
+                // Usually Calendar days running during recess? 
+                // Novo CPC Art 220: "Suspende-se o curso do prazo processual nos dias compreendidos entre 20 de dezembro e 20 de janeiro."
+                // This suspension applies to ALL procedural deadlines, even calendar ones (like penal)? 
+                // Controversial. But for standardized tool, usually we suspend.
+                
+                if (Holidays::isForensicRecess($dateStr)) {
+                    // Suspended
+                } else {
+                    $daysCounted++;
+                }
             }
         }
 
         // 3. Check End Date (Termo Final)
         // If it lands on a non-business day (always applies), push to next business day.
         $finalPush = false;
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true)) {
+        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true, $state, $city)) {
             $reason = '';
+             $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
+             
              if (Holidays::isWeekend($currentDate->format('Y-m-d'))) $reason = 'Fim de semana';
-             elseif (Holidays::isHoliday($currentDate->format('Y-m-d'))) $reason = 'Feriado';
+             elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
              elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) $reason = 'Recesso';
              
              $log[] = "Vencimento em " . $currentDate->format('d/m/Y') . " prorrogado ($reason)";
@@ -101,8 +106,23 @@ class DeadlineCalculator {
             'end_date' => $currentDate->format('Y-m-d'),
             'days' => $days,
             'type' => $type,
-            'description' => "Vence " . $currentDate->format('l, d/m/Y'),
-            'log' => $log
+            'description' => "Vence " . self::formatDatePt($currentDate),
+            'log' => $log,
+            'location' => $state ? "$city, $state" : 'Nacional'
         ];
+    }
+
+    private static function formatDatePt($date) {
+        $days = [
+            'Sunday' => 'Domingo',
+            'Monday' => 'Segunda-feira',
+            'Tuesday' => 'Terça-feira',
+            'Wednesday' => 'Quarta-feira',
+            'Thursday' => 'Quinta-feira',
+            'Friday' => 'Sexta-feira',
+            'Saturday' => 'Sábado'
+        ];
+        $dayName = $days[$date->format('l')];
+        return $dayName . ', ' . $date->format('d/m/Y');
     }
 }

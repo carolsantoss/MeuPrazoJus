@@ -42,36 +42,53 @@ class Holidays {
         return $holidays;
     }
 
-    public static function isHoliday($date) {
-        $year = date('Y', strtotime($date));
-        $holidays = self::getHolidays($year);
-        return array_key_exists($date, $holidays);
+    private static $localHolidays = null;
+
+    private static function loadRules() {
+        if (self::$localHolidays === null) {
+            $file = __DIR__ . '/../data/jurisdictions.json';
+            if (file_exists($file)) {
+                $data = json_decode(file_get_contents($file), true);
+                self::$localHolidays = $data['holidays'] ?? [];
+            } else {
+                self::$localHolidays = [];
+            }
+        }
     }
 
-    /**
-     * Checks for "Recesso Forense" (Dec 20 to Jan 20)
-     * Note: This suspends DEADLINES (Prazos).
-     * However, courts are physically closed usually Dec 20 to Jan 6.
-     * New CPC says deadlines suspend Dec 20 - Jan 20.
-     */
-    public static function isForensicRecess($date) {
-        $md = date('m-d', strtotime($date));
-        // Dec 20 to Dec 31
-        if ($md >= '12-20') return true;
-        // Jan 01 to Jan 20
-        if ($md <= '01-20') return true;
+    public static function isHoliday($date, $state = null, $city = null) {
+        $year = date('Y', strtotime($date));
         
+        // 1. National
+        $holidays = self::getHolidays($year);
+        if (array_key_exists($date, $holidays)) return $holidays[$date];
+
+        // 2. Local
+        self::loadRules();
+        
+        // Example check: AC (State)
+        if ($state && isset(self::$localHolidays[$state])) {
+            if (in_array($date, self::$localHolidays[$state])) return "Feriado Estadual ($state)";
+        }
+
+        // Example check: BRASILEIA (City)
+        if ($city && isset(self::$localHolidays[$city])) {
+            if (in_array($date, self::$localHolidays[$city])) return "Feriado Municipal ($city)";
+        }
+
         return false;
     }
 
+    // ... (recess logic remains)
+
     public static function isWeekend($date) {
         $w = date('w', strtotime($date));
-        return ($w == 0 || $w == 6); // 0 = Sunday, 6 = Saturday
+        return ($w == 0 || $w == 6);
     }
 
-    public static function isBusinessDay($date, $considerRecess = true) {
+    public static function isBusinessDay($date, $considerRecess = true, $state = null, $city = null) {
         if (self::isWeekend($date)) return false;
-        if (self::isHoliday($date)) return false;
+        if (self::isHoliday($date, $state, $city)) return false;
         if ($considerRecess && self::isForensicRecess($date)) return false;
         return true;
     }
