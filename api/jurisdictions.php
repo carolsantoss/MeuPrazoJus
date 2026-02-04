@@ -1,5 +1,4 @@
 <?php
-// api/jurisdictions.php
 header('Content-Type: application/json');
 
 $file = __DIR__ . '/../data/jurisdictions.json';

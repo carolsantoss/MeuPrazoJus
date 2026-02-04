@@ -1,5 +1,4 @@
 <?php
-// api/deadlines.php
 session_start();
 header('Content-Type: application/json');
 
@@ -16,7 +15,6 @@ $userId = $_SESSION['user_id'];
 $pending = array_values($manager->getPending($userId));
 $finalized = array_values($manager->getFinalized($userId));
 
-// Calculate stats for calendar or charts
 $stats = [
     'total' => count($pending) + count($finalized),
     'pending' => count($pending),

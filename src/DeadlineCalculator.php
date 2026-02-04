@@ -9,23 +9,23 @@ class DeadlineCalculator {
      * Calculate legal deadline
      * @param string $startDate Y-m-d (Data da Publicação/Intimação)
      * @param int $days Number of days
+     * @param string $type 'working' or 'calendar'
      * @param string|null $state UF (e.g., 'SP')
      * @param string|null $city City ID (e.g., 'SAO_PAULO')
+     * @param string|null $matter Legal area (e.g., 'CRIMINAL', 'CIVIL', 'LABOR')
      * @return array Result details
      */
-    public static function calculate($startDate, $days, $type = 'working', $state = null, $city = null) {
+    public static function calculate($startDate, $days, $type = 'working', $state = null, $city = null, $matter = null, $cityName = null) {
         $clientDate = new DateTime($startDate);
         $log = [];
         
-        // 1. Determine Start of Count (Termo Inicial)
         $currentDate = clone $clientDate;
         $log[] = "Publicação: " . $currentDate->format('d/m/Y');
 
-        // Step 1: Advance one day (Day 0 + 1)
         $currentDate->modify('+1 day');
         
-        // Wait for business day to start counting
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true, $state, $city)) {
+        $considerRecess = ($matter !== 'CRIMINAL');
+        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), $considerRecess, $state, $city)) {
              $reason = '';
              $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
              
@@ -40,15 +40,12 @@ class DeadlineCalculator {
         $termStart = clone $currentDate;
         $log[] = "Início da contagem: " . $termStart->format('d/m/Y');
 
-        // 2. Count the days
         $daysCounted = 0;
         
-        // Check Day 1 (TermStart)
         if ($days > 0) {
             $daysCounted = 1; 
         }
 
-        // Loop for remaining days
         while ($daysCounted < $days) {
             $currentDate->modify('+1 day');
             $dateStr = $currentDate->format('Y-m-d');
@@ -62,29 +59,21 @@ class DeadlineCalculator {
                      if (Holidays::isWeekend($dateStr)) $reason = 'Fim de semana';
                      elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
                      elseif (Holidays::isForensicRecess($dateStr)) $reason = 'Recesso';
-                     
-                     // Optional: Add to log for clarity on skipped days (only if verbose)
-                     // $log[] = "Dia " . $currentDate->format('d/m/Y') . " não contado ($reason)";
                 }
             } else {
-                // Calendar days: check for recess if needed?
-                // Usually Calendar days running during recess? 
-                // Novo CPC Art 220: "Suspende-se o curso do prazo processual nos dias compreendidos entre 20 de dezembro e 20 de janeiro."
-                // This suspension applies to ALL procedural deadlines, even calendar ones (like penal)? 
-                // Controversial. But for standardized tool, usually we suspend.
-                
-                if (Holidays::isForensicRecess($dateStr)) {
-                    // Suspended
-                } else {
+                if ($matter === 'CRIMINAL') {
                     $daysCounted++;
+                } else {
+                    if (Holidays::isForensicRecess($dateStr)) {
+                    } else {
+                        $daysCounted++;
+                    }
                 }
             }
         }
 
-        // 3. Check End Date (Termo Final)
-        // If it lands on a non-business day (always applies), push to next business day.
         $finalPush = false;
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), true, $state, $city)) {
+        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), $considerRecess, $state, $city)) {
             $reason = '';
              $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
              
@@ -106,9 +95,10 @@ class DeadlineCalculator {
             'end_date' => $currentDate->format('Y-m-d'),
             'days' => $days,
             'type' => $type,
+            'matter' => $matter,
             'description' => "Vence " . self::formatDatePt($currentDate),
             'log' => $log,
-            'location' => $state ? "$city, $state" : 'Nacional'
+            'location' => $cityName ? "$cityName - $state" : ($state ? "Estado de $state" : 'Nacional')
         ];
     }
 

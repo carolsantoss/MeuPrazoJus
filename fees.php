@@ -74,7 +74,6 @@
                                     <input type="date" id="fee-start-date" required>
                                 </div>
                                 <div class="form-group" style="flex: 1;">
-                                    <!-- Dynamic lawyers will go here -->
                                 </div>
                             </div>
 
@@ -109,7 +108,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="fee-table-body">
-                                    <!-- JS Generated -->
                                 </tbody>
                             </table>
                         </div>
@@ -122,10 +120,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Set default date to today
     document.getElementById('fee-start-date').valueAsDate = new Date();
 
-    // Currency Mask
     const feeInput = document.getElementById('fee-total');
     feeInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, "");
@@ -136,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = value;
     });
 
-    // Add Lawyer
     document.getElementById('add-lawyer-btn').addEventListener('click', () => {
         const container = document.getElementById('lawyers-list');
         const div = document.createElement('div');
@@ -179,18 +174,14 @@ function calculateFees() {
     const installValue = total / installments;
     const perPerson = installValue / splitCount;
     
-    // Date handling
     const [y, m, d] = startDateStr.split('-').map(Number);
-    // Create date focusing on noon to avoid timezone issues on simple addition
     let currentDate = new Date(y, m - 1, d, 12, 0, 0);
 
     for (let i = 1; i <= installments; i++) {
         const row = document.createElement('tr');
         
-        // Format Date
         const dateFmt = currentDate.toLocaleDateString('pt-BR');
         
-        // Google Calendar Link
         const gcalLink = generateGCalLink(currentDate, installValue, i, installments);
 
         row.innerHTML = `
@@ -202,7 +193,6 @@ function calculateFees() {
         `;
         tbody.appendChild(row);
 
-        // Next Month
         currentDate.setMonth(currentDate.getMonth() + 1);
     }
 

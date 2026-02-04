@@ -32,5 +32,18 @@
         "end_date": "2026-02-02",
         "description": "Vence Segunda-feira, 02\/02\/2026",
         "location": "SAO_PAULO, SP"
+    },
+    {
+        "id": "dl_6983b99e55cdb",
+        "user_id": "69815e341c9e9",
+        "created_at": "2026-02-04 18:26:54",
+        "status": "active",
+        "start_date": "2026-02-04",
+        "days": 8,
+        "type": "working",
+        "matter": "LABOR",
+        "end_date": "2026-02-16",
+        "description": "Vence Segunda-feira, 16\/02\/2026",
+        "location": "SAO_PAULO, SP"
     }
 ]

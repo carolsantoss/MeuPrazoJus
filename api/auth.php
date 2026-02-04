@@ -1,5 +1,4 @@
 <?php
-// api/auth.php
 session_start();
 header('Content-Type: application/json');
 
@@ -7,7 +6,6 @@ require_once '../src/UserManager.php';
 
 $action = $_GET['action'] ?? '';
 
-// Support both JSON input and traditional POST (FormData)
 $json = json_decode(file_get_contents('php://input'), true) ?? [];
 $data = array_merge($json, $_POST);
 

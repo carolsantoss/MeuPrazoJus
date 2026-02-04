@@ -1,5 +1,4 @@
 <?php
-// src/UserManager.php
 
 class UserManager {
     private $file;
@@ -29,7 +28,7 @@ class UserManager {
             'name' => $name,
             'phone' => $phone,
             'password' => password_hash($password, PASSWORD_DEFAULT),
-            'subscription_status' => 'free', // 'free' or 'premium'
+            'subscription_status' => 'free',
             'calculations_count' => 0
         ];
         

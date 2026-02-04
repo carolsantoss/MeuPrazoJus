@@ -1,5 +1,4 @@
 <?php
-// config.php
 
 // Define base path
 define('BASE_PATH', __DIR__);

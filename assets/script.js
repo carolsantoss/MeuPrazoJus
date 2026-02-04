@@ -1,10 +1,8 @@
-// Basic Navigation
 function showSection(id) {
     document.querySelectorAll('.dash-section').forEach(el => el.style.display = 'none');
     const target = document.getElementById('section-' + id);
     if (target) target.style.display = 'block';
 
-    // Update active nav
     document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.remove('active');
         if (el.getAttribute('onclick')?.includes(`'${id}'`)) {
@@ -15,7 +13,6 @@ function showSection(id) {
     if (id === 'dashboard') loadDeadlines();
 }
 
-// ----- JURISDICTION LOGIC -----
 let jurisdictionsData = null;
 
 async function loadJurisdictions() {
@@ -23,18 +20,16 @@ async function loadJurisdictions() {
         const res = await fetch('api/jurisdictions.php');
         jurisdictionsData = await res.json();
 
-        populateJurisdictions('');      // Landing
-        populateJurisdictions('-dash'); // Dashboard
+        populateJurisdictions('');
+        populateJurisdictions('-dash');
 
     } catch (e) { console.error('Error loading jurisdictions', e); }
 }
 
 function populateJurisdictions(suffix) {
-    // Populate States
     const stateSelect = document.getElementById('state' + suffix);
     if (!stateSelect) return;
 
-    // Clear first to avoid duplicates if called multiple times (though not here)
     stateSelect.innerHTML = '<option value="">Selecione...</option>';
 
     jurisdictionsData.states.forEach(s => {
@@ -44,7 +39,6 @@ function populateJurisdictions(suffix) {
         stateSelect.appendChild(opt);
     });
 
-    // Populate Matters
     const matterSelect = document.getElementById('matter' + suffix);
     if (matterSelect) {
         matterSelect.innerHTML = '<option value="">Geral</option>';
@@ -57,7 +51,18 @@ function populateJurisdictions(suffix) {
         });
     }
 
-    // Event Listeners
+    const varaSelect = document.getElementById('vara' + suffix);
+    if (varaSelect && jurisdictionsData.varas) {
+        varaSelect.innerHTML = '<option value="">Geral</option>';
+        jurisdictionsData.varas.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.innerText = v.name;
+            opt.dataset.matter = v.matter || '';
+            varaSelect.appendChild(opt);
+        });
+    }
+
     setupJurisdictionListeners(suffix);
 }
 
@@ -78,6 +83,7 @@ function setupJurisdictionListeners(suffix) {
                     const opt = document.createElement('option');
                     opt.value = c.id;
                     opt.innerText = c.name;
+                    opt.dataset.name = c.name;
                     citySelect.appendChild(opt);
                 });
             } else {
@@ -89,15 +95,84 @@ function setupJurisdictionListeners(suffix) {
     if (matterSelect) {
         matterSelect.addEventListener('change', () => {
             const selected = matterSelect.options[matterSelect.selectedIndex];
+            const matterId = matterSelect.value;
             const type = selected.dataset.type;
+
             if (type) {
-                if (type === 'working') {
-                    const el = document.getElementById('type-working' + suffix);
-                    if (el) el.checked = true;
+                const elW = document.getElementById('type-working' + suffix);
+                if (elW) elW.checked = (type === 'working');
+                const elC = document.getElementById('type-calendar' + suffix);
+                if (elC) elC.checked = (type === 'calendar');
+            }
+
+            const dtGroup = document.getElementById('deadline-type-group' + suffix);
+            const dtSelect = document.getElementById('deadline-type' + suffix);
+            const disclaimer = document.getElementById('deadline-disclaimer' + suffix);
+
+            if (matterId && dtSelect) {
+                const matter = jurisdictionsData.matters.find(m => m.id === matterId);
+                if (matter && matter.deadlines) {
+                    dtSelect.innerHTML = '<option value="">Selecione...</option>';
+                    matter.deadlines.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.name;
+                        opt.innerText = d.name;
+                        opt.dataset.days = d.days;
+                        opt.dataset.type = d.type;
+                        opt.dataset.ref = d.ref || '';
+                        dtSelect.appendChild(opt);
+                    });
+                    dtGroup.style.display = 'block';
+                } else {
+                    dtGroup.style.display = 'none';
                 }
-                if (type === 'calendar') {
-                    const el = document.getElementById('type-calendar' + suffix);
-                    if (el) el.checked = true;
+            } else {
+                if (dtGroup) dtGroup.style.display = 'none';
+            }
+            if (disclaimer) disclaimer.style.display = 'none';
+        });
+    }
+
+    const dtSelect = document.getElementById('deadline-type' + suffix);
+    if (dtSelect) {
+        dtSelect.addEventListener('change', () => {
+            const selected = dtSelect.options[dtSelect.selectedIndex];
+            const days = selected.dataset.days;
+            const type = selected.dataset.type;
+            const disclaimer = document.getElementById('deadline-disclaimer' + suffix);
+
+            if (days) {
+                const daysInput = document.getElementById('days' + suffix);
+                if (daysInput) daysInput.value = days;
+            }
+            if (type) {
+                const elW = document.getElementById('type-working' + suffix);
+                if (elW) elW.checked = (type === 'working');
+                const elC = document.getElementById('type-calendar' + suffix);
+                if (elC) elC.checked = (type === 'calendar');
+            }
+            if (disclaimer) {
+                if (dtSelect.value) {
+                    const ref = selected.dataset.ref;
+                    disclaimer.style.display = 'block';
+                    disclaimer.innerHTML = `⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. Estimativa baseada na lei federal${ref ? ' (' + ref + ')' : ''}.`;
+                } else {
+                    disclaimer.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    const varaSelect = document.getElementById('vara' + suffix);
+    if (varaSelect) {
+        varaSelect.addEventListener('change', () => {
+            const selected = varaSelect.options[varaSelect.selectedIndex];
+            const matterId = selected.dataset.matter;
+            if (matterId) {
+                const matterSelect = document.getElementById('matter' + suffix);
+                if (matterSelect && matterSelect.value !== matterId) {
+                    matterSelect.value = matterId;
+                    matterSelect.dispatchEvent(new Event('change'));
                 }
             }
         });
@@ -109,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCalculator('calc-form', '');
     setupCalculator('calc-form-dash', '-dash');
 
-    // Handle Deep Linking
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
     if (section) {
@@ -126,20 +200,17 @@ function setupCalculator(formId, suffix) {
 
         const startDate = document.getElementById('start_date' + suffix).value;
         const days = document.getElementById('days' + suffix).value;
-        // Actually radio names must be unique per group if on same page, OR scoped by form.
-        // Since we conditionally render (if/else), only ONE form exists in DOM usually?
-        // NO. PHP has if(!isset) -> Landing ELSE Dashboard.
-        // So they never coexist on the same page load.
-        // Wait, 'type' radios on dashboard form need unique IDs but same Name?
-        // If they don't coexist, same IDs is fine.
-        // BUT my replace logic added suffix IDs.
-        // Let's rely on form scoping: form.querySelector
 
         const typeInput = form.querySelector('input[name="type' + suffix + '"]:checked');
         const typeVal = typeInput ? typeInput.value : 'working';
 
         const state = document.getElementById('state' + suffix).value;
-        const city = document.getElementById('city' + suffix).value;
+        const citySelect = document.getElementById('city' + suffix);
+        const city = citySelect.value;
+        const cityName = citySelect.options[citySelect.selectedIndex]?.dataset.name || '';
+        const matter = document.getElementById('matter' + suffix).value;
+        const vara = document.getElementById('vara' + suffix).value;
+        const deadlineType = document.getElementById('deadline-type' + suffix)?.value;
 
         const btn = form.querySelector('button[type="submit"]');
 
@@ -150,7 +221,7 @@ function setupCalculator(formId, suffix) {
             const response = await fetch('api/calculate.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ startDate, days, type: typeVal, state, city })
+                body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, deadlineType })
             });
 
             const data = await response.json();
@@ -175,7 +246,8 @@ function setupCalculator(formId, suffix) {
                 document.getElementById('result-date' + suffix).innerText = data.description;
 
                 const logContainer = document.getElementById('log-details' + suffix);
-                logContainer.innerHTML = '';
+                logContainer.innerHTML = `<div class='log-item' style='color:#4ade80; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:0.5rem; padding-bottom:0.5rem;'>📍 Localidade: ${data.location}</div>`;
+
                 data.log.forEach(line => {
                     const div = document.createElement('div');
                     div.className = 'log-item';
@@ -200,23 +272,19 @@ function setupCalculator(formId, suffix) {
     });
 }
 
-
-// Load Deadlines (Dashboard)
 async function loadDeadlines() {
     try {
         const res = await fetch('api/deadlines.php');
         const data = await res.json();
 
-        if (data.error) return; // Not logged in or error
+        if (data.error) return;
 
-        // Counters
         const pCount = document.getElementById('count-pending');
         if (pCount) pCount.innerText = data.stats.pending;
 
         const fCount = document.getElementById('count-finalized');
         if (fCount) fCount.innerText = data.stats.finalized;
 
-        // Lists
         renderList('list-pending', data.pending);
         renderList('list-finalized', data.finalized);
 
@@ -253,14 +321,12 @@ function renderList(elementId, items) {
     });
 }
 
-// Initial Load if dashboard exists
 if (document.querySelector('.dashboard-container')) {
     loadDeadlines();
 }
 
 
 function setupGoogleCalendar(data, suffix = '') {
-    // Construct Google Calendar Link
     const title = encodeURIComponent("Fim de Prazo Legal");
     const endDateStr = data.end_date.replace(/-/g, '');
     const startDateTime = endDateStr + 'T090000';

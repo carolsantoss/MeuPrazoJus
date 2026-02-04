@@ -1,5 +1,4 @@
 <?php
-// src/Holidays.php
 
 class Holidays {
 
@@ -15,23 +14,16 @@ class Holidays {
             $year . '-12-25' => 'Natal',
         ];
 
-        // Mobile holidays (Pascoa based)
         $easterDate = easter_date($year);
         $easterDay = date('j', $easterDate);
         $easterMonth = date('n', $easterDate);
         $easterYear = date('Y', $easterDate);
 
-        // Carnaval (47 days before Easter) - Facuultative point usually, but often courts close
-        // Lets treat Carnaval Mon/Tue as non-business for safety or keep it strict?
-        // Standard national holidays usually count Carnaval as Facultative.
-        // Courts usually close Monday and Tuesday. Adding them for safety.
         $carnaval = date('Y-m-d', mktime(0, 0, 0, $easterMonth, $easterDay - 47, $easterYear));
         $carnaval2 = date('Y-m-d', mktime(0, 0, 0, $easterMonth, $easterDay - 46, $easterYear));
         
-        // Sexta-feira Santa (2 days before Easter)
         $goodFriday = date('Y-m-d', mktime(0, 0, 0, $easterMonth, $easterDay - 2, $easterYear));
         
-        // Corpus Christi (60 days after Easter)
         $corpusChristi = date('Y-m-d', mktime(0, 0, 0, $easterMonth, $easterDay + 60, $easterYear));
 
         $holidays[$carnaval] = 'Carnaval';
@@ -83,9 +75,7 @@ class Holidays {
         $m = (int)date('m', strtotime($date));
         $d = (int)date('d', strtotime($date));
         
-        // Dec 20 to Dec 31
         if ($m == 12 && $d >= 20) return true;
-        // Jan 1 to Jan 20
         if ($m == 1 && $d <= 20) return true;
         
         return false;

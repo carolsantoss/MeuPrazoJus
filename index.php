@@ -82,6 +82,20 @@
                             </select>
                         </div>
 
+                        <div class="form-group" id="deadline-type-group" style="display:none;">
+                            <label for="deadline-type">Tipo de Prazo</label>
+                            <select id="deadline-type" name="deadline-type">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="vara-group">
+                            <label for="vara">Vara / Juízo</label>
+                            <select id="vara" name="vara">
+                                <option value="">Geral</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="start_date">Data da Publicação / Intimação</label>
                             <input type="date" id="start_date" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
@@ -106,6 +120,10 @@
                             </div>
                         </div>
 
+                        <div id="deadline-disclaimer" style="display:none; background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #cc9900; font-size: 0.85rem; color: #eee;">
+                            ⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-block">Calcular Prazo</button>
                     </form>
 
@@ -118,7 +136,6 @@
                         </div>
                         
                         <div class="log-container" id="log-details">
-                            <!-- Steps go here -->
                         </div>
                         
                          <a href="#" target="_blank" id="gcal-link" class="btn gcal-btn">
@@ -209,6 +226,20 @@
                                     </select>
                                 </div>
 
+                                <div class="form-group" id="deadline-type-group-dash" style="display:none;">
+                                    <label for="deadline-type-dash">Tipo de Prazo</label>
+                                    <select id="deadline-type-dash" name="deadline-type">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="vara-group-dash">
+                                    <label for="vara-dash">Vara / Juízo</label>
+                                    <select id="vara-dash" name="vara">
+                                        <option value="">Geral</option>
+                                    </select>
+                                </div>
+
                                 <div class="form-group">
                                     <label for="start_date-dash">Data da Publicação / Intimação</label>
                                     <input type="date" id="start_date-dash" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
@@ -229,6 +260,10 @@
                                             Dias Corridos
                                         </label>
                                     </div>
+                                </div>
+
+                                <div id="deadline-disclaimer-dash" style="display:none; background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #cc9900; font-size: 0.85rem; color: #eee;">
+                                    ⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">Calcular e Salvar</button>
                             </form>
