@@ -64,13 +64,8 @@
                 window.location.href = 'login.php';
                 return;
             }
-            // Mock Payment
-            const res = await fetch('api/auth.php?action=subscribe', { method: 'POST' });
-            const data = await res.json();
-            if(data.success) {
-                alert('Assinatura ativada com sucesso! (Mock)');
-                window.location.href = 'index.php';
-            }
+            // Redirect to dedicated checkout page
+            window.location.href = 'checkout.php';
         });
 
         async function logout() {

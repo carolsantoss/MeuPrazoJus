@@ -14,7 +14,7 @@
             <nav>
                 <div class="logo">MeuPrazoJus</div>
                 <div>
-                   <a href="index.php" class="btn btn-ghost">Voltar</a>
+                    <a href="index.php" class="btn btn-ghost">Voltar</a>
                 </div>
             </nav>
         </div>
@@ -54,7 +54,7 @@
             </form>
 
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Já tem conta? <a href="login" style="color: var(--primary); text-decoration: none;">Entrar</a>
+                Já tem conta? <a href="login.php" style="color: var(--primary); text-decoration: none;">Entrar</a>
             </p>
         </div>
     </main>
@@ -115,7 +115,7 @@
                 try {
                    const data = JSON.parse(text);
                    if(data.success) {
-                       window.location.href = 'index';
+                       window.location.href = 'index.php';
                    } else {
                        alert(data.error || 'Erro ao criar conta');
                    }

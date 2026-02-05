@@ -26,15 +26,19 @@ class DeadlineCalculator {
         
         $considerRecess = ($matter !== 'CRIMINAL');
         while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), $considerRecess, $state, $city)) {
-             $reason = '';
-             $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
-             
-             if (Holidays::isWeekend($currentDate->format('Y-m-d'))) $reason = 'Fim de semana';
-             elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
-             elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) $reason = 'Recesso';
-             
-             $log[] = "Pula " . $currentDate->format('d/m/Y') . " ($reason)";
-             $currentDate->modify('+1 day');
+            $reason = '';
+            $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
+            
+            if (Holidays::isWeekend($currentDate->format('Y-m-d'))) {
+                $reason = 'Fim de semana';
+            } elseif ($hol) {
+                $reason = $hol === true ? 'Feriado' : $hol;
+            } elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) {
+                $reason = 'Recesso';
+            }
+            
+            $log[] = "Pula " . $currentDate->format('d/m/Y') . " ($reason)";
+            $currentDate->modify('+1 day');
         }
 
         $termStart = clone $currentDate;

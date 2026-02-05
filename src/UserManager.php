@@ -15,7 +15,14 @@ class UserManager {
         try {
             $stmt = $this->db->prepare("INSERT INTO users (id, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$id, $email, $hash, $name, $phone]);
-            return ['id' => $id, 'email' => $email, 'name' => $name, 'phone' => $phone];
+            return [
+                'id' => $id, 
+                'email' => $email, 
+                'name' => $name, 
+                'phone' => $phone,
+                'subscription_status' => 'free',
+                'calculations_count' => 0
+            ];
         } catch (PDOException $e) {
             // Likely duplicate email
             return false;
@@ -33,10 +40,10 @@ class UserManager {
         return false;
     }
 
-    public function getUser($id) {
+    public function getUserById($id) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch() ?: null;
+        return $stmt->fetch();
     }
 
     public function incrementUsage($id) {

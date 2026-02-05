@@ -31,7 +31,7 @@ $isSubscribed = false;
 $usageCount = 0;
 
 if (isset($_SESSION['user_id'])) {
-    $user = $userManager->getUser($_SESSION['user_id']);
+    $user = $userManager->getUserById($_SESSION['user_id']);
     $usageCount = $user['calculations_count'] ?? 0;
     $isSubscribed = ($user['subscription_status'] === 'premium');
 } else {

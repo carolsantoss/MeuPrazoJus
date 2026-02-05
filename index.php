@@ -14,13 +14,13 @@
             <nav>
                 <div class="logo">MeuPrazoJus</div>
                 <div>
-                   <?php if(isset($_SESSION['user_id'])): ?>
-                       <a href="subscription.php" class="btn btn-ghost">Planos</a>
-                       <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
-                   <?php else: ?>
-                       <a href="login.php" class="btn btn-ghost">Entrar</a>
-                       <a href="subscription.php" class="btn btn-primary">Assinar Agora</a>
-                   <?php endif; ?>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="subscription.php" class="btn btn-ghost">Planos</a>
+                        <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
+                    <?php else: ?>
+                        <a href="login.php" class="btn btn-ghost">Entrar</a>
+                        <a href="subscription.php" class="btn btn-primary">Assinar Agora</a>
+                    <?php endif; ?>
                 </div>
             </nav>
         </div>
