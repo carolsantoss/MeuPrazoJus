@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeuPrazoJus - Calculadora de Prazos Processuais</title>
     <link rel="stylesheet" href="assets/style.css?v=<?php echo time(); ?>">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -36,7 +35,6 @@
 
     <main>
         <?php if(!isset($_SESSION['user_id'])): ?>
-            <!-- LANDING PAGE (Guest) -->
             <div class="landing-hero">
                 <h1>Domine seus Prazos</h1>
                 <p class="subtitle">Calculadora de prazos processuais atualizada conforme o Novo CPC e recesso forense.</p>
@@ -59,7 +57,6 @@
                 <div class="calculator-card">
                     <h3 style="text-align:center; color:white; margin-bottom:1rem;">Faça uma simulação gratuita</h3>
                     <form id="calc-form">
-                        <!-- Jurisdiction Fields -->
                         <div class="form-group">
                             <label for="state">Estado (UF)</label>
                             <select id="state" name="state">
