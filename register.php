@@ -54,7 +54,7 @@
             </form>
 
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Já tem conta? <a href="login" style="color: var(--primary); text-decoration: none;">Entrar</a>
+                Já tem conta? <a href="login.php" style="color: var(--primary); text-decoration: none;">Entrar</a>
             </p>
         </div>
     </main>
@@ -99,16 +99,36 @@
 
         document.getElementById('reg-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const res = await fetch('api/auth.php?action=register', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if(data.success) {
-                window.location.href = 'index.php';
-            } else {
-                alert(data.error || 'Erro ao criar conta');
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Carregando...';
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData(e.target);
+                const res = await fetch('api/auth.php?action=register', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const text = await res.text();
+                try {
+                   const data = JSON.parse(text);
+                   if(data.success) {
+                       window.location.href = 'index.php';
+                   } else {
+                       alert(data.error || 'Erro ao criar conta');
+                   }
+                } catch(e) {
+                   console.error('Server response was not JSON:', text);
+                   alert('Erro no servidor: O banco de dados pode estar fora do ar ou mal configurado.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erro de conexão ou sistema.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         });
     </script>

@@ -41,7 +41,7 @@
                 <div id="msg" style="margin-top:1rem; text-align:center; color: #f87171;"></div>
             </form>
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Não tem conta? <a href="register" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
+                Não tem conta? <a href="register.php" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
             </p>
         </div>
     </main>
@@ -65,17 +65,30 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            
-            const res = await fetch('api/auth.php?action=login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, password})
-            });
-            const data = await res.json();
-            if(data.success) {
-                window.location.href = 'index.php';
-            } else {
-                document.getElementById('msg').innerText = data.error;
+            const msg = document.getElementById('msg');
+            msg.innerText = 'Autenticando...';
+
+            try {
+                const res = await fetch('api/auth.php?action=login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    if(data.success) {
+                        window.location.href = 'index.php';
+                    } else {
+                        msg.innerText = data.error;
+                    }
+                } catch(e) {
+                    console.error('Server response was not JSON:', text);
+                    msg.innerText = 'Erro no servidor. Verifique o banco de dados.';
+                }
+            } catch (e) {
+                console.error(e);
+                msg.innerText = 'Erro de conexão.';
             }
         });
     </script>
