@@ -93,10 +93,11 @@ function setupJurisdictionListeners(suffix) {
     }
 
     if (matterSelect) {
+        let lastValue = matterSelect.value;
         matterSelect.addEventListener('change', () => {
-            const selected = matterSelect.options[matterSelect.selectedIndex];
             const matterId = matterSelect.value;
-            const type = selected.dataset.type;
+            const selected = matterSelect.options[matterSelect.selectedIndex];
+            const type = selected ? selected.dataset.type : null;
 
             if (type) {
                 const elW = document.getElementById('type-working' + suffix);
@@ -112,6 +113,7 @@ function setupJurisdictionListeners(suffix) {
             if (matterId && dtSelect) {
                 const matter = jurisdictionsData.matters.find(m => m.id === matterId);
                 if (matter && matter.deadlines) {
+                    const currentVal = dtSelect.value;
                     dtSelect.innerHTML = '<option value="">Selecione...</option>';
                     matter.deadlines.forEach(d => {
                         const opt = document.createElement('option');
@@ -122,14 +124,25 @@ function setupJurisdictionListeners(suffix) {
                         opt.dataset.ref = d.ref || '';
                         dtSelect.appendChild(opt);
                     });
+
+                    // Try to restore previous selection if it exists in new list
+                    if (currentVal) dtSelect.value = currentVal;
+
                     dtGroup.style.display = 'block';
                 } else {
                     dtGroup.style.display = 'none';
+                    dtSelect.innerHTML = '<option value="">Selecione...</option>';
                 }
             } else {
                 if (dtGroup) dtGroup.style.display = 'none';
+                if (dtSelect) dtSelect.innerHTML = '<option value="">Selecione...</option>';
             }
-            if (disclaimer) disclaimer.style.display = 'none';
+
+            // Only hide disclaimer if we actually changed matter or it was empty
+            if (matterId !== lastValue) {
+                if (disclaimer) disclaimer.style.display = 'none';
+                lastValue = matterId;
+            }
         });
     }
 
