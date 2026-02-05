@@ -114,7 +114,7 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
+    padding: 1rem 2rem;
 }
 
 h1 {
@@ -450,7 +450,7 @@ select:focus {
     gap: 3rem;
     /* Increase gap for better separation */
     padding: 0;
-    min-height: 80vh;
+    min-height: 60vh;
 }
 
 .sidebar {
@@ -719,7 +719,7 @@ select:focus {
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--glass-border);
-    padding: 2rem 0;
+    padding: 1rem 0;
     margin-top: auto;
     width: 100%;
 }

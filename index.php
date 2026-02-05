@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <header>
         <div class="max-w-7xl">
             <nav>
@@ -284,6 +283,6 @@
     </main>
 
     <?php include 'src/footer.php'; ?>
-    <script src="assets/script.js"></script>
+    <script src="assets/script.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

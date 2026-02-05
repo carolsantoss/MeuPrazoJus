@@ -17,8 +17,10 @@ let jurisdictionsData = null;
 
 async function loadJurisdictions() {
     try {
-        const res = await fetch('api/jurisdictions.php');
+        // Cache bypass for API data
+        const res = await fetch('api/jurisdictions.php?v=' + Date.now());
         jurisdictionsData = await res.json();
+        console.log('Jurisdictions Loaded:', jurisdictionsData);
 
         populateJurisdictions('');
         populateJurisdictions('-dash');
