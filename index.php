@@ -106,9 +106,9 @@
                             <input type="number" id="days" name="days" placeholder="Ex: 5, 10, 15" required min="1">
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="text-align: center;">
                             <label>Tipo de Contagem</label>
-                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem; justify-content: center;">
                                 <label style="color: white; cursor: pointer;">
                                     <input type="radio" name="type" value="working" id="type-working" checked> 
                                     Dias Úteis (Novo CPC)
@@ -201,7 +201,7 @@
 
                     <!-- Section: New Deadline (The Calculator) -->
                     <div id="section-new-deadline" class="dash-section" style="display:none">
-                        <h2>Cadastrar Novo Prazo</h2>
+                        <h2 style="text-align: center;">Cadastrar Novo Prazo</h2>
                         <div class="calculator-card" style="margin: 0 auto;">
                             <form id="calc-form-dash">
                                 <!-- Jurisdiction Fields -->
@@ -248,9 +248,9 @@
                                     <label for="days-dash">Prazo (em dias)</label>
                                     <input type="number" id="days-dash" name="days" placeholder="Ex: 5, 10, 15" required min="1">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="text-align: center;">
                                     <label>Tipo de Contagem</label>
-                                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem; justify-content: center;">
                                         <label style="color: white; cursor: pointer;">
                                             <input type="radio" name="type-dash" value="working" id="type-working-dash" checked> 
                                             Dias Úteis
