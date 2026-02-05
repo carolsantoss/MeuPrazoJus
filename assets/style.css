@@ -188,8 +188,9 @@ select:focus {
 }
 
 /* Results */
-#results-area {
-    margin-top: 2rem;
+#results-area,
+#results-area-dash {
+    margin-top: 2.5rem;
     padding-top: 2rem;
     border-top: 1px solid var(--glass-border);
     display: none;
