@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Honorários | MeuPrazoJus</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/style.css?v=<?php echo time(); ?>">
 </head>
 <body>
 
@@ -113,6 +113,28 @@
                         </div>
                         <div class="fee-total" id="fee-summary" style="margin-top: 1.5rem; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);"></div>
                     </div>
+
+                    <!-- History Section -->
+                    <div id="fee-history-container" class="card" style="margin-top: 2rem;">
+                        <h3>Histórico de Cálculos</h3>
+                        <div class="table-responsive">
+                            <table class="glass-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data Criado</th>
+                                        <th>Valor Total</th>
+                                        <th>Parcelas</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <tr><td colspan="4" style="text-align:center">Carregando histórico...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-controls" style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -151,9 +173,130 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         calculateFees();
     });
+
+    loadHistory();
 });
 
-function calculateFees() {
+let currentHistoryPage = 1;
+
+async function loadHistory(page = 1) {
+    try {
+        currentHistoryPage = page;
+        const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
+        const data = await res.json();
+        
+        const tbody = document.getElementById('history-table-body');
+        tbody.innerHTML = '';
+
+        if (data.items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum cálculo salvo ainda.</td></tr>';
+            return;
+        }
+
+        data.items.forEach(item => {
+            const tr = document.createElement('tr');
+            const date = new Date(item.created_at).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            tr.innerHTML = `
+                <td>${date}</td>
+                <td>${formatCurrency(item.total)}</td>
+                <td>${item.installments}x</td>
+                <td><button onclick='loadCalculation(${JSON.stringify(item)})' class="btn btn-ghost" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        renderPagination(data.page, data.total_pages);
+
+    } catch (e) { console.error('Error loading history', e); }
+}
+
+function renderPagination(current, total) {
+    const container = document.getElementById('pagination-controls');
+    container.innerHTML = '';
+    
+    if (total <= 1) return;
+
+    const prev = document.createElement('button');
+    prev.className = 'btn btn-ghost';
+    prev.innerText = '←';
+    prev.disabled = current === 1;
+    prev.onclick = () => loadHistory(current - 1);
+    container.appendChild(prev);
+
+    const span = document.createElement('span');
+    span.innerText = `${current} / ${total}`;
+    span.style.color = 'var(--text-muted)';
+    container.appendChild(span);
+
+    const next = document.createElement('button');
+    next.className = 'btn btn-ghost';
+    next.innerText = '→';
+    next.disabled = current === total;
+    next.onclick = () => loadHistory(current + 1);
+    container.appendChild(next);
+}
+
+function loadCalculation(item) {
+    document.getElementById('fee-total').value = formatCurrency(item.total);
+    document.getElementById('fee-installments').value = item.installments;
+    document.getElementById('fee-start-date').value = item.startDate;
+    
+    const container = document.getElementById('lawyers-list');
+    container.innerHTML = '';
+    item.lawyers.forEach((name, idx) => {
+        const div = document.createElement('div');
+        div.className = 'lawyer-input-group';
+        div.style.display = 'flex';
+        div.style.gap = '0.5rem';
+        div.innerHTML = `
+            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;" value="${name}">
+            ${idx > 0 ? '<button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>' : ''}
+        `;
+        container.appendChild(div);
+        
+        const btn = div.querySelector('.remove-lawyer');
+        if (btn) btn.addEventListener('click', () => div.remove());
+    });
+
+    const tbody = document.getElementById('fee-table-body');
+    tbody.innerHTML = '';
+
+    const installValue = item.total / item.installments;
+    const perPerson = installValue / (item.lawyers.length || 1);
+    
+    const [y, m, d] = item.startDate.split('-').map(Number);
+    let currentDate = new Date(y, m - 1, d, 12, 0, 0);
+
+    for (let i = 1; i <= item.installments; i++) {
+        const row = document.createElement('tr');
+        const dateFmt = currentDate.toLocaleDateString('pt-BR');
+        const gcalLink = generateGCalLink(currentDate, installValue, i, item.installments);
+
+        row.innerHTML = `
+            <td>${i}x</td>
+            <td>${dateFmt}</td>
+            <td>${formatCurrency(installValue)}</td>
+            <td>${formatCurrency(perPerson)} <br><small style="font-size: 0.75rem; color: var(--text-muted)">p/ ${item.lawyers.join(', ') || 'Advogado'}</small></td>
+            <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
+        `;
+        tbody.appendChild(row);
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    document.getElementById('fee-summary').innerText = `Total: ${formatCurrency(item.total)}`;
+    document.getElementById('fee-results').style.display = 'block';
+    
+    document.getElementById('fee-results').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function calculateFees() {
     const rawValue = document.getElementById('fee-total').value;
     const total = parseFloat(rawValue.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
     const installments = parseInt(document.getElementById('fee-installments').value);
@@ -166,6 +309,22 @@ function calculateFees() {
     if (isNaN(total) || total <= 0) {
         alert("Digite um valor válido.");
         return;
+    }
+
+    try {
+        await fetch('api/fees.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                total,
+                installments,
+                startDate: startDateStr,
+                lawyers
+            })
+        });
+        loadHistory(1);
+    } catch (e) {
+        console.error('Error saving calculation', e);
     }
 
     const tbody = document.getElementById('fee-table-body');
@@ -220,6 +379,6 @@ function generateGCalLink(date, val, current, total) {
 </script>
 
     <?php include 'src/footer.php'; ?>
-    <script src="assets/script.js"></script>
+    <script src="assets/script.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

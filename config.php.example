@@ -1,0 +1,14 @@
+<?php
+// config.php.example - COPIE ESTE ARQUIVO PARA config.php E PREENCHA OS DADOS
+
+// Database Configuration
+define('DB_HOST', 'IP_DO_SERVIDOR');
+define('DB_USER', 'USUARIO_DB');
+define('DB_PASS', 'SENHA_DB');
+define('DB_NAME', 'NOME_DO_BANCO');
+
+// Define base path
+define('BASE_PATH', __DIR__);
+
+// Global functions or constants can go here
+date_default_timezone_set('America/Sao_Paulo');

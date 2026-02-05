@@ -1,65 +1,56 @@
 <?php
-// src/DeadlineManager.php
+require_once __DIR__ . '/Database.php';
 
 class DeadlineManager {
-    private $file;
-    private $deadlines = [];
+    private $db;
 
     public function __construct() {
-        $this->file = __DIR__ . '/../data/deadlines.json';
-        if (file_exists($this->file)) {
-            $this->deadlines = json_decode(file_get_contents($this->file), true) ?? [];
-        }
-    }
-
-    private function saveFile() {
-        file_put_contents($this->file, json_encode($this->deadlines, JSON_PRETTY_PRINT));
+        $this->db = Database::getInstance()->getConnection();
     }
 
     public function save($userId, $data) {
-        // $data includes: startDate, days, type, result_date, description, created_at
         $id = uniqid('dl_');
-        $record = array_merge([
-            'id' => $id,
-            'user_id' => $userId,
-            'created_at' => date('Y-m-d H:i:s'),
-            'status' => 'active' // active, archived
-        ], $data);
+        $stmt = $this->db->prepare("INSERT INTO deadlines (
+            id, user_id, start_date, end_date, days, type, state, city, cityName, matter, vara, deadlineType, description, location
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
-        $this->deadlines[] = $record;
-        $this->saveFile();
-        return $record;
+        $stmt->execute([
+            $id, 
+            $userId, 
+            $data['start_date'], 
+            $data['end_date'], 
+            $data['days'], 
+            $data['type'], 
+            $data['state'] ?? null, 
+            $data['city'] ?? null, 
+            $data['cityName'] ?? null, 
+            $data['matter'] ?? null, 
+            $data['vara'] ?? null, 
+            $data['deadlineType'] ?? null, 
+            $data['description'] ?? null, 
+            $data['location'] ?? null
+        ]);
+        
+        return array_merge(['id' => $id], $data);
     }
 
     public function getByUser($userId) {
-        $userDeadlines = [];
-        foreach ($this->deadlines as $d) {
-            if ($d['user_id'] === $userId) {
-                $userDeadlines[] = $d;
-            }
-        }
-        
-        // Sort by End Date (Ascending)
-        usort($userDeadlines, function($a, $b) {
-            return strtotime($a['end_date']) - strtotime($b['end_date']);
-        });
-
-        return $userDeadlines;
+        $stmt = $this->db->prepare("SELECT * FROM deadlines WHERE user_id = ? ORDER BY end_date ASC");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
     }
 
     public function getPending($userId) {
         $today = date('Y-m-d');
-        $all = $this->getByUser($userId);
-        return array_filter($all, function($d) use ($today) {
-            return $d['end_date'] >= $today;
-        });
+        $stmt = $this->db->prepare("SELECT * FROM deadlines WHERE user_id = ? AND end_date >= ? ORDER BY end_date ASC");
+        $stmt->execute([$userId, $today]);
+        return $stmt->fetchAll();
     }
 
     public function getFinalized($userId) {
         $today = date('Y-m-d');
-        $all = $this->getByUser($userId);
-        return array_filter($all, function($d) use ($today) {
-            return $d['end_date'] < $today;
-        });
+        $stmt = $this->db->prepare("SELECT * FROM deadlines WHERE user_id = ? AND end_date < ? ORDER BY end_date ASC");
+        $stmt->execute([$userId, $today]);
+        return $stmt->fetchAll();
     }
 }

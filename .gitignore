@@ -1,5 +1,6 @@
 vendor/
 *.log
-users.json
+data/*.json
 database.sqlite
 .DS_Store
+config.php
