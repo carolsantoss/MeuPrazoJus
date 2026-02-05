@@ -106,6 +106,26 @@ function setupJurisdictionListeners(suffix) {
                 if (elC) elC.checked = (type === 'calendar');
             }
 
+            // Filter Varas based on Matter
+            const varaSelect = document.getElementById('vara' + suffix);
+            if (varaSelect && jurisdictionsData.varas) {
+                const currentVara = varaSelect.value;
+                varaSelect.innerHTML = '<option value="">Geral</option>';
+                jurisdictionsData.varas.forEach(v => {
+                    // Show if matter matches OR if no matter is selected (show all)
+                    if (!matterId || v.matter === matterId) {
+                        const opt = document.createElement('option');
+                        opt.value = v.name;
+                        opt.innerText = v.name;
+                        opt.dataset.matter = v.matter || '';
+                        varaSelect.appendChild(opt);
+                    }
+                });
+                // Restore vara if still in list
+                varaSelect.value = currentVara;
+                if (varaSelect.selectedIndex === -1) varaSelect.value = "";
+            }
+
             const dtGroup = document.getElementById('deadline-type-group' + suffix);
             const dtSelect = document.getElementById('deadline-type' + suffix);
             const disclaimer = document.getElementById('deadline-disclaimer' + suffix);
@@ -171,21 +191,6 @@ function setupJurisdictionListeners(suffix) {
                     disclaimer.innerHTML = `⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. Estimativa baseada na lei federal${ref ? ' (' + ref + ')' : ''}.`;
                 } else {
                     disclaimer.style.display = 'none';
-                }
-            }
-        });
-    }
-
-    const varaSelect = document.getElementById('vara' + suffix);
-    if (varaSelect) {
-        varaSelect.addEventListener('change', () => {
-            const selected = varaSelect.options[varaSelect.selectedIndex];
-            const matterId = selected.dataset.matter;
-            if (matterId) {
-                const matterSelect = document.getElementById('matter' + suffix);
-                if (matterSelect && matterSelect.value !== matterId) {
-                    matterSelect.value = matterId;
-                    matterSelect.dispatchEvent(new Event('change'));
                 }
             }
         });

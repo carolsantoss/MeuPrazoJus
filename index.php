@@ -82,17 +82,17 @@
                             </select>
                         </div>
 
-                        <div class="form-group" id="deadline-type-group" style="display:none;">
-                            <label for="deadline-type">Tipo de Prazo</label>
-                            <select id="deadline-type" name="deadline-type">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-
                         <div class="form-group" id="vara-group">
                             <label for="vara">Vara / Juízo</label>
                             <select id="vara" name="vara">
                                 <option value="">Geral</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="deadline-type-group" style="display:none;">
+                            <label for="deadline-type">Tipo de Prazo</label>
+                            <select id="deadline-type" name="deadline-type">
+                                <option value="">Selecione...</option>
                             </select>
                         </div>
 
@@ -226,17 +226,17 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group" id="deadline-type-group-dash" style="display:none;">
-                                    <label for="deadline-type-dash">Tipo de Prazo</label>
-                                    <select id="deadline-type-dash" name="deadline-type">
-                                        <option value="">Selecione...</option>
-                                    </select>
-                                </div>
-
                                 <div class="form-group" id="vara-group-dash">
                                     <label for="vara-dash">Vara / Juízo</label>
                                     <select id="vara-dash" name="vara">
                                         <option value="">Geral</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="deadline-type-group-dash" style="display:none;">
+                                    <label for="deadline-type-dash">Tipo de Prazo</label>
+                                    <select id="deadline-type-dash" name="deadline-type">
+                                        <option value="">Selecione...</option>
                                     </select>
                                 </div>
 
