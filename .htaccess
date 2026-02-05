@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Redirect /file.php to /file
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php\ HTTP
+RewriteRule ^([^.]+)\.php$ /$1 [R=301,L]
+
+# Internally map /file to /file.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*?)/?$ $1.php [NC,L]
