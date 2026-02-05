@@ -41,7 +41,7 @@
                 <div id="msg" style="margin-top:1rem; text-align:center; color: #f87171;"></div>
             </form>
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Não tem conta? <a href="register.php" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
+                Não tem conta? <a href="register" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
             </p>
         </div>
     </main>
@@ -78,7 +78,7 @@
                 try {
                     const data = JSON.parse(text);
                     if(data.success) {
-                        window.location.href = 'index.php';
+                        window.location.href = 'index';
                     } else {
                         msg.innerText = data.error;
                     }

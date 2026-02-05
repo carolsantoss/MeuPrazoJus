@@ -40,10 +40,10 @@
                     <p>Gerencie seus prazos.</p>
                 </div>
                 <nav class="side-nav">
-                    <a href="index.php" class="nav-item">📊 Prazos</a>
-                    <a href="index.php?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
-                    <a href="fees.php" class="nav-item active">💰 Honorários</a>
-                    <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
+                    <a href="index" class="nav-item">📊 Prazos</a>
+                    <a href="index?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
+                    <a href="fees" class="nav-item active">💰 Honorários</a>
+                    <a href="subscription" class="nav-item">⭐ Assinatura</a>
                 </nav>
             </aside>
 
