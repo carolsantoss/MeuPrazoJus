@@ -13,7 +13,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                    <?php if(isset($_SESSION['user_id'])): ?>
                        <a href="subscription.php" class="btn btn-ghost">Planos</a>
@@ -84,7 +84,8 @@
                                 </label>
                                 <div id="lawyers-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
                                     <div class="lawyer-input-group" style="display: flex; gap: 0.5rem;">
-                                        <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;">
+                                        <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;">
+                                        <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;">
                                     </div>
                                 </div>
                             </div>
@@ -161,7 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         div.style.display = 'flex';
         div.style.gap = '0.5rem';
         div.innerHTML = `
-            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;">
+            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;">
+            <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;">
             <button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>
         `;
         container.appendChild(div);
@@ -250,13 +252,22 @@ function loadCalculation(item) {
     
     const container = document.getElementById('lawyers-list');
     container.innerHTML = '';
-    item.lawyers.forEach((name, idx) => {
+
+    // Compatibilidade: Converte formato antigo (array de strings) para novo (objetos)
+    let lawyersData = item.lawyers;
+    if (lawyersData.length > 0 && typeof lawyersData[0] === 'string') {
+        const splitPercent = 100 / lawyersData.length;
+        lawyersData = lawyersData.map(name => ({ name, percent: splitPercent }));
+    }
+
+    lawyersData.forEach((l, idx) => {
         const div = document.createElement('div');
         div.className = 'lawyer-input-group';
         div.style.display = 'flex';
         div.style.gap = '0.5rem';
         div.innerHTML = `
-            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 1;" value="${name}">
+            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;" value="${l.name}">
+            <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;" value="${l.percent}">
             ${idx > 0 ? '<button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>' : ''}
         `;
         container.appendChild(div);
@@ -269,7 +280,6 @@ function loadCalculation(item) {
     tbody.innerHTML = '';
 
     const installValue = item.total / item.installments;
-    const perPerson = installValue / (item.lawyers.length || 1);
     
     const [y, m, d] = item.startDate.split('-').map(Number);
     let currentDate = new Date(y, m - 1, d, 12, 0, 0);
@@ -279,11 +289,17 @@ function loadCalculation(item) {
         const dateFmt = currentDate.toLocaleDateString('pt-BR');
         const gcalLink = generateGCalLink(currentDate, installValue, i, item.installments);
 
+         // Monta texto de distribuição
+         let distributionText = lawyersData.map(l => {
+            const share = installValue * (l.percent / 100);
+            return `${l.name} (${parseFloat(l.percent).toFixed(2)}%): ${formatCurrency(share)}`;
+        }).join('<br>');
+
         row.innerHTML = `
             <td>${i}x</td>
             <td>${dateFmt}</td>
             <td>${formatCurrency(installValue)}</td>
-            <td>${formatCurrency(perPerson)} <br><small style="font-size: 0.75rem; color: var(--text-muted)">p/ ${item.lawyers.join(', ') || 'Advogado'}</small></td>
+            <td><small style="font-size: 0.85rem; color: var(--text-muted)">${distributionText}</small></td>
             <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
         `;
         tbody.appendChild(row);
@@ -302,12 +318,28 @@ async function calculateFees() {
     const installments = parseInt(document.getElementById('fee-installments').value);
     const startDateStr = document.getElementById('fee-start-date').value;
     
-    const lawyerInputs = document.querySelectorAll('.lawyer-name');
-    const lawyers = Array.from(lawyerInputs).map(i => i.value).filter(v => v.trim() !== "");
-    const splitCount = lawyers.length || 1;
+    // Coleta advogados e porcentagens
+    const lawyerInputs = document.querySelectorAll('.lawyer-input-group');
+    const lawyers = [];
+    let totalPercent = 0;
+
+    lawyerInputs.forEach(div => {
+        const name = div.querySelector('.lawyer-name').value.trim();
+        const percent = parseFloat(div.querySelector('.lawyer-percent').value) || 0;
+        
+        if (name) {
+            lawyers.push({ name, percent });
+            totalPercent += percent;
+        }
+    });
 
     if (isNaN(total) || total <= 0) {
         alert("Digite um valor válido.");
+        return;
+    }
+
+    if (Math.abs(totalPercent - 100) > 0.1) { // Tolerância para float
+        alert(`A soma das porcentagens deve ser 100%. Atual: ${totalPercent}%`);
         return;
     }
 
@@ -319,7 +351,7 @@ async function calculateFees() {
                 total,
                 installments,
                 startDate: startDateStr,
-                lawyers
+                lawyers // Agora envia objetos {name, percent}
             })
         });
         loadHistory(1);
@@ -331,23 +363,26 @@ async function calculateFees() {
     tbody.innerHTML = '';
 
     const installValue = total / installments;
-    const perPerson = installValue / splitCount;
     
     const [y, m, d] = startDateStr.split('-').map(Number);
     let currentDate = new Date(y, m - 1, d, 12, 0, 0);
 
     for (let i = 1; i <= installments; i++) {
         const row = document.createElement('tr');
-        
         const dateFmt = currentDate.toLocaleDateString('pt-BR');
-        
         const gcalLink = generateGCalLink(currentDate, installValue, i, installments);
+
+        // Monta texto de distribuição
+        let distributionText = lawyers.map(l => {
+            const share = installValue * (l.percent / 100);
+            return `${l.name} (${l.percent}%): ${formatCurrency(share)}`;
+        }).join('<br>');
 
         row.innerHTML = `
             <td>${i}x</td>
             <td>${dateFmt}</td>
             <td>${formatCurrency(installValue)}</td>
-            <td>${formatCurrency(perPerson)} <br><small style="font-size: 0.75rem; color: var(--text-muted)">p/ ${lawyers.join(', ') || 'Advogado'}</small></td>
+            <td><small style="font-size: 0.85rem; color: var(--text-muted)">${distributionText}</small></td>
             <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
         `;
         tbody.appendChild(row);

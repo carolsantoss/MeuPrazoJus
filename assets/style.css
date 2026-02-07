@@ -765,3 +765,9 @@ select:focus {
         text-align: center;
     }
 }
+
+.disabled-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.2);
+}

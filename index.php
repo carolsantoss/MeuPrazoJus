@@ -1,4 +1,15 @@
-<?php session_start(); ?>
+<?php 
+session_start(); 
+if (isset($_SESSION['user_id'])) {
+    require_once 'src/UserManager.php';
+    $um = new UserManager();
+    $u = $um->getUserById($_SESSION['user_id']);
+    if ($u) {
+        $_SESSION['calculations'] = $u['calculations_count'];
+        $_SESSION['is_subscribed'] = ($u['subscription_status'] === 'premium');
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,7 +23,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="subscription.php" class="btn btn-ghost">Planos</a>
@@ -37,7 +48,7 @@
         <?php if(!isset($_SESSION['user_id'])): ?>
             <div class="landing-hero">
                 <h1>Domine seus Prazos</h1>
-                <p class="subtitle">Calculadora de prazos processuais atualizada conforme o Novo CPC e recesso forense.</p>
+                <p class="subtitle">Simule prazos rapidamente ou faça login para gerenciar seus processos com segurança.</p>
                 
                 <div class="features-row">
                     <div class="feature-box">
@@ -50,7 +61,7 @@
                     </div>
                      <div class="feature-box">
                         <h3>🔒 Segurança</h3>
-                        <p>Seus dados salvos e acessíveis de qualquer lugar.</p>
+                        <p>Histórico completo e seguro na nuvem (apenas usuários logados).</p>
                     </div>
                 </div>
 
@@ -131,6 +142,16 @@
                             <div class="result-date" id="result-date">...</div>
                         </div>
                         
+                        <!-- Warning for Guest Users -->
+                        <div id="guest-warning" style="display:none; background: #fffbeb; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fcd34d; text-align: center;">
+                            <p style="margin-bottom: 0.5rem; font-weight: 600;">⚠️ Atenção: Este cálculo não foi salvo!</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para salvar seu histórico e gerenciar prazos com segurança, crie sua conta agora.</p>
+                            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                <a href="register.php" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Criar Conta Grátis</a>
+                                <a href="login.php" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.9rem; color: #92400e; border-color: #92400e;">Entrar</a>
+                            </div>
+                        </div>
+
                         <div class="log-container" id="log-details">
                         </div>
                         
@@ -155,9 +176,34 @@
                         <p>Gerencie seus prazos.</p>
                     </div>
                     <nav class="side-nav">
+                        <?php 
+                            $isPremium = $_SESSION['is_subscribed'] ?? false;
+                            $calcCount = $_SESSION['calculations'] ?? 0;
+                            $limit = 5;
+                        ?>
+
+                        <?php if (!$isPremium): ?>
+                            <div class="usage-counter" style="margin: 0 0.5rem 1rem 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 6px; font-size: 0.85rem; color: #aaa;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                                    <span>Consultas</span>
+                                    <span><?= $calcCount ?>/<?= $limit ?></span>
+                                </div>
+                                <div style="width:100%; height:4px; background:#444; border-radius:2px;">
+                                    <div style="width: <?= min(100, ($calcCount/$limit)*100) ?>%; height:100%; background: var(--primary); border-radius:2px;"></div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
                         <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
-                        <a href="fees.php" class="nav-item">💰 Honorários</a>
+                        <button class="nav-item" onclick="showSection('history')">📜 Histórico</button>
+                        
+                        <?php if ($isPremium): ?>
+                            <a href="fees.php" class="nav-item">💰 Honorários</a>
+                        <?php else: ?>
+                            <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
+                        <?php endif; ?>
+
                         <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                     </nav>
                 </aside>
@@ -191,6 +237,30 @@
                                 <ul class="deadline-list" id="list-finalized">
                                     <li>Carregando...</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: History -->
+                    <div id="section-history" class="dash-section" style="display:none">
+                        <h2>Histórico de Cálculos</h2>
+                        <div class="list-card">
+                            <div class="table-responsive">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data Final</th>
+                                            <th>Descrição</th>
+                                            <th>Dias</th>
+                                            <th>Local</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <!-- Populated by JS -->
+                                        <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

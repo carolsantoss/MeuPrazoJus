@@ -268,6 +268,17 @@ function setupCalculator(formId, suffix) {
                 const logContainer = document.getElementById('log-details' + suffix);
                 logContainer.innerHTML = `<div class='log-item' style='color:#4ade80; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:0.5rem; padding-bottom:0.5rem;'>📍 Localidade: ${data.location}</div>`;
 
+                // Update usage counter usage
+                if (data.usage) {
+                    const counterText = document.querySelector('.usage-counter span:nth-child(2)');
+                    const counterBar = document.querySelector('.usage-counter div div');
+                    if (counterText && counterBar) {
+                        counterText.innerText = `${data.usage.count}/${data.usage.limit}`;
+                        const pct = Math.min(100, (data.usage.count / data.usage.limit) * 100);
+                        counterBar.style.width = `${pct}%`;
+                    }
+                }
+
                 data.log.forEach(line => {
                     const div = document.createElement('div');
                     div.className = 'log-item';
@@ -279,6 +290,12 @@ function setupCalculator(formId, suffix) {
 
                 if (document.querySelector('.dashboard-container')) {
                     loadDeadlines();
+                }
+
+                // Show warning for guest users (empty suffix means home calculator)
+                if (suffix === '') {
+                    const guestWarning = document.getElementById('guest-warning');
+                    if (guestWarning) guestWarning.style.display = 'block';
                 }
             }
 
@@ -308,9 +325,45 @@ async function loadDeadlines() {
         renderList('list-pending', data.pending);
         renderList('list-finalized', data.finalized);
 
+        // History
+        const allItems = [...data.pending, ...data.finalized].sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+        renderHistory(allItems);
+
     } catch (e) {
         console.error(e);
     }
+}
+
+function renderHistory(items) {
+    const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Nenhum histórico encontrado.</td></tr>';
+        return;
+    }
+
+    items.forEach(item => {
+        const tr = document.createElement('tr');
+
+        const dateParts = item.end_date.split('-');
+        const dateFmt = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+        const today = new Date().toISOString().split('T')[0];
+        const status = item.end_date < today ?
+            '<span class="req-status status-completed">Finalizado</span>' :
+            '<span class="req-status status-pending">Pendente</span>';
+
+        tr.innerHTML = `
+            <td>${dateFmt}</td>
+            <td>${item.description || '-'}</td>
+            <td>${item.days}</td>
+            <td>${item.cityName || item.location || '-'}</td>
+            <td>${status}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function renderList(elementId, items) {

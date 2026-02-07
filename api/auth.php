@@ -28,7 +28,12 @@ if ($action === 'register') {
         $_SESSION['user_name'] = $user['name'] ?? '';
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
-        echo json_encode(['success' => true]);
+        $_SESSION['calculations'] = 0;
+        echo json_encode([
+            'success' => true,
+            'is_subscribed' => $_SESSION['is_subscribed'],
+            'calculations_count' => 0
+        ]);
     } else {
         echo json_encode(['error' => 'Email já cadastrado']);
     }
@@ -43,7 +48,12 @@ if ($action === 'register') {
         $_SESSION['user_name'] = $user['name'] ?? '';
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
-        echo json_encode(['success' => true]);
+        $_SESSION['calculations'] = $user['calculations_count'] ?? 0;
+        echo json_encode([
+            'success' => true,
+            'is_subscribed' => $_SESSION['is_subscribed'],
+            'calculations_count' => $_SESSION['calculations']
+        ]);
     } else {
         echo json_encode(['error' => 'Credenciais inválidas']);
     }

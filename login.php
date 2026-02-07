@@ -12,7 +12,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                     <a href="index.php" class="btn btn-ghost">Voltar</a>
                 </div>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Acessar</button>
-                <div id="msg" style="margin-top:1rem; text-align:center; color: #f87171;"></div>
+                <div id="msg" style="margin-top:1rem; text-align:center;"></div>
             </form>
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
                 Não tem conta? <a href="register.php" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
@@ -66,6 +66,9 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const msg = document.getElementById('msg');
+            
+            // Set success/loading color
+            msg.style.color = '#10b981'; // Green
             msg.innerText = 'Autenticando...';
 
             try {
@@ -80,14 +83,18 @@
                     if(data.success) {
                         window.location.href = 'index.php';
                     } else {
+                        // Set error color
+                        msg.style.color = '#f87171'; // Red
                         msg.innerText = data.error;
                     }
                 } catch(e) {
                     console.error('Server response was not JSON:', text);
+                    msg.style.color = '#f87171';
                     msg.innerText = 'Erro no servidor. Verifique o banco de dados.';
                 }
             } catch (e) {
                 console.error(e);
+                msg.style.color = '#f87171';
                 msg.innerText = 'Erro de conexão.';
             }
         });

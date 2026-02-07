@@ -13,7 +13,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                    <a href="index.php" class="btn btn-ghost">Calculadora</a>
                    <?php if(isset($_SESSION['user_id'])): ?>
@@ -51,6 +51,7 @@
                 <ul class="features-list">
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Integração Google Agenda</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Acesso a Honorários</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
                 <button id="sub-btn" class="btn btn-primary btn-block">Assinar Agora</button>

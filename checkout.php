@@ -116,7 +116,7 @@ $user_email = $_SESSION['user_email'] ?? '';
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                    <a href="subscription.php" class="btn btn-ghost">Alterar Plano</a>
                 </div>
@@ -208,9 +208,11 @@ $user_email = $_SESSION['user_email'] ?? '';
                 },
                 callbacks: {
                     onReady: () => {
+                        console.log('Brick pronto (onReady)');
                         document.getElementById('loading-payment').style.display = 'none';
                     },
                     onSubmit: ({ selectedPaymentMethod, formData }) => {
+                        console.log('Botão Pagar clicado (onSubmit)');
                         return new Promise((resolve, reject) => {
                             fetch("api/process_payment.php", {
                                 method: "POST",
@@ -219,8 +221,11 @@ $user_email = $_SESSION['user_email'] ?? '';
                                 },
                                 body: JSON.stringify(formData),
                             })
-                            .then((response) => response.json())
+                            .then((response) => {
+                                return response.json();
+                            })
                             .then((data) => {
+                                console.log('Dados processados:', data);
                                 if (data.status === 'approved') {
                                     window.location.href = 'api/payment_callback.php?status=success&payment_id=' + data.id;
                                 } else if (data.pix) {
@@ -238,13 +243,34 @@ $user_email = $_SESSION['user_email'] ?? '';
                                     resolve();
                                 } else if (data.status === 'in_process' || data.status === 'pending') {
                                     window.location.href = 'api/payment_callback.php?status=pending&payment_id=' + data.id;
+                                } else if (data.status === 'rejected') {
+                                    let msg = 'Pagamento recusado.';
+                                    if (data.status_detail === 'cc_rejected_other_reason') {
+                                        msg = 'Pagamento recusado. Se estiver em modo de teste, use um cartão de teste válido. Caso contrário, contate seu banco.';
+                                    } else if (data.status_detail === 'cc_rejected_bad_filled_card_number') {
+                                        msg = 'Verifique o número do cartão.';
+                                    } else if (data.status_detail === 'cc_rejected_bad_filled_date') {
+                                        msg = 'Verifique a data de validade.';
+                                    } else if (data.status_detail === 'cc_rejected_bad_filled_security_code') {
+                                        msg = 'Verifique o código de segurança.';
+                                    } else if (data.status_detail === 'cc_rejected_bad_filled_other') {
+                                        msg = 'Verifique os dados do cartão.';
+                                    } else if (data.status_detail === 'cc_rejected_insufficient_amount') {
+                                        msg = 'Saldo insuficiente.';
+                                    } else {
+                                        msg = 'Motivo: ' + data.status_detail;
+                                    }
+                                    alert(msg);
+                                    resolve();
                                 } else {
+                                    console.error('Erro:', data);
                                     alert('Pagamento não processado: ' + (data.status_detail || 'Erro inesperado'));
                                     resolve();
                                 }
                             })
                             .catch((error) => {
                                 console.error("Process error:", error);
+                                alert('Erro de conexão ao processar pagamento.');
                                 reject();
                             });
                         });
@@ -252,7 +278,7 @@ $user_email = $_SESSION['user_email'] ?? '';
                     onError: (error) => {
                         console.error("Payment Brick Error:", error);
                         document.getElementById('loading-payment').innerHTML = 
-                            '<p style="color: #ef4444;">Erro ao carregar o formulário de pagamento. Verifique suas credenciais no config.php.</p>';
+                            '<p style="color: #ef4444;">Erro ao carregar o formulário de pagamento. Tente recarregar a página.</p>';
                     },
                 },
             };

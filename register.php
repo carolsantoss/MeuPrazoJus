@@ -12,7 +12,7 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <div class="logo">MeuPrazoJus</div>
+                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                     <a href="index.php" class="btn btn-ghost">Voltar</a>
                 </div>
