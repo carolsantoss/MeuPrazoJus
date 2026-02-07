@@ -21,6 +21,12 @@ if (!isset($_SESSION['user_email'])) {
 $user_name = $_SESSION['user_name'] ?? 'Usuário';
 $user_email = $_SESSION['user_email'] ?? '';
 
+// Prevent double subscription
+if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
+    header('Location: index.php');
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

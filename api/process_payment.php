@@ -90,7 +90,8 @@ file_put_contents($log_file, $log_entry, FILE_APPEND);
 if ($http_code === 201 || $http_code === 200) {
     if ($result['status'] === 'approved') {
         $userManager = new UserManager();
-        $userManager->setSubscription($user_id, 'premium');
+        $expiryDate = date('Y-m-d H:i:s', strtotime('+1 year'));
+        $userManager->setSubscription($user_id, 'premium', $expiryDate);
         $_SESSION['is_subscribed'] = true;
     }
     

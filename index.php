@@ -7,6 +7,7 @@ if (isset($_SESSION['user_id'])) {
     if ($u) {
         $_SESSION['calculations'] = $u['calculations_count'];
         $_SESSION['is_subscribed'] = ($u['subscription_status'] === 'premium');
+        $_SESSION['subscription_end'] = $u['subscription_end'] ?? null;
     }
 }
 ?>
@@ -171,13 +172,21 @@ if (isset($_SESSION['user_id'])) {
                         <?php 
                             $fullName = $_SESSION['user_name'] ?? 'Usuário';
                             $firstName = explode(' ', trim($fullName))[0];
+                            $isPremium = $_SESSION['is_subscribed'] ?? false;
                         ?>
                         <h3>Olá, <?= htmlspecialchars($firstName) ?>!</h3>
                         <p>Gerencie seus prazos.</p>
+                        <?php if ($isPremium && !empty($_SESSION['subscription_end'])): ?>
+                            <div style="font-size: 0.8rem; color: #aaa; margin-top: 15px;">
+                                <?php 
+                                    $endDate = new DateTime($_SESSION['subscription_end']);
+                                    echo "Vence em: " . $endDate->format('d/m/Y');
+                                ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <nav class="side-nav">
                         <?php 
-                            $isPremium = $_SESSION['is_subscribed'] ?? false;
                             $calcCount = $_SESSION['calculations'] ?? 0;
                             $limit = 5;
                         ?>
@@ -213,6 +222,24 @@ if (isset($_SESSION['user_id'])) {
                     
                     <!-- Section: Overview -->
                     <div id="section-dashboard" class="dash-section">
+                        <?php
+                        if ($isPremium && !empty($_SESSION['subscription_end'])) {
+                            $endDate = new DateTime($_SESSION['subscription_end']);
+                            $now = new DateTime();
+                            $daysRemaining = $now->diff($endDate)->days;
+                            $invert = $now->diff($endDate)->invert;
+
+                            if (!$invert && $daysRemaining <= 15) {
+                                echo '<div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; color: #ffca2c; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 1.5rem;">⚠️</span>
+                                    <div>
+                                        <strong>Sua assinatura vence em ' . $daysRemaining . ' dias!</strong><br>
+                                        <a href="subscription.php" style="color: #ffca2c; text-decoration: underline;">Renove agora para não perder o acesso.</a>
+                                    </div>
+                                </div>';
+                            }
+                        }
+                        ?>
                         <h2>Meus Prazos</h2>
                         <div class="stats-grid">
                             <div class="stat-card">

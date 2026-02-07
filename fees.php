@@ -35,13 +35,23 @@
                     <?php 
                         $fullName = $_SESSION['user_name'] ?? 'Usuário';
                         $firstName = explode(' ', trim($fullName))[0];
+                        $isPremium = $_SESSION['is_subscribed'] ?? false;
                     ?>
                     <h3>Olá, <?= htmlspecialchars($firstName) ?>!</h3>
                     <p>Gerencie seus prazos.</p>
+                    <?php if ($isPremium && !empty($_SESSION['subscription_end'])): ?>
+                        <div style="font-size: 0.8rem; color: #aaa; margin-top: 15px;">
+                            <?php 
+                                $endDate = new DateTime($_SESSION['subscription_end']);
+                                echo "Vence em: " . $endDate->format('d/m/Y');
+                            ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <nav class="side-nav">
                     <a href="index.php" class="nav-item">📊 Prazos</a>
                     <a href="index.php?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
+                    <a href="index.php?section=history" class="nav-item">📜 Histórico</a>
                     <a href="fees.php" class="nav-item active">💰 Honorários</a>
                     <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                 </nav>
