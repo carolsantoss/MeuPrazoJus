@@ -771,3 +771,42 @@ select:focus {
     cursor: not-allowed;
     background: rgba(0, 0, 0, 0.2);
 }
+
+.feedback-corner {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.7;
+}
+
+.feedback-corner:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    border-color: var(--primary);
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .feedback-corner {
+        bottom: 0.5rem;
+        right: 0.5rem;
+        font-size: 0.75rem;
+        padding: 0.5rem 1rem;
+    }
+}

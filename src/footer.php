@@ -10,4 +10,7 @@
             <p class="credits">Feito para simplificar seu trabalho.</p>
         </div>
     </div>
+    <a href="mailto:contato@meuprazojus.com.br?subject=Feedback MeuPrazoJus" class="feedback-corner" target="_blank">
+        🐛 Bug / Sugestão
+    </a>
 </footer>
