@@ -17,7 +17,6 @@ let jurisdictionsData = null;
 
 async function loadJurisdictions() {
     try {
-        // Cache bypass for API data
         const res = await fetch('api/jurisdictions.php?v=' + Date.now());
         jurisdictionsData = await res.json();
         console.log('Jurisdictions Loaded:', jurisdictionsData);
@@ -91,6 +90,24 @@ function setupJurisdictionListeners(suffix) {
             } else {
                 cityGroup.style.display = 'none';
             }
+
+            const courtSelect = document.getElementById('court' + suffix);
+            const courtGroup = document.getElementById('court-group' + suffix);
+
+            if (courtSelect && jurisdictionsData.courts && jurisdictionsData.courts[uf]) {
+                courtSelect.innerHTML = '<option value="">Selecione...</option>';
+                courtGroup.style.display = 'block';
+
+                jurisdictionsData.courts[uf].forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = c.name || c.id;
+                    courtSelect.appendChild(opt);
+                });
+            } else if (courtGroup) {
+                courtGroup.style.display = 'none';
+                if (courtSelect) courtSelect.innerHTML = '<option value="">Selecione o Estado</option>';
+            }
         });
     }
 
@@ -108,13 +125,11 @@ function setupJurisdictionListeners(suffix) {
                 if (elC) elC.checked = (type === 'calendar');
             }
 
-            // Filter Varas based on Matter
             const varaSelect = document.getElementById('vara' + suffix);
             if (varaSelect && jurisdictionsData.varas) {
                 const currentVara = varaSelect.value;
                 varaSelect.innerHTML = '<option value="">Geral</option>';
                 jurisdictionsData.varas.forEach(v => {
-                    // Show if matter matches OR if no matter is selected (show all)
                     if (!matterId || v.matter === matterId) {
                         const opt = document.createElement('option');
                         opt.value = v.name;
@@ -123,7 +138,6 @@ function setupJurisdictionListeners(suffix) {
                         varaSelect.appendChild(opt);
                     }
                 });
-                // Restore vara if still in list
                 varaSelect.value = currentVara;
                 if (varaSelect.selectedIndex === -1) varaSelect.value = "";
             }
@@ -147,7 +161,6 @@ function setupJurisdictionListeners(suffix) {
                         dtSelect.appendChild(opt);
                     });
 
-                    // Try to restore previous selection if it exists in new list
                     if (currentVal) dtSelect.value = currentVal;
 
                     dtGroup.style.display = 'block';
@@ -160,7 +173,6 @@ function setupJurisdictionListeners(suffix) {
                 if (dtSelect) dtSelect.innerHTML = '<option value="">Selecione...</option>';
             }
 
-            // Only hide disclaimer if we actually changed matter or it was empty
             if (matterId !== lastValue) {
                 if (disclaimer) disclaimer.style.display = 'none';
                 lastValue = matterId;
@@ -230,6 +242,8 @@ function setupCalculator(formId, suffix) {
         const cityName = citySelect.options[citySelect.selectedIndex]?.dataset.name || '';
         const matter = document.getElementById('matter' + suffix).value;
         const vara = document.getElementById('vara' + suffix).value;
+        const court = document.getElementById('court' + suffix)?.value;
+        const processType = document.getElementById('process-type' + suffix)?.value || 'electronic';
         const deadlineType = document.getElementById('deadline-type' + suffix)?.value;
 
         const btn = form.querySelector('button[type="submit"]');
@@ -241,7 +255,7 @@ function setupCalculator(formId, suffix) {
             const response = await fetch('api/calculate.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, deadlineType })
+                body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, court, processType, deadlineType })
             });
 
             const data = await response.json();
@@ -268,7 +282,6 @@ function setupCalculator(formId, suffix) {
                 const logContainer = document.getElementById('log-details' + suffix);
                 logContainer.innerHTML = `<div class='log-item' style='color:#4ade80; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:0.5rem; padding-bottom:0.5rem;'>📍 Localidade: ${data.location}</div>`;
 
-                // Update usage counter usage
                 if (data.usage) {
                     const counterText = document.querySelector('.usage-counter span:nth-child(2)');
                     const counterBar = document.querySelector('.usage-counter div div');
@@ -279,20 +292,15 @@ function setupCalculator(formId, suffix) {
                     }
                 }
 
-                data.log.forEach(line => {
-                    const div = document.createElement('div');
-                    div.className = 'log-item';
-                    div.innerText = line;
-                    logContainer.appendChild(div);
-                });
+                logContainer.innerHTML = '';
 
                 setupGoogleCalendar(data, suffix);
+                setupPDF(data, suffix);
 
                 if (document.querySelector('.dashboard-container')) {
                     loadDeadlines();
                 }
 
-                // Show warning for guest users (empty suffix means home calculator)
                 if (suffix === '') {
                     const guestWarning = document.getElementById('guest-warning');
                     if (guestWarning) guestWarning.style.display = 'block';
@@ -325,7 +333,6 @@ async function loadDeadlines() {
         renderList('list-pending', data.pending);
         renderList('list-finalized', data.finalized);
 
-        // History
         const allItems = [...data.pending, ...data.finalized].sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
         renderHistory(allItems);
 
@@ -378,7 +385,6 @@ function renderList(elementId, items) {
 
     items.forEach(item => {
         const li = document.createElement('li');
-        // Simple format: 10/02/2026 - Vence xxxx
         const dateParts = item.end_date.split('-');
         const dateFmt = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
         const loc = item.location ? `<br><small style='color:#666'>${item.location}</small>` : '';
@@ -424,3 +430,125 @@ async function logout() {
     }
 }
 
+
+function setupPDF(data, suffix) {
+    const btn = document.getElementById('btn-pdf' + suffix);
+    if (!btn) return;
+
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', function () {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        function formatDateBR(isoDate) {
+            if (!isoDate) return '-';
+            const parts = isoDate.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        const rows = [];
+        data.log.forEach(item => {
+            if (typeof item === 'object') {
+                let countStr = '';
+                if (item.count && item.count !== 'X') countStr = item.count.toString();
+                else if (item.count === 'X') countStr = 'X';
+
+                const d = new Date(item.date + 'T12:00:00');
+                const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                const dayName = days[d.getDay()];
+                const dateFmt = formatDateBR(item.date);
+
+                rows.push([countStr, `${dateFmt} - ${dayName}`, item.description || '-']);
+            } else {
+                rows.push(['-', item, '-']);
+            }
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        doc.setFillColor(245, 247, 250);
+        doc.rect(0, 0, pageWidth, 40, 'F');
+
+        doc.setFontSize(22);
+        doc.setTextColor(28, 40, 75);
+        doc.setFont("helvetica", "bold");
+        doc.text("MeuPrazoJus", 14, 25);
+
+        let y = 50;
+        doc.setFontSize(10);
+        doc.setTextColor(50, 50, 50);
+        doc.setFont("helvetica", "normal");
+
+        const stateName = document.getElementById('state' + suffix)?.options[document.getElementById('state' + suffix).selectedIndex]?.text || '-';
+        const cityName = document.getElementById('city' + suffix)?.options[document.getElementById('city' + suffix).selectedIndex]?.text || '-';
+        const courtName = document.getElementById('court' + suffix)?.options[document.getElementById('court' + suffix).selectedIndex]?.text || '-';
+        const matterName = document.getElementById('matter' + suffix)?.options[document.getElementById('matter' + suffix).selectedIndex]?.text || '-';
+        const processName = document.getElementById('process-type' + suffix)?.options[document.getElementById('process-type' + suffix).selectedIndex]?.text || '-';
+
+        doc.text(`Estado: ${stateName}`, 14, y); y += 6;
+        doc.text(`Município: ${cityName}`, 14, y); y += 6;
+        doc.text(`Matéria: ${matterName}`, 14, y); y += 6;
+        doc.text(`Processo: ${processName}`, 14, y); y += 6;
+        doc.text(`Tribunal: ${courtName}`, 14, y); y += 12; // Gap
+
+        doc.setFontSize(12);
+        doc.text(`Prazo de ${data.days} dias (${data.type === 'working' ? 'úteis' : 'corridos'}), iniciando em ${formatDateBR(data.term_start)}.`, 14, y);
+        y += 10;
+
+        doc.setFontSize(16);
+        doc.setTextColor(220, 53, 69);
+        doc.setFont("helvetica", "bold");
+        const finalDateText = `Data final: ${formatDateBR(data.end_date)}`;
+        const textWidth = doc.getTextWidth(finalDateText);
+        doc.text(finalDateText, (pageWidth - textWidth) / 2, y);
+        y += 10;
+
+        doc.autoTable({
+            startY: y,
+            head: [['Contagem', 'Data', 'Descrição']],
+            body: rows,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [230, 230, 230],
+                textColor: [0, 0, 0],
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 4,
+                valign: 'middle'
+            },
+            columnStyles: {
+                0: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [100, 100, 100] },
+                1: { cellWidth: 80 },
+                2: { cellWidth: 'auto' }
+            },
+            didParseCell: function (data) {
+                if (data.column.index === 0) {
+                    const val = data.cell.raw;
+                    if (val !== 'X' && val !== '' && !isNaN(parseInt(val))) {
+                        data.cell.styles.textColor = [0, 128, 0];
+                        data.cell.styles.fontStyle = 'bold';
+                    } else if (val === 'X') {
+                        data.cell.styles.textColor = [200, 50, 50];
+                    }
+                }
+            }
+        });
+
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        const disclaimer = "O MeuPrazoJus disponibiliza este cálculo como simples referência. Este serviço não substitui a consulta a um advogado ou contador profissional. O usuário é responsável pelas informações inseridas.";
+        const splitDisclaimer = doc.splitTextToSize(disclaimer, pageWidth - 28);
+        doc.text(splitDisclaimer, pageWidth / 2, finalY, { align: 'center' });
+
+        doc.setTextColor(28, 40, 75);
+        doc.text("www.meuprazojus.com.br", pageWidth / 2, finalY + 15, { align: 'center' });
+
+        doc.save(`Prazo-${data.days}dias-${data.end_date}.pdf`);
+    });
+}

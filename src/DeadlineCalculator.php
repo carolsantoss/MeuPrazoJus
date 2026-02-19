@@ -17,91 +17,110 @@ class DeadlineCalculator {
      */
     public static function calculate($startDate, $days, $type = 'working', $state = null, $city = null, $matter = null, $cityName = null) {
         $clientDate = new DateTime($startDate);
-        $log = [];
+        $structuredLog = [];
         
         $currentDate = clone $clientDate;
-        $log[] = "Publicação: " . $currentDate->format('d/m/Y');
-
-        $currentDate->modify('+1 day');
+        $structuredLog[] = [
+            'date' => $currentDate->format('Y-m-d'),
+            'description' => 'Data da Publicação/Intimação',
+            'status' => 'info',
+            'count' => null
+        ];
         
-        $considerRecess = ($matter !== 'CRIMINAL');
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), $considerRecess, $state, $city)) {
-            $reason = '';
-            $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
-            
-            if (Holidays::isWeekend($currentDate->format('Y-m-d'))) {
-                $reason = 'Fim de semana';
-            } elseif ($hol) {
-                $reason = $hol === true ? 'Feriado' : $hol;
-            } elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) {
-                $reason = 'Recesso';
-            }
-            
-            $log[] = "Pula " . $currentDate->format('d/m/Y') . " ($reason)";
-            $currentDate->modify('+1 day');
-        }
-
         $termStart = clone $currentDate;
-        $log[] = "Início da contagem: " . $termStart->format('d/m/Y');
+        $termStart->modify('+1 day');
+        
+        while (!Holidays::isBusinessDay($termStart->format('Y-m-d'), true, $state, $city)) {
 
+            $reason = '';
+            $dStr = $termStart->format('Y-m-d');
+            $hol = Holidays::isHoliday($dStr, $state, $city);
+            
+            if (Holidays::isWeekend($dStr)) $reason = '(Final de Semana)';
+            elseif ($hol) $reason = is_string($hol) ? "($hol)" : '(Feriado)';
+            elseif (Holidays::isForensicRecess($dStr)) $reason = '(Recesso Forense)';
+            
+            $structuredLog[] = [
+                'date' => $dStr,
+                'description' => $reason,
+                'status' => 'skipped',
+                'count' => 'X'
+            ];
+            
+            $termStart->modify('+1 day');
+        }
+        
+        $currentDate = clone $termStart; 
         $daysCounted = 0;
         
-        if ($days > 0) {
-            $daysCounted = 1; 
-        }
-
         while ($daysCounted < $days) {
-            $currentDate->modify('+1 day');
-            $dateStr = $currentDate->format('Y-m-d');
+            $dStr = $currentDate->format('Y-m-d');
+            $isBusiness = Holidays::isBusinessDay($dStr, $matter !== 'CRIMINAL', $state, $city);
+            
+            $reason = '';
+            $hol = Holidays::isHoliday($dStr, $state, $city);
+            if (Holidays::isWeekend($dStr)) $reason = '(Final de Semana)';
+            elseif ($hol) $reason = is_string($hol) ? "($hol)" : '(Feriado)';
+            elseif (Holidays::isForensicRecess($dStr)) $reason = '(Recesso Forense)';
+            
+            $increment = false;
             
             if ($type === 'working') {
-                if (Holidays::isBusinessDay($dateStr, true, $state, $city)) {
+                if ($isBusiness) {
                     $daysCounted++;
-                } else {
-                     $reason = '';
-                     $hol = Holidays::isHoliday($dateStr, $state, $city);
-                     if (Holidays::isWeekend($dateStr)) $reason = 'Fim de semana';
-                     elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
-                     elseif (Holidays::isForensicRecess($dateStr)) $reason = 'Recesso';
+                    $increment = true;
                 }
             } else {
-                if ($matter === 'CRIMINAL') {
-                    $daysCounted++;
-                } else {
-                    if (Holidays::isForensicRecess($dateStr)) {
-                    } else {
-                        $daysCounted++;
-                    }
-                }
+                 if ($matter === 'CRIMINAL' || !Holidays::isForensicRecess($dStr)) {
+                     $daysCounted++;
+                     $increment = true;
+                 } else {
+                     $reason = '(Suspenso/Recesso)';
+                 }
+            }
+            
+            $structuredLog[] = [
+                'date' => $dStr,
+                'description' => $reason ? $reason : '-',
+                'status' => $increment ? 'counted' : 'skipped',
+                'count' => $increment ? $daysCounted : 'X'
+            ];
+            
+            if ($daysCounted < $days) {
+                $currentDate->modify('+1 day');
             }
         }
-
-        $finalPush = false;
-        while (!Holidays::isBusinessDay($currentDate->format('Y-m-d'), $considerRecess, $state, $city)) {
+        
+        
+        $finalDate = clone $currentDate;
+        
+        while (!Holidays::isBusinessDay($finalDate->format('Y-m-d'), $matter !== 'CRIMINAL', $state, $city)) {
+            $finalDate->modify('+1 day');
+             $dStr = $finalDate->format('Y-m-d');
+             
             $reason = '';
-             $hol = Holidays::isHoliday($currentDate->format('Y-m-d'), $state, $city);
-             
-             if (Holidays::isWeekend($currentDate->format('Y-m-d'))) $reason = 'Fim de semana';
-             elseif ($hol) $reason = $hol === true ? 'Feriado' : $hol;
-             elseif (Holidays::isForensicRecess($currentDate->format('Y-m-d'))) $reason = 'Recesso';
-             
-             $log[] = "Vencimento em " . $currentDate->format('d/m/Y') . " prorrogado ($reason)";
-             $currentDate->modify('+1 day');
-             $finalPush = true;
+            $hol = Holidays::isHoliday($dStr, $state, $city);
+            if (Holidays::isWeekend($dStr)) $reason = '(Final de Semana)';
+            elseif ($hol) $reason = is_string($hol) ? "($hol)" : '(Feriado)';
+            elseif (Holidays::isForensicRecess($dStr)) $reason = '(Recesso Forense)';
+            
+             $structuredLog[] = [
+                'date' => $dStr,
+                'description' => "Prorrogação $reason",
+                'status' => 'extended',
+                'count' => 'Próx. Dia Útil'
+            ];
         }
-
-        $formattedEnd = $currentDate->format('d/m/Y');
-        $log[] = "Prazo Final: " . $formattedEnd;
 
         return [
             'start_date' => $startDate,
             'term_start' => $termStart->format('Y-m-d'),
-            'end_date' => $currentDate->format('Y-m-d'),
+            'end_date' => $finalDate->format('Y-m-d'),
             'days' => $days,
             'type' => $type,
             'matter' => $matter,
-            'description' => "Vence " . self::formatDatePt($currentDate),
-            'log' => $log,
+            'description' => "Vence " . self::formatDatePt($finalDate),
+            'log' => $structuredLog, // New structured log
             'location' => $cityName ? "$cityName - $state" : ($state ? "Estado de $state" : 'Nacional')
         ];
     }

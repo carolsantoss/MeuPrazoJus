@@ -18,7 +18,10 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeuPrazoJus - Calculadora de Prazos Processuais</title>
     <link rel="stylesheet" href="assets/style.css?v=<?php echo time(); ?>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <?php include 'src/google_adsense.php'; ?>
 </head>
 <body>
     <header>
@@ -90,10 +93,25 @@ if (isset($_SESSION['user_id'])) {
                             </select>
                         </div>
 
+                        <div class="form-group" id="court-group" style="display:none;">
+                            <label for="court">Tribunal / Regional</label>
+                            <select id="court" name="court">
+                                <option value="">Selecione o Estado primeiro</option>
+                            </select>
+                        </div>
+
                         <div class="form-group" id="vara-group">
                             <label for="vara">Vara / Juízo</label>
                             <select id="vara" name="vara">
                                 <option value="">Geral</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="process-type">Processo</label>
+                            <select id="process-type" name="process-type">
+                                <option value="electronic">Eletrônico</option>
+                                <option value="physical">Físico</option>
                             </select>
                         </div>
 
@@ -159,6 +177,7 @@ if (isset($_SESSION['user_id'])) {
                          <a href="#" target="_blank" id="gcal-link" class="btn gcal-btn">
                             Adicionar ao Google Agenda
                         </a>
+                         <button id="btn-pdf" class="btn btn-secondary" style="width:100%; margin-top:10px;">📄 Baixar PDF Detalhado</button>
                     </div>
                 </div>
             </div>
@@ -191,17 +210,7 @@ if (isset($_SESSION['user_id'])) {
                             $limit = 5;
                         ?>
 
-                        <?php if (!$isPremium): ?>
-                            <div class="usage-counter" style="margin: 0 0.5rem 1rem 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 6px; font-size: 0.85rem; color: #aaa;">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
-                                    <span>Consultas</span>
-                                    <span><?= $calcCount ?>/<?= $limit ?></span>
-                                </div>
-                                <div style="width:100%; height:4px; background:#444; border-radius:2px;">
-                                    <div style="width: <?= min(100, ($calcCount/$limit)*100) ?>%; height:100%; background: var(--primary); border-radius:2px;"></div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                        <?php // Usage counter removed as per request ?>
 
                         <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
                         <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
@@ -319,10 +328,25 @@ if (isset($_SESSION['user_id'])) {
                                     </select>
                                 </div>
 
+                                <div class="form-group" id="court-group-dash" style="display:none;">
+                                    <label for="court-dash">Tribunal / Regional</label>
+                                    <select id="court-dash" name="court">
+                                        <option value="">Selecione o Estado primeiro</option>
+                                    </select>
+                                </div>
+
                                 <div class="form-group" id="vara-group-dash">
                                     <label for="vara-dash">Vara / Juízo</label>
                                     <select id="vara-dash" name="vara">
                                         <option value="">Geral</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="process-type-dash">Processo</label>
+                                    <select id="process-type-dash" name="process-type">
+                                        <option value="electronic">Eletrônico</option>
+                                        <option value="physical">Físico</option>
                                     </select>
                                 </div>
 
@@ -367,6 +391,7 @@ if (isset($_SESSION['user_id'])) {
                                 </div>
                                 <div class="log-container" id="log-details-dash"></div>
                                 <a href="#" target="_blank" id="gcal-link-dash" class="btn gcal-btn">Adicionar ao Google Agenda</a>
+                                <button id="btn-pdf-dash" class="btn btn-secondary" style="width:100%; margin-top:10px;">📄 Baixar PDF Detalhado</button>
                             </div>
                         </div>
                     </div>

@@ -116,6 +116,7 @@ if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
             100% { transform: rotate(360deg); }
         }
     </style>
+    <?php include 'src/google_adsense.php'; ?>
 </head>
 <body>
 

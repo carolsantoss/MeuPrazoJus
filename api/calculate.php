@@ -19,6 +19,8 @@ $state = $data['state'] ?? null;
 $city = $data['city'] ?? null;
 $cityName = $data['cityName'] ?? null;
 $matter = $data['matter'] ?? null;
+$processType = $data['processType'] ?? 'electronic';
+$court = $data['court'] ?? null;
 
 if (!$startDate || $days <= 0) {
     echo json_encode(['error' => 'Dados inválidos']);
@@ -39,13 +41,6 @@ if (isset($_SESSION['user_id'])) {
     $usageCount = $_SESSION['calculations'];
 }
 
-if (!$isSubscribed && $usageCount >= 5) {
-    echo json_encode([
-        'error' => 'upgrade_required',
-        'message' => 'Você atingiu o limite de 5 cálculos gratuitos. Assine para continuar.'
-    ]);
-    exit;
-}
 
 try {
     $result = DeadlineCalculator::calculate($startDate, $days, $type, $state, $city, $matter, $cityName);

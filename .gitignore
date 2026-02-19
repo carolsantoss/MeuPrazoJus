@@ -1,6 +1,23 @@
-vendor/
-*.log
-data/*.json
-database.sqlite
-.DS_Store
+# Config and Sensitive Files
 config.php
+src/google_adsense.php
+
+# Dependency Directories
+vendor/
+node_modules/
+
+# Logs and Temp Files
+*.log
+.DS_Store
+Thumbs.db
+
+# Private Data
+data/*.json
+# Except public/static data if you want to commit jurisdictions:
+!data/jurisdictions.json
+!data/fees.json
+database.sqlite
+
+# IDE Settings
+.vscode/
+.idea/

@@ -7,6 +7,7 @@
     <title>Planos - MeuPrazoJus</title>
     <link rel="stylesheet" href="assets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <?php include 'src/google_adsense.php'; ?>
 </head>
 <body>
 
@@ -37,7 +38,7 @@
                 <div class="price">R$ 0</div>
                 <div class="period">para testar</div>
                 <ul class="features-list">
-                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 5 Cálculos Gratuitos</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Contagem Novo CPC</li>
                 </ul>
                 <a href="index.php" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
