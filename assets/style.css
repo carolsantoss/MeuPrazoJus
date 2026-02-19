@@ -838,3 +838,39 @@ select:focus {
         padding: 0.5rem 1rem;
     }
 }
+.upload-zone {
+    border: 2px dashed var(--glass-border);
+    border-radius: 1rem;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+    color: white;
+}
+
+.upload-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--glass);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.upload-item .remove-btn {
+    color: var(--secondary);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}

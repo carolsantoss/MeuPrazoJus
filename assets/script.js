@@ -1,7 +1,14 @@
 function showSection(id) {
     document.querySelectorAll('.dash-section').forEach(el => el.style.display = 'none');
+
     const target = document.getElementById('section-' + id);
-    if (target) target.style.display = 'block';
+    if (!target) return;
+
+    if (id === 'converter') {
+        target.style.display = 'flex';
+    } else {
+        target.style.display = 'block';
+    }
 
     document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.remove('active');
@@ -550,5 +557,159 @@ function setupPDF(data, suffix) {
         doc.text("www.meuprazojus.com.br", pageWidth / 2, finalY + 15, { align: 'center' });
 
         doc.save(`Prazo-${data.days}dias-${data.end_date}.pdf`);
+    });
+}
+
+// --- Converter Functionality ---
+
+let converterFiles = [];
+
+function switchConverterTab(type) {
+    // Hide all panels
+    document.getElementById('converter-pdf-panel').style.display = 'none';
+    document.getElementById('converter-audio-panel').style.display = 'none';
+    document.getElementById('converter-video-panel').style.display = 'none';
+
+    // Reset active buttons
+    ['pdf', 'audio', 'video'].forEach(t => {
+        document.getElementById(`btn-tab-${t}`).classList.remove('btn-primary');
+        document.getElementById(`btn-tab-${t}`).classList.add('btn-ghost');
+    });
+
+    // Show active
+    document.getElementById(`converter-${type}-panel`).style.display = 'block';
+
+    // Set active button
+    const activeBtn = document.getElementById(`btn-tab-${type}`);
+    activeBtn.classList.remove('btn-ghost');
+    activeBtn.classList.add('btn-primary');
+}
+
+// PDF Converter Drop Zone
+const dropZonePdf = document.getElementById('drop-zone-pdf');
+const inputImages = document.getElementById('input-images');
+
+if (dropZonePdf) {
+    dropZonePdf.addEventListener('click', () => inputImages.click());
+
+    dropZonePdf.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZonePdf.classList.add('dragover');
+    });
+
+    dropZonePdf.addEventListener('dragleave', () => dropZonePdf.classList.remove('dragover'));
+
+    dropZonePdf.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZonePdf.classList.remove('dragover');
+        handlePdfFiles(e.dataTransfer.files);
+    });
+
+    inputImages.addEventListener('change', (e) => handlePdfFiles(e.target.files));
+}
+
+function handlePdfFiles(files) {
+    const list = document.getElementById('preview-list');
+    const btn = document.getElementById('btn-convert-pdf');
+
+    Array.from(files).forEach(file => {
+        if (file.type === 'image/jpeg' || file.type === 'image/png') {
+            converterFiles.push(file);
+
+            const item = document.createElement('div');
+            item.className = 'upload-item';
+
+            item.innerHTML = `
+                <span>${file.name}</span>
+                <button class="remove-btn" onclick="removeFile(this, '${file.name}')">&times;</button>
+            `;
+            list.appendChild(item);
+        }
+    });
+
+    btn.disabled = converterFiles.length === 0;
+}
+
+function removeFile(el, name) {
+    converterFiles = converterFiles.filter(f => f.name !== name);
+    el.parentElement.remove();
+    document.getElementById('btn-convert-pdf').disabled = converterFiles.length === 0;
+}
+
+// Generate PDF from Images
+const btnConvertPdf = document.getElementById('btn-convert-pdf');
+if (btnConvertPdf) {
+    btnConvertPdf.addEventListener('click', async () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        for (let i = 0; i < converterFiles.length; i++) {
+            const file = converterFiles[i];
+            const imgData = await readFileAsDataURL(file);
+
+            // Get Image Props
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            if (i > 0) doc.addPage();
+            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+
+        doc.save("MeusDocumentos.pdf");
+
+        // Reset
+        converterFiles = [];
+        document.getElementById('preview-list').innerHTML = '';
+        btnConvertPdf.disabled = true;
+        alert("PDF Gerado com sucesso!");
+    });
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Audio/Video Placeholders (UI Logic Only for now)
+const btnConvertAudio = document.getElementById('btn-convert-audio');
+if (btnConvertAudio) {
+    btnConvertAudio.addEventListener('click', () => {
+        alert("O conversor de áudio avançado requer um servidor processador dedicado. Esta funcionalidade será ativada em breve.");
+    });
+}
+
+const inputAudio = document.getElementById('input-audio');
+const dropZoneAudio = document.getElementById('drop-zone-audio');
+if (dropZoneAudio) {
+    dropZoneAudio.addEventListener('click', () => inputAudio.click());
+    inputAudio.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            document.getElementById('audio-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;
+            document.getElementById('btn-convert-audio').disabled = false;
+        }
+    });
+}
+
+const btnConvertVideo = document.getElementById('btn-convert-video');
+if (btnConvertVideo) {
+    btnConvertVideo.addEventListener('click', () => {
+        alert("O conversor de vídeo avançado requer um servidor processador dedicado. Esta funcionalidade será ativada em breve.");
+    });
+}
+
+const inputVideo = document.getElementById('input-video');
+const dropZoneVideo = document.getElementById('drop-zone-video');
+if (dropZoneVideo) {
+    dropZoneVideo.addEventListener('click', () => inputVideo.click());
+    inputVideo.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            document.getElementById('video-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;
+            document.getElementById('btn-convert-video').disabled = false;
+        }
     });
 }

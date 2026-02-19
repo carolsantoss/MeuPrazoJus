@@ -218,8 +218,10 @@ if (isset($_SESSION['user_id'])) {
                         
                         <?php if ($isPremium): ?>
                             <a href="fees.php" class="nav-item">💰 Honorários</a>
+                            <button class="nav-item" onclick="showSection('converter')">🔄 Conversor PDF/Áudio</button>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
+                            <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
                         <?php endif; ?>
 
                         <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
@@ -393,6 +395,56 @@ if (isset($_SESSION['user_id'])) {
                                 <a href="#" target="_blank" id="gcal-link-dash" class="btn gcal-btn">Adicionar ao Google Agenda</a>
                                 <button id="btn-pdf-dash" class="btn btn-secondary" style="width:100%; margin-top:10px;">📄 Baixar PDF Detalhado</button>
                             </div>
+                        </div>
+                    </div>
+                
+
+                    <!-- Section: Converter (New) -->
+                    <div id="section-converter" class="dash-section" style="display:none; flex: 1; flex-direction: column; justify-content: center; align-items: center; min-height: 70vh;">
+                        <h2 style="text-align: center;">Conversor de Arquivos</h2>
+                        <div class="calculator-card" style="margin: 0 auto; max-width: 600px; width: 100%;">
+                            <p class="subtitle" style="margin-bottom: 20px;">Converta imagens, áudios e vídeos rapidamente.</p>
+                            
+                            <!-- Tabs for Converter Type -->
+                            <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                                <button type="button" class="btn btn-primary" id="btn-tab-pdf" onclick="switchConverterTab('pdf')">Imagem p/ PDF</button>
+                                <button type="button" class="btn btn-ghost" id="btn-tab-audio" onclick="switchConverterTab('audio')">Áudio (MP3)</button>
+                                <button type="button" class="btn btn-ghost" id="btn-tab-video" onclick="switchConverterTab('video')">Vídeo (MP4)</button>
+                            </div>
+
+                            <!-- Image to PDF -->
+                            <div id="converter-pdf-panel">
+                                <div class="upload-zone" id="drop-zone-pdf">
+                                    <p>Arraste imagens (JPG, PNG) aqui ou clique para selecionar</p>
+                                    <input type="file" id="input-images" accept="image/jpeg, image/png" multiple style="display:none">
+                                </div>
+                                <div id="preview-list" style="margin: 15px 0;"></div>
+                                <button id="btn-convert-pdf" class="btn btn-primary btn-block" disabled>Gerar PDF</button>
+                            </div>
+
+                            <!-- Audio to MP3 -->
+                            <div id="converter-audio-panel" style="display:none;">
+                                <div class="upload-zone" id="drop-zone-audio">
+                                    <p>Selecione áudio (OGG, OPUS, WAV) para converter em MP3</p>
+                                    <input type="file" id="input-audio" accept=".ogg,.opus,.wav" style="display:none">
+                                </div>
+                                <div id="audio-file-info" style="margin: 15px 0; color: #aaa;"></div>
+                                <div class="alert-box" style="margin-top: 15px; background: rgba(255,193,7,0.1); color: #ffca2c; padding: 10px; border-radius: 5px; font-size: 0.9rem;">
+                                    ⚠️ A conversão de áudio pode levar alguns instantes.
+                                </div>
+                                 <button id="btn-convert-audio" class="btn btn-primary btn-block" disabled>Converter para MP3</button>
+                            </div>
+
+                            <!-- Video to MP4 -->
+                            <div id="converter-video-panel" style="display:none;">
+                                <div class="upload-zone" id="drop-zone-video">
+                                    <p>Selecione vídeo (MOV, AVI, WEBM) para converter em MP4</p>
+                                    <input type="file" id="input-video" accept=".mov,.avi,.webm" style="display:none">
+                                </div>
+                                <div id="video-file-info" style="margin: 15px 0; color: #aaa;"></div>
+                                <button id="btn-convert-video" class="btn btn-primary btn-block" disabled>Converter para MP4</button>
+                            </div>
+
                         </div>
                     </div>
 
