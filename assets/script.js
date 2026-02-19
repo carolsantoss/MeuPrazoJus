@@ -675,11 +675,72 @@ function readFileAsDataURL(file) {
     });
 }
 
-// Audio/Video Placeholders (UI Logic Only for now)
+// --- FFMPEG ---
+
+const { createFFmpeg, fetchFile } = FFmpeg;
+let ffmpeg = null;
+
+async function loadFFmpeg() {
+    if (ffmpeg) return;
+
+    ffmpeg = createFFmpeg({ log: true });
+
+    if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+    }
+}
+
 const btnConvertAudio = document.getElementById('btn-convert-audio');
 if (btnConvertAudio) {
-    btnConvertAudio.addEventListener('click', () => {
-        alert("O conversor de áudio avançado requer um servidor processador dedicado. Esta funcionalidade será ativada em breve.");
+    btnConvertAudio.addEventListener('click', async () => {
+        const fileInput = document.getElementById('input-audio');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert("Selecione um arquivo de áudio primeiro.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const btn = btnConvertAudio;
+        const originalText = btn.innerText;
+
+        try {
+            btn.disabled = true;
+            btn.innerText = "Carregando FFmpeg...";
+
+            await loadFFmpeg();
+
+            btn.innerText = "Convertendo...";
+
+            const fileName = file.name;
+            const outputName = 'audio_convertido.mp3';
+
+            ffmpeg.FS('writeFile', fileName, await fetchFile(file));
+
+            await ffmpeg.run('-i', fileName, outputName);
+
+            const data = ffmpeg.FS('readFile', outputName);
+
+            const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = outputName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            ffmpeg.FS('unlink', fileName);
+            ffmpeg.FS('unlink', outputName);
+
+            alert("Conversão de áudio concluída com sucesso!");
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro na conversão: " + err.message + ". Verifique se seu navegador suporta SharedArrayBuffer (HTTPS ou localhost com headers corretos).");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
     });
 }
 
@@ -697,8 +758,55 @@ if (dropZoneAudio) {
 
 const btnConvertVideo = document.getElementById('btn-convert-video');
 if (btnConvertVideo) {
-    btnConvertVideo.addEventListener('click', () => {
-        alert("O conversor de vídeo avançado requer um servidor processador dedicado. Esta funcionalidade será ativada em breve.");
+    btnConvertVideo.addEventListener('click', async () => {
+        const fileInput = document.getElementById('input-video');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert("Selecione um arquivo de vídeo primeiro.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const btn = btnConvertVideo;
+        const originalText = btn.innerText;
+
+        try {
+            btn.disabled = true;
+            btn.innerText = "Carregando FFmpeg...";
+
+            await loadFFmpeg();
+
+            btn.innerText = "Convertendo...";
+
+            const fileName = file.name;
+            const outputName = 'video_convertido.mp4';
+
+            ffmpeg.FS('writeFile', fileName, await fetchFile(file));
+
+            await ffmpeg.run('-i', fileName, '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', outputName);
+
+            const data = ffmpeg.FS('readFile', outputName);
+
+            const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = outputName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            ffmpeg.FS('unlink', fileName);
+            ffmpeg.FS('unlink', outputName);
+
+            alert("Conversão de vídeo concluída com sucesso!");
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro na conversão: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
     });
 }
 

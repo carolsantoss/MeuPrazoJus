@@ -1,8 +1,8 @@
 <?php
-/**
- * Router for PHP Built-in Server
- * Usage: php -S localhost:8000 router.php
- */
+
+header("Cross-Origin-Opener-Policy: same-origin");
+header("Cross-Origin-Embedder-Policy: require-corp");
+header("Access-Control-Allow-Origin: *");
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $file = __DIR__ . $uri;

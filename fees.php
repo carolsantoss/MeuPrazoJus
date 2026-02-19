@@ -54,6 +54,11 @@
                     <a href="index.php?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
                     <a href="index.php?section=history" class="nav-item">📜 Histórico</a>
                     <a href="fees.php" class="nav-item active">💰 Honorários</a>
+                    <?php if ($isPremium): ?>
+                        <a href="index.php?section=converter" class="nav-item">🔄 Conversor PDF/Áudio</a>
+                    <?php else: ?>
+                        <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
+                    <?php endif; ?>
                     <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
                 </nav>
             </aside>
