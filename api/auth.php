@@ -48,6 +48,7 @@ if ($action === 'register') {
         $_SESSION['user_name'] = $user['name'] ?? '';
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
+        $_SESSION['subscription_end'] = $user['subscription_end'] ?? null;
         $_SESSION['calculations'] = $user['calculations_count'] ?? 0;
         echo json_encode([
             'success' => true,
@@ -64,8 +65,11 @@ if ($action === 'register') {
 } elseif ($action === 'subscribe') {
     // Mock subscription
     if (isset($_SESSION['user_id'])) {
-        $userManager->setSubscription($_SESSION['user_id'], 'premium');
+        $date = new DateTime('+1 year');
+        $dateStr = $date->format('Y-m-d');
+        $userManager->setSubscription($_SESSION['user_id'], 'premium', $dateStr);
         $_SESSION['is_subscribed'] = true;
+        $_SESSION['subscription_end'] = $dateStr;
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['error' => 'Não autenticado']);
