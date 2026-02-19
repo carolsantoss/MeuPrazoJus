@@ -28,14 +28,14 @@ if (isset($_SESSION['user_id'])) {
     <header>
         <div class="max-w-7xl">
             <nav>
-                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
+                <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="subscription.php" class="btn btn-ghost">Planos</a>
+                        <a href="subscription" class="btn btn-ghost">Planos</a>
                         <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
                     <?php else: ?>
-                        <a href="login.php" class="btn btn-ghost">Entrar</a>
-                        <a href="subscription.php" class="btn btn-primary">Assinar Agora</a>
+                        <a href="login" class="btn btn-ghost">Entrar</a>
+                        <a href="subscription" class="btn btn-primary">Assinar Agora</a>
                     <?php endif; ?>
                 </div>
             </nav>
@@ -162,13 +162,12 @@ if (isset($_SESSION['user_id'])) {
                             <div class="result-date" id="result-date">...</div>
                         </div>
                         
-                        <!-- Warning for Guest Users -->
                         <div id="guest-warning" style="display:none; background: #fffbeb; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fcd34d; text-align: center;">
                             <p style="margin-bottom: 0.5rem; font-weight: 600;">⚠️ Atenção: Este cálculo não foi salvo!</p>
                             <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para salvar seu histórico e gerenciar prazos com segurança, crie sua conta agora.</p>
                             <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                <a href="register.php" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Criar Conta Grátis</a>
-                                <a href="login.php" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.9rem; color: #92400e; border-color: #92400e;">Entrar</a>
+                                <a href="register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Criar Conta Grátis</a>
+                                <a href="login" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.9rem; color: #92400e; border-color: #92400e;">Entrar</a>
                             </div>
                         </div>
 
@@ -184,9 +183,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
         <?php else: ?>
-            <!-- DASHBOARD (Logged In) -->
             <div class="dashboard-container">
-                <!-- Sidebar -->
                 <aside class="sidebar">
                     <div class="user-info">
                         <?php 
@@ -211,28 +208,24 @@ if (isset($_SESSION['user_id'])) {
                             $limit = 5;
                         ?>
 
-                        <?php // Usage counter removed as per request ?>
-
                         <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
                         <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
                         <button class="nav-item" onclick="showSection('history')">📜 Histórico</button>
                         
                         <?php if ($isPremium): ?>
-                            <a href="fees.php" class="nav-item">💰 Honorários</a>
+                            <a href="fees" class="nav-item">💰 Honorários</a>
                             <button class="nav-item" onclick="showSection('converter')">🔄 Conversor PDF/Áudio</button>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
                         <?php endif; ?>
 
-                        <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
+                        <a href="subscription" class="nav-item">⭐ Assinatura</a>
                     </nav>
                 </aside>
 
-                <!-- Main Dashboard Area -->
                 <div class="dash-content">
                     
-                    <!-- Section: Overview -->
                     <div id="section-dashboard" class="dash-section">
                         <?php
                         if ($isPremium && !empty($_SESSION['subscription_end'])) {
@@ -246,7 +239,7 @@ if (isset($_SESSION['user_id'])) {
                                     <span style="font-size: 1.5rem;">⚠️</span>
                                     <div>
                                         <strong>Sua assinatura vence em ' . $daysRemaining . ' dias!</strong><br>
-                                        <a href="subscription.php" style="color: #ffca2c; text-decoration: underline;">Renove agora para não perder o acesso.</a>
+                                        <a href="subscription" style="color: #ffca2c; text-decoration: underline;">Renove agora para não perder o acesso.</a>
                                     </div>
                                 </div>';
                             }
@@ -280,7 +273,6 @@ if (isset($_SESSION['user_id'])) {
                         </div>
                     </div>
 
-                    <!-- Section: History -->
                     <div id="section-history" class="dash-section" style="display:none">
                         <h2>Histórico de Cálculos</h2>
                         <div class="list-card">
@@ -296,7 +288,6 @@ if (isset($_SESSION['user_id'])) {
                                         </tr>
                                     </thead>
                                     <tbody id="history-table-body">
-                                        <!-- Populated by JS -->
                                         <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
                                     </tbody>
                                 </table>
@@ -304,12 +295,10 @@ if (isset($_SESSION['user_id'])) {
                         </div>
                     </div>
 
-                    <!-- Section: New Deadline (The Calculator) -->
                     <div id="section-new-deadline" class="dash-section" style="display:none">
                         <h2 style="text-align: center;">Cadastrar Novo Prazo</h2>
                         <div class="calculator-card" style="margin: 0 auto;">
                             <form id="calc-form-dash">
-                                <!-- Jurisdiction Fields -->
                                 <div class="form-group">
                                     <label for="state-dash">Estado (UF)</label>
                                     <select id="state-dash" name="state">
@@ -400,20 +389,17 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 
 
-                    <!-- Section: Converter (New) -->
                     <div id="section-converter" class="dash-section" style="display:none; flex: 1; flex-direction: column; justify-content: center; align-items: center; min-height: 70vh;">
                         <h2 style="text-align: center;">Conversor de Arquivos</h2>
                         <div class="calculator-card" style="margin: 0 auto; max-width: 600px; width: 100%;">
                             <p class="subtitle" style="margin-bottom: 20px;">Converta imagens, áudios e vídeos rapidamente.</p>
                             
-                            <!-- Tabs for Converter Type -->
                             <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
                                 <button type="button" class="btn btn-primary" id="btn-tab-pdf" onclick="switchConverterTab('pdf')">Imagem p/ PDF</button>
                                 <button type="button" class="btn btn-ghost" id="btn-tab-audio" onclick="switchConverterTab('audio')">Áudio (MP3)</button>
                                 <button type="button" class="btn btn-ghost" id="btn-tab-video" onclick="switchConverterTab('video')">Vídeo (MP4)</button>
                             </div>
 
-                            <!-- Image to PDF -->
                             <div id="converter-pdf-panel">
                                 <div class="upload-zone" id="drop-zone-pdf">
                                     <p>Arraste imagens (JPG, PNG) aqui ou clique para selecionar</p>
@@ -423,7 +409,6 @@ if (isset($_SESSION['user_id'])) {
                                 <button id="btn-convert-pdf" class="btn btn-primary btn-block" disabled>Gerar PDF</button>
                             </div>
 
-                            <!-- Audio to MP3 -->
                             <div id="converter-audio-panel" style="display:none;">
                                 <div class="upload-zone" id="drop-zone-audio">
                                     <p>Selecione áudio (OGG, OPUS, WAV) para converter em MP3</p>
@@ -436,7 +421,6 @@ if (isset($_SESSION['user_id'])) {
                                  <button id="btn-convert-audio" class="btn btn-primary btn-block" disabled>Converter para MP3</button>
                             </div>
 
-                            <!-- Video to MP4 -->
                             <div id="converter-video-panel" style="display:none;">
                                 <div class="upload-zone" id="drop-zone-video">
                                     <p>Selecione vídeo (MOV, AVI, WEBM) para converter em MP4</p>

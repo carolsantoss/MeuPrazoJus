@@ -3,7 +3,7 @@ session_start();
 require_once 'config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -23,7 +23,7 @@ $user_email = $_SESSION['user_email'] ?? '';
 
 // Prevent double subscription
 if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
-    header('Location: index.php');
+    header('Location: index');
     exit;
 }
 
@@ -123,9 +123,9 @@ if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
     <header>
         <div class="max-w-7xl">
             <nav>
-                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
+                <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
-                   <a href="subscription.php" class="btn btn-ghost">Alterar Plano</a>
+                   <a href="subscription" class="btn btn-ghost">Alterar Plano</a>
                 </div>
             </nav>
         </div>

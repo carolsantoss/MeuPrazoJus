@@ -18,6 +18,15 @@ function showSection(id) {
     });
 
     if (id === 'dashboard') loadDeadlines();
+
+    // Atualiza a URL sem recarregar
+    const url = new URL(window.location);
+    if (id === 'dashboard') {
+        url.searchParams.delete('section');
+    } else {
+        url.searchParams.set('section', id);
+    }
+    window.history.pushState({}, '', url);
 }
 
 let jurisdictionsData = null;
@@ -430,7 +439,7 @@ async function logout() {
         const res = await fetch('api/auth.php?action=logout');
         const data = await res.json();
         if (data.success) {
-            window.location.href = 'login.php';
+            window.location.href = 'login';
         }
     } catch (e) {
         console.error('Logout error', e);

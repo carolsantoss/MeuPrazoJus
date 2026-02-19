@@ -14,13 +14,13 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
+                <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
-                   <a href="index.php" class="btn btn-ghost">Calculadora</a>
+                   <a href="index" class="btn btn-ghost">Calculadora</a>
                    <?php if(isset($_SESSION['user_id'])): ?>
                        <a href="#" class="btn btn-ghost" onclick="logout()">Sair</a>
                    <?php else: ?>
-                       <a href="login.php" class="btn btn-ghost">Entrar</a>
+                       <a href="login" class="btn btn-ghost">Entrar</a>
                    <?php endif; ?>
                 </div>
             </nav>
@@ -41,7 +41,7 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Contagem Novo CPC</li>
                 </ul>
-                <a href="index.php" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
+                <a href="index" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
             </div>
 
             <!-- Premium -->
@@ -67,11 +67,11 @@
     <script>
         document.getElementById('sub-btn').addEventListener('click', async () => {
             if(!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>) {
-                window.location.href = 'login.php';
+                window.location.href = 'login';
                 return;
             }
             // Redirect to dedicated checkout page
-            window.location.href = 'checkout.php';
+            window.location.href = 'checkout';
         });
 
         async function logout() {

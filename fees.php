@@ -14,14 +14,14 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
+                <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                    <?php if(isset($_SESSION['user_id'])): ?>
-                       <a href="subscription.php" class="btn btn-ghost">Planos</a>
+                       <a href="subscription" class="btn btn-ghost">Planos</a>
                        <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
                    <?php else: ?>
-                       <a href="login.php" class="btn btn-ghost">Entrar</a>
-                       <a href="subscription.php" class="btn btn-primary">Assinar Agora</a>
+                       <a href="login" class="btn btn-ghost">Entrar</a>
+                       <a href="subscription" class="btn btn-primary">Assinar Agora</a>
                    <?php endif; ?>
                 </div>
             </nav>
@@ -30,7 +30,6 @@
 
     <main>
         <div class="dashboard-container">
-            <!-- Sidebar -->
             <aside class="sidebar">
                 <div class="user-info">
                     <?php 
@@ -50,20 +49,19 @@
                     <?php endif; ?>
                 </div>
                 <nav class="side-nav">
-                    <a href="index.php" class="nav-item">📊 Prazos</a>
-                    <a href="index.php?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
-                    <a href="index.php?section=history" class="nav-item">📜 Histórico</a>
-                    <a href="fees.php" class="nav-item active">💰 Honorários</a>
+                    <a href="index" class="nav-item">📊 Prazos</a>
+                    <a href="index?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
+                    <a href="index?section=history" class="nav-item">📜 Histórico</a>
+                    <a href="fees" class="nav-item active">💰 Honorários</a>
                     <?php if ($isPremium): ?>
-                        <a href="index.php?section=converter" class="nav-item">🔄 Conversor PDF/Áudio</a>
+                        <a href="index?section=converter" class="nav-item">🔄 Conversor PDF/Áudio</a>
                     <?php else: ?>
                         <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
                     <?php endif; ?>
-                    <a href="subscription.php" class="nav-item">⭐ Assinatura</a>
+                    <a href="subscription" class="nav-item">⭐ Assinatura</a>
                 </nav>
             </aside>
 
-            <!-- Main Content -->
             <div class="dash-content centered">
                 <header class="top-bar">
                     <h1 style="text-align: center;">Calculadora de Honorários</h1>
@@ -131,7 +129,6 @@
                         <div class="fee-total" id="fee-summary" style="margin-top: 1.5rem; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);"></div>
                     </div>
 
-                    <!-- History Section -->
                     <div id="fee-history-container" class="card" style="margin-top: 2rem;">
                         <h3>Histórico de Cálculos</h3>
                         <div class="table-responsive">
@@ -269,7 +266,6 @@ function loadCalculation(item) {
     const container = document.getElementById('lawyers-list');
     container.innerHTML = '';
 
-    // Compatibilidade: Converte formato antigo (array de strings) para novo (objetos)
     let lawyersData = item.lawyers;
     if (lawyersData.length > 0 && typeof lawyersData[0] === 'string') {
         const splitPercent = 100 / lawyersData.length;
@@ -305,7 +301,6 @@ function loadCalculation(item) {
         const dateFmt = currentDate.toLocaleDateString('pt-BR');
         const gcalLink = generateGCalLink(currentDate, installValue, i, item.installments);
 
-         // Monta texto de distribuição
          let distributionText = lawyersData.map(l => {
             const share = installValue * (l.percent / 100);
             return `${l.name} (${parseFloat(l.percent).toFixed(2)}%): ${formatCurrency(share)}`;
@@ -334,7 +329,6 @@ async function calculateFees() {
     const installments = parseInt(document.getElementById('fee-installments').value);
     const startDateStr = document.getElementById('fee-start-date').value;
     
-    // Coleta advogados e porcentagens
     const lawyerInputs = document.querySelectorAll('.lawyer-input-group');
     const lawyers = [];
     let totalPercent = 0;
@@ -354,7 +348,7 @@ async function calculateFees() {
         return;
     }
 
-    if (Math.abs(totalPercent - 100) > 0.1) { // Tolerância para float
+    if (Math.abs(totalPercent - 100) > 0.1) { 
         alert(`A soma das porcentagens deve ser 100%. Atual: ${totalPercent}%`);
         return;
     }
@@ -367,7 +361,7 @@ async function calculateFees() {
                 total,
                 installments,
                 startDate: startDateStr,
-                lawyers // Agora envia objetos {name, percent}
+                lawyers 
             })
         });
         loadHistory(1);
@@ -388,7 +382,6 @@ async function calculateFees() {
         const dateFmt = currentDate.toLocaleDateString('pt-BR');
         const gcalLink = generateGCalLink(currentDate, installValue, i, installments);
 
-        // Monta texto de distribuição
         let distributionText = lawyers.map(l => {
             const share = installValue * (l.percent / 100);
             return `${l.name} (${l.percent}%): ${formatCurrency(share)}`;
@@ -417,7 +410,6 @@ function formatCurrency(val) {
 function generateGCalLink(date, val, current, total) {
     const title = encodeURIComponent(`Recebimento Honorários (${current}/${total})`);
     
-    // Format YYYYMMDD
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');

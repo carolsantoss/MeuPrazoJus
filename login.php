@@ -13,9 +13,9 @@
     <header>
         <div class="max-w-7xl">
             <nav>
-                <a href="index.php" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
+                <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
-                    <a href="index.php" class="btn btn-ghost">Voltar</a>
+                    <a href="index" class="btn btn-ghost">Voltar</a>
                 </div>
             </nav>
         </div>
@@ -42,7 +42,7 @@
                 <div id="msg" style="margin-top:1rem; text-align:center;"></div>
             </form>
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Não tem conta? <a href="register.php" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
+                Não tem conta? <a href="register" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
             </p>
         </div>
     </main>
@@ -82,7 +82,7 @@
                 try {
                     const data = JSON.parse(text);
                     if(data.success) {
-                        window.location.href = 'index.php';
+                        window.location.href = 'index';
                     } else {
                         // Set error color
                         msg.style.color = '#f87171'; // Red
