@@ -1,10 +1,12 @@
 RewriteEngine On
 
-# Redirect /file.php to /file
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php\ HTTP
-RewriteRule ^([^.]+)\.php$ /$1 [R=301,L]
+# Verificações de segurança e loop
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
 
-# Internally map /file to /file.php
+# Se o arquivo .php existe, faça a reescrita interna
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}\.php -f
-RewriteRule ^(.*?)/?$ $1.php [NC,L]
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L,QSA]
+
+# Proteção básica de diretórios
+Options -Indexes
