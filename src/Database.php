@@ -15,6 +15,11 @@ class Database {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ]);
         } catch (PDOException $e) {
+            if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode(['error' => 'DB Conn Error: ' . $e->getMessage()]);
+                exit;
+            }
             die("Connection failed: " . $e->getMessage());
         }
     }
