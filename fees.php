@@ -62,16 +62,13 @@
                 </nav>
             </aside>
 
-            <div class="dash-content centered">
-                <header class="top-bar">
-                    <h1 style="text-align: center;">Calculadora de Honorários</h1>
-                    <p class="subtitle" style="text-align: center;">Organize o recebimento e divisão de valores.</p>
-                </header>
+            <div class="dash-content">
+                <div class="calculator-card" style="margin: 0 auto; max-width: 800px;">
+                    <h2 style="text-align: center; color: white; margin-bottom: 0.5rem;">Calculadora de Honorários</h2>
+                    <p style="text-align: center; margin-bottom: 2.5rem; color: var(--text-muted); font-size: 0.95rem;">Organize o recebimento e divisão de valores.</p>
 
-                <div class="content-wrapper">
-                    <div class="card">
                         <form id="fee-form">
-                            <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
                                 <div class="form-group" style="flex: 1;">
                                     <label>Valor Total</label>
                                     <input type="text" id="fee-total" required placeholder="R$ 0,00">
@@ -82,7 +79,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
                                 <div class="form-group" style="flex: 1;">
                                     <label>Data 1ª Parcela</label>
                                     <input type="date" id="fee-start-date" required>
@@ -94,7 +91,7 @@
                             <div class="form-group" style="margin-bottom: 1.5rem;">
                                 <label style="display: flex; justify-content: space-between; align-items: center;">
                                     Advogados Participantes
-                                    <button type="button" class="btn btn-ghost" id="add-lawyer-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">+ Adicionar Advogado</button>
+                                    <button type="button" class="btn btn-ghost" id="add-lawyer-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; color: var(--primary); border: 1px solid var(--glass-border);">+ Adicionar Advogado</button>
                                 </label>
                                 <div id="lawyers-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
                                     <div class="lawyer-input-group" style="display: flex; gap: 0.5rem;">
@@ -103,13 +100,12 @@
                                     </div>
                                 </div>
                             </div>
-                            </div>
 
                             <button type="submit" class="btn btn-primary btn-block">Calcular Parcelas</button>
                         </form>
                     </div>
 
-                    <div id="fee-results" style="display:none; margin-top: 2rem;" class="card">
+                    <div id="fee-results" style="display:none; margin: 2rem auto; max-width: 800px;" class="card">
                         <h3>Planejamento de Recebimento</h3>
                         <div class="table-responsive">
                             <table class="glass-table">
@@ -129,7 +125,7 @@
                         <div class="fee-total" id="fee-summary" style="margin-top: 1.5rem; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);"></div>
                     </div>
 
-                    <div id="fee-history-container" class="card" style="margin-top: 2rem;">
+                    <div id="fee-history-container" class="card" style="margin: 2rem auto; max-width: 800px;">
                         <h3>Histórico de Cálculos</h3>
                         <div class="table-responsive">
                             <table class="glass-table">
@@ -149,7 +145,6 @@
                         <div id="pagination-controls" style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </main>
