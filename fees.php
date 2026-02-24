@@ -105,8 +105,8 @@
                         </form>
                     </div>
 
-                    <div id="fee-results" style="display:none; margin: 2rem auto; max-width: 800px;" class="card">
-                        <h3>Planejamento de Recebimento</h3>
+                    <div id="fee-results" style="display:none; margin: 2rem auto; max-width: 800px; width: 100%;" class="calculator-card">
+                        <h3 style="margin-bottom: 1.5rem; color: white; display: block;">Planejamento de Recebimento</h3>
                         <div class="table-responsive">
                             <table class="glass-table">
                                 <thead>
@@ -125,8 +125,8 @@
                         <div class="fee-total" id="fee-summary" style="margin-top: 1.5rem; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);"></div>
                     </div>
 
-                    <div id="fee-history-container" class="card" style="margin: 2rem auto; max-width: 800px;">
-                        <h3>Histórico de Cálculos</h3>
+                    <div id="fee-history-container" class="calculator-card" style="margin: 2rem auto; max-width: 800px; width: 100%;">
+                        <h3 style="margin-bottom: 1.5rem; color: white;">Histórico de Cálculos</h3>
                         <div class="table-responsive">
                             <table class="glass-table">
                                 <thead>
