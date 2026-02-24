@@ -137,7 +137,7 @@
                                         <th>Ação</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-table-body">
+                                <tbody id="fee-history-table-body">
                                     <tr><td colspan="4" style="text-align:center">Carregando histórico...</td></tr>
                                 </tbody>
                             </table>
@@ -195,7 +195,7 @@ async function loadHistory(page = 1) {
         const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
         const data = await res.json();
         
-        const tbody = document.getElementById('history-table-body');
+        const tbody = document.getElementById('fee-history-table-body');
         tbody.innerHTML = '';
 
         if (data.items.length === 0) {
