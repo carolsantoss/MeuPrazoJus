@@ -217,8 +217,9 @@ async function loadHistory(page = 1) {
                 <td>${date}</td>
                 <td>${formatCurrency(item.total)}</td>
                 <td>${item.installments}x</td>
-                <td><button onclick='loadCalculation(${JSON.stringify(item)})' class="btn btn-ghost" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button></td>
+                <td><button class="btn btn-ghost view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button></td>
             `;
+            tr.querySelector('.view-btn').onclick = () => loadCalculation(item);
             tbody.appendChild(tr);
         });
 
@@ -399,7 +400,7 @@ async function calculateFees() {
 }
 
 function formatCurrency(val) {
-    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function generateGCalLink(date, val, current, total) {
