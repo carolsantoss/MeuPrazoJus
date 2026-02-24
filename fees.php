@@ -196,6 +196,13 @@ async function loadHistory(page = 1) {
         const data = await res.json();
         
         const tbody = document.getElementById('fee-history-table-body');
+        
+        if (data.error || !data.items) {
+            console.error('API Error:', data.error || 'No items');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Erro ao carregar histórico.</td></tr>';
+            return;
+        }
+
         tbody.innerHTML = '';
 
         if (data.items.length === 0) {
@@ -205,13 +212,16 @@ async function loadHistory(page = 1) {
 
         data.items.forEach(item => {
             const tr = document.createElement('tr');
-            const date = new Date(item.created_at).toLocaleDateString('pt-BR', {
+            
+            // Corrige o bug do Safari com Data (substitui espaços por T)
+            const safeDateStr = item.created_at ? item.created_at.replace(' ', 'T') : '';
+            const date = safeDateStr ? new Date(safeDateStr).toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
-            });
+            }) : '-';
 
             tr.innerHTML = `
                 <td>${date}</td>
