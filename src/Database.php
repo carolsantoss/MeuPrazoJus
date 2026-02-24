@@ -16,6 +16,7 @@ class Database {
             ]);
         } catch (PDOException $e) {
             if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false) {
+                if (ob_get_length()) ob_clean();
                 header('Content-Type: application/json');
                 echo json_encode(['error' => 'DB Conn Error: ' . $e->getMessage()]);
                 exit;

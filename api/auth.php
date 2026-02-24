@@ -16,8 +16,8 @@ if ($action === 'register') {
     $password = $data['password'] ?? '';
     $name = $data['name'] ?? '';
     $phone = $data['phone'] ?? '';
-    
     if (!$email || !$password) {
+        ob_clean();
         echo json_encode(['error' => 'Preencha todos os campos']);
         exit;
     }
@@ -29,12 +29,14 @@ if ($action === 'register') {
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
         $_SESSION['calculations'] = 0;
+        ob_clean();
         echo json_encode([
             'success' => true,
             'is_subscribed' => $_SESSION['is_subscribed'],
             'calculations_count' => 0
         ]);
     } else {
+        ob_clean();
         echo json_encode(['error' => 'Email já cadastrado']);
     }
 
@@ -49,18 +51,20 @@ if ($action === 'register') {
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
         $_SESSION['subscription_end'] = $user['subscription_end'] ?? null;
-        $_SESSION['calculations'] = $user['calculations_count'] ?? 0;
+        ob_clean();
         echo json_encode([
             'success' => true,
             'is_subscribed' => $_SESSION['is_subscribed'],
             'calculations_count' => $_SESSION['calculations']
         ]);
     } else {
+        ob_clean();
         echo json_encode(['error' => 'Credenciais inválidas']);
     }
 
 } elseif ($action === 'logout') {
     session_destroy();
+    ob_clean();
     echo json_encode(['success' => true]);
 } elseif ($action === 'subscribe') {
     // Mock subscription
@@ -70,10 +74,13 @@ if ($action === 'register') {
         $userManager->setSubscription($_SESSION['user_id'], 'premium', $dateStr);
         $_SESSION['is_subscribed'] = true;
         $_SESSION['subscription_end'] = $dateStr;
+        ob_clean();
         echo json_encode(['success' => true]);
     } else {
+        ob_clean();
         echo json_encode(['error' => 'Não autenticado']);
     }
 } else {
+    ob_clean();
     echo json_encode(['error' => 'Ação inválida']);
 }

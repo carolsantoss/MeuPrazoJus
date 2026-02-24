@@ -41,7 +41,11 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Contagem Novo CPC</li>
                 </ul>
-                <a href="index" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
+                <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
+                    <button class="btn btn-ghost btn-block" disabled style="opacity: 0.5; cursor: not-allowed; border: 1px solid var(--glass-border)">Inativo</button>
+                <?php else: ?>
+                    <a href="index" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
+                <?php endif; ?>
             </div>
 
             <!-- Premium -->

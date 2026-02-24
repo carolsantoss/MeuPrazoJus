@@ -577,6 +577,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    width: 100%;
+    align-items: stretch;
 }
 
 .nav-item {
@@ -593,7 +595,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     font-size: 0.95rem;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.75rem;
+    width: 100%;
 }
 
 .nav-item:hover {

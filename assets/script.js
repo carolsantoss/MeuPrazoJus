@@ -158,36 +158,7 @@ function setupJurisdictionListeners(suffix) {
                 if (varaSelect.selectedIndex === -1) varaSelect.value = "";
             }
 
-            const dtGroup = document.getElementById('deadline-type-group' + suffix);
-            const dtSelect = document.getElementById('deadline-type' + suffix);
-            const disclaimer = document.getElementById('deadline-disclaimer' + suffix);
 
-            if (matterId && dtSelect) {
-                const matter = jurisdictionsData.matters.find(m => m.id === matterId);
-                if (matter && matter.deadlines) {
-                    const currentVal = dtSelect.value;
-                    dtSelect.innerHTML = '<option value="">Selecione...</option>';
-                    matter.deadlines.forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d.name;
-                        opt.innerText = d.name;
-                        opt.dataset.days = d.days;
-                        opt.dataset.type = d.type;
-                        opt.dataset.ref = d.ref || '';
-                        dtSelect.appendChild(opt);
-                    });
-
-                    if (currentVal) dtSelect.value = currentVal;
-
-                    dtGroup.style.display = 'block';
-                } else {
-                    dtGroup.style.display = 'none';
-                    dtSelect.innerHTML = '<option value="">Selecione...</option>';
-                }
-            } else {
-                if (dtGroup) dtGroup.style.display = 'none';
-                if (dtSelect) dtSelect.innerHTML = '<option value="">Selecione...</option>';
-            }
 
             if (matterId !== lastValue) {
                 if (disclaimer) disclaimer.style.display = 'none';
@@ -196,35 +167,6 @@ function setupJurisdictionListeners(suffix) {
         });
     }
 
-    const dtSelect = document.getElementById('deadline-type' + suffix);
-    if (dtSelect) {
-        dtSelect.addEventListener('change', () => {
-            const selected = dtSelect.options[dtSelect.selectedIndex];
-            const days = selected.dataset.days;
-            const type = selected.dataset.type;
-            const disclaimer = document.getElementById('deadline-disclaimer' + suffix);
-
-            if (days) {
-                const daysInput = document.getElementById('days' + suffix);
-                if (daysInput) daysInput.value = days;
-            }
-            if (type) {
-                const elW = document.getElementById('type-working' + suffix);
-                if (elW) elW.checked = (type === 'working');
-                const elC = document.getElementById('type-calendar' + suffix);
-                if (elC) elC.checked = (type === 'calendar');
-            }
-            if (disclaimer) {
-                if (dtSelect.value) {
-                    const ref = selected.dataset.ref;
-                    disclaimer.style.display = 'block';
-                    disclaimer.innerHTML = `⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. Estimativa baseada na lei federal${ref ? ' (' + ref + ')' : ''}.`;
-                } else {
-                    disclaimer.style.display = 'none';
-                }
-            }
-        });
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -260,7 +202,7 @@ function setupCalculator(formId, suffix) {
         const vara = document.getElementById('vara' + suffix).value;
         const court = document.getElementById('court' + suffix)?.value;
         const processType = document.getElementById('process-type' + suffix)?.value || 'electronic';
-        const deadlineType = document.getElementById('deadline-type' + suffix)?.value;
+
 
         const btn = form.querySelector('button[type="submit"]');
 
@@ -271,7 +213,7 @@ function setupCalculator(formId, suffix) {
             const response = await fetch('api/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, court, processType, deadlineType })
+                body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, court, processType })
             });
 
             const data = await response.json();
