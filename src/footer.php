@@ -1,7 +1,7 @@
 <footer class="main-footer">
     <div class="max-w-7xl footer-content">
         <div class="footer-brand">
-            <div class="logo">FC Technology</div>
+            <a href="https://fc.fmacedo.adv.br/" target="_blank" class="logo" style="text-decoration: none;">FC Technology</a>
             <p class="tagline">Futuro Conectado.</p>
         </div>
         

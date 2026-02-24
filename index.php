@@ -147,8 +147,8 @@ if (isset($_SESSION['user_id'])) {
                             </div>
                         </div>
 
-                        <div id="deadline-disclaimer" style="display:none; background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #cc9900; font-size: 0.85rem; color: #eee;">
-                            ⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
+                        <div id="deadline-disclaimer" style="display:none; background: rgba(197, 160, 89, 0.05); padding: 0.85rem; border-radius: 0.5rem; margin-bottom: 1.25rem; border-left: 4px solid var(--primary); font-size: 0.9rem; color: var(--text-muted);">
+                            ⚠️ <strong style="color: var(--text-main);">Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block">Calcular Prazo</button>
@@ -162,12 +162,12 @@ if (isset($_SESSION['user_id'])) {
                             <div class="result-date" id="result-date">...</div>
                         </div>
                         
-                        <div id="guest-warning" style="display:none; background: #fffbeb; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fcd34d; text-align: center;">
+                        <div id="guest-warning" style="display:none; background: rgba(197, 160, 89, 0.1); color: #dfc690; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; border: 1px solid rgba(197, 160, 89, 0.3); text-align: center;">
                             <p style="margin-bottom: 0.5rem; font-weight: 600;">⚠️ Atenção: Este cálculo não foi salvo!</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para salvar seu histórico e gerenciar prazos com segurança, crie sua conta agora.</p>
-                            <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                <a href="register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Criar Conta Grátis</a>
-                                <a href="login" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.9rem; color: #92400e; border-color: #92400e;">Entrar</a>
+                            <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">Para salvar seu histórico e gerenciar prazos com segurança, crie sua conta agora.</p>
+                            <div style="display: flex; gap: 1rem; justify-content: center;">
+                                <a href="register" class="btn btn-primary">Criar Conta Grátis</a>
+                                <a href="login" class="btn btn-ghost" style="color: #dfc690; border: 1px solid rgba(197, 160, 89, 0.3);">Entrar</a>
                             </div>
                         </div>
 
@@ -235,11 +235,11 @@ if (isset($_SESSION['user_id'])) {
                             $invert = $now->diff($endDate)->invert;
 
                             if (!$invert && $daysRemaining <= 15) {
-                                echo '<div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; color: #ffca2c; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                echo '<div style="background: rgba(197, 160, 89, 0.1); border: 1px solid rgba(197, 160, 89, 0.3); color: #dfc690; padding: 1rem 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                                     <span style="font-size: 1.5rem;">⚠️</span>
                                     <div>
-                                        <strong>Sua assinatura vence em ' . $daysRemaining . ' dias!</strong><br>
-                                        <a href="subscription" style="color: #ffca2c; text-decoration: underline;">Renove agora para não perder o acesso.</a>
+                                        <strong style="color: var(--text-main);">Sua assinatura vence em ' . $daysRemaining . ' dias!</strong><br>
+                                        <a href="subscription" style="color: var(--primary); text-decoration: none; font-weight: 500; font-size: 0.95rem;">Renove agora para não perder o acesso &rarr;</a>
                                     </div>
                                 </div>';
                             }
@@ -371,8 +371,8 @@ if (isset($_SESSION['user_id'])) {
                                     </div>
                                 </div>
 
-                                <div id="deadline-disclaimer-dash" style="display:none; background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #cc9900; font-size: 0.85rem; color: #eee;">
-                                    ⚠️ <strong>Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
+                                <div id="deadline-disclaimer-dash" style="display:none; background: rgba(197, 160, 89, 0.05); padding: 0.85rem; border-radius: 0.5rem; margin-bottom: 1.25rem; border-left: 4px solid var(--primary); font-size: 0.9rem; color: var(--text-muted);">
+                                    ⚠️ <strong style="color: var(--text-main);">Aviso:</strong> Confira se o prazo está correto. A estimativa foi baseada na lei federal.
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">Calcular e Salvar</button>
                             </form>

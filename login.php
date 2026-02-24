@@ -22,8 +22,8 @@
     </header>
 
     <main class="auth-wrapper">
-        <div class="card" style="max-width: 400px; width: 100%;">
-            <h2 style="text-align: center; color: white; margin-bottom: 2rem;">Entrar</h2>
+        <div class="auth-card">
+            <h2 class="auth-title">Entrar</h2>
             <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email</label>
