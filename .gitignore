@@ -1,5 +1,7 @@
 # Config and Sensitive Files
 .env
+.env.*
+*.env
 src/google_adsense.php
 
 # Dependency Directories

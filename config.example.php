@@ -17,6 +17,6 @@ if (IS_LOCAL) {
     define('DB_NAME', 'production_db');
 }
 
-// Mercado Pago
-define('MP_ACCESS_TOKEN', 'YOUR_ACCESS_TOKEN');
-define('MP_PUBLIC_KEY', 'YOUR_PUBLIC_KEY');
+// ASAAS Credentials
+define('ASAAS_API_KEY', 'YOUR_ASAAS_API_KEY');
+define('ASAAS_URL', 'https://sandbox.asaas.com/api/v3');

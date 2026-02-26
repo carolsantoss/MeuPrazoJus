@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once '../src/UserManager.php';
+require_once __DIR__ . '/../src/UserManager.php';
 
 $action = $_GET['action'] ?? '';
 
@@ -74,6 +74,17 @@ if ($action === 'register') {
         $userManager->setSubscription($_SESSION['user_id'], 'premium', $dateStr);
         $_SESSION['is_subscribed'] = true;
         $_SESSION['subscription_end'] = $dateStr;
+        ob_clean();
+        echo json_encode(['success' => true]);
+    } else {
+        ob_clean();
+        echo json_encode(['error' => 'Não autenticado']);
+    }
+} elseif ($action === 'cancel_subscription') {
+    if (isset($_SESSION['user_id'])) {
+        $userManager->setSubscription($_SESSION['user_id'], 'free', null);
+        $_SESSION['is_subscribed'] = false;
+        $_SESSION['subscription_end'] = null;
         ob_clean();
         echo json_encode(['success' => true]);
     } else {

@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once '../src/DeadlineManager.php';
+require_once __DIR__ . '/../src/DeadlineManager.php';
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Unauthorized']);

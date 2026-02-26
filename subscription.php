@@ -60,7 +60,8 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
                 <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
-                    <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed;">Plano Ativo</button>
+                    <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
+                    <button id="cancel-sub-btn" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
                 <?php else: ?>
                     <button id="sub-btn" class="btn btn-primary btn-block">Assinar Agora</button>
                 <?php endif; ?>
@@ -69,14 +70,43 @@
     </main>
 
     <script>
-        document.getElementById('sub-btn').addEventListener('click', async () => {
-            if(!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>) {
-                window.location.href = 'login';
-                return;
-            }
-            // Redirect to dedicated checkout page
-            window.location.href = 'checkout';
-        });
+        const subBtn = document.getElementById('sub-btn');
+        if (subBtn) {
+            subBtn.addEventListener('click', async () => {
+                if(!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>) {
+                    window.location.href = 'login';
+                    return;
+                }
+                // Redirect to dedicated checkout page
+                window.location.href = 'checkout';
+            });
+        }
+
+        const cancelBtn = document.getElementById('cancel-sub-btn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', async () => {
+                if(confirm("Tem certeza que deseja cancelar sua assinatura? Você perderá acesso aos recursos premium imediatamente.")) {
+                    cancelBtn.innerText = "Cancelando...";
+                    cancelBtn.disabled = true;
+                    try {
+                        const res = await fetch('api/auth.php?action=cancel_subscription');
+                        const data = await res.json();
+                        if (data.success) {
+                            alert("Assinatura cancelada com sucesso!");
+                            window.location.reload();
+                        } else {
+                            alert("Erro ao cancelar: " + (data.error || "Desconhecido"));
+                            cancelBtn.innerText = "Cancelar Assinatura";
+                            cancelBtn.disabled = false;
+                        }
+                    } catch (e) {
+                        alert("Erro de sistema. Tente novamente.");
+                        cancelBtn.innerText = "Cancelar Assinatura";
+                        cancelBtn.disabled = false;
+                    }
+                }
+            });
+        }
 
         async function logout() {
             await fetch('api/auth.php?action=logout');

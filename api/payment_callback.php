@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../src/UserManager.php';
+require_once __DIR__ . '/../src/UserManager.php';
 
 $status = $_GET['status'] ?? 'pending';
 $payment_id = $_GET['payment_id'] ?? '';
