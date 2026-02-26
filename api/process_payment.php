@@ -20,7 +20,7 @@ register_shutdown_function(function() {
     if ($error && ($error['type'] === E_ERROR || $error['type'] === E_PARSE || $error['type'] === E_COMPILE_ERROR)) {
         ob_clean();
         $msg = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']}";
-        file_put_contents('../payment_errors.log', date('Y-m-d H:i:s') . " - " . $msg . PHP_EOL, FILE_APPEND);
+        error_log($msg);
         echo json_encode(['error' => 'Erro interno crítico. Consulte o log.', 'debug_msg' => $msg]);
     }
 });
@@ -48,7 +48,7 @@ try {
     $headers = [
         "access_token: " . ASAAS_API_KEY,
         "Content-Type: application/json",
-        "User-Agent: MeuPrazoJus/1.0"
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     ];
 
     // 1. Create or Find Customer
@@ -57,9 +57,17 @@ try {
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $response = curl_exec($ch);
-    $customers = json_decode($response, true);
+    $curl_error = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-
+    
+    if ($response === false) {
+        error_log("cURL Error on Customer API: " . $curl_error);
+        json_response(['error' => 'Erro de conexão (cURL). ' . $curl_error], 500);
+    }
+    
+    $customers = json_decode($response, true);
+    
     $customer_id = null;
     if (isset($customers['data']) && count($customers['data']) > 0) {
         $customer_id = $customers['data'][0]['id'];
@@ -85,7 +93,7 @@ try {
         if (isset($result['id'])) {
             $customer_id = $result['id'];
         } else {
-            file_put_contents('../payment_errors.log', date('Y-m-d H:i:s') . " - Erro ao criar cliente no Asaas: " . $response . PHP_EOL, FILE_APPEND);
+            error_log("Erro ao criar cliente no Asaas: " . $response);
             $msg = isset($result['errors'][0]['description']) ? $result['errors'][0]['description'] : 'Erro ao cadastrar cliente no Asaas.';
             json_response(['error' => $msg], 400);
         }
@@ -119,13 +127,18 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payment_data));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $response = curl_exec($ch);
+    $curl_error = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $result = json_decode($response, true);
     curl_close($ch);
 
-    $log_file = '../payment.log';
-    $log_entry = date('Y-m-d H:i:s') . " - User: $user_id - HTTP Code: $http_code - Response: " . $response . PHP_EOL;
-    file_put_contents($log_file, $log_entry, FILE_APPEND);
+    if ($response === false) {
+        error_log("cURL Error on Payment API: " . $curl_error);
+        json_response(['error' => 'Erro de conexão (cURL). ' . $curl_error], 500);
+    }
+    
+    $result = json_decode($response, true);
+    
+    error_log("Payment Processed - User: $user_id - HTTP: $http_code");
 
     if (isset($result['invoiceUrl'])) {
         json_response([
@@ -143,6 +156,6 @@ try {
 } catch (Throwable $e) {
     ob_clean();
     $msg = "Exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine();
-    file_put_contents('../payment_errors.log', date('Y-m-d H:i:s') . " - " . $msg . PHP_EOL, FILE_APPEND);
+    error_log($msg);
     json_response(['error' => 'Erro interno no servidor', 'debug_msg' => $msg], 500);
 }
