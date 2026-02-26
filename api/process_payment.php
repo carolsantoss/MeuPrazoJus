@@ -10,7 +10,7 @@ ob_start();
 
 function json_response($data, $code = 200) {
     ob_clean();
-    http_response_code($code);
+    http_response_code(200); 
     echo json_encode($data);
     exit;
 }
