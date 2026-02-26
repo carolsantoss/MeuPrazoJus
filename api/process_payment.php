@@ -51,7 +51,6 @@ try {
         "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     ];
 
-    // 1. Create or Find Customer
     $ch = curl_init(ASAAS_URL . "/customers?cpfCnpj=" . $cpfCnpj);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -72,7 +71,6 @@ try {
     if (isset($customers['data']) && count($customers['data']) > 0) {
         $customer_id = $customers['data'][0]['id'];
     } else {
-        // Create customer
         $customer_data = [
             "name" => $user_name,
             "email" => $user_email,
@@ -99,17 +97,15 @@ try {
         }
     }
 
-    // 2. Create Charge
     $dueDate = date('Y-m-d');
     
-    // Determine the base URL for the callback
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+    $protocol = "https";
     $host = $_SERVER['HTTP_HOST'];
     $callbackUrl = $protocol . "://" . $host . "/api/payment_callback.php?status=success";
     
     $payment_data = [
         "customer" => $customer_id,
-        "billingType" => "UNDEFINED", // Let the user choose Pix, Boleto or CC on Asaas checkout page
+        "billingType" => "UNDEFINED",
         "value" => 50.00,
         "dueDate" => $dueDate,
         "description" => "Assinatura Anual MeuPrazoJus",
