@@ -17,11 +17,11 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeuPrazoJus - Calculadora de Prazos Processuais</title>
-    <link rel="stylesheet" href="assets/style.css?v=<?php echo time(); ?>">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="assets/style.css?v=<?php echo filemtime('assets/style.css'); ?>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js" defer></script>
     <?php include 'src/google_adsense.php'; ?>
 </head>
 <body>
@@ -427,6 +427,6 @@ if (isset($_SESSION['user_id'])) {
     </main>
 
     <?php include 'src/footer.php'; ?>
-    <script src="assets/script.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/script.js?v=<?php echo filemtime('assets/script.js'); ?>"></script>
 </body>
 </html>

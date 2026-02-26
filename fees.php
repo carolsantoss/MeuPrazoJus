@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Honorários | MeuPrazoJus</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="assets/style.css?v=<?php echo filemtime('assets/style.css'); ?>">
     <?php include 'src/google_adsense.php'; ?>
 </head>
 <body>
@@ -428,6 +428,6 @@ function generateGCalLink(date, val, current, total) {
 </script>
 
     <?php include 'src/footer.php'; ?>
-    <script src="assets/script.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/script.js?v=<?php echo filemtime('assets/script.js'); ?>"></script>
 </body>
 </html>
