@@ -203,7 +203,18 @@ if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
                     body: JSON.stringify({ cpfCnpj: cpfCnpj })
                 });
 
-                const data = await res.json();
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("Resposta bruta do servidor:", text);
+                    errorMsg.innerText = "Erro do servidor: A resposta não é um JSON válido. Verifique o console ou log de erros.";
+                    errorMsg.style.display = "block";
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    return;
+                }
                 
                 if (data.invoiceUrl) {
                     window.location.href = data.invoiceUrl;
