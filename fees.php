@@ -52,12 +52,15 @@
                     <a href="index" class="nav-item">📊 Prazos</a>
                     <a href="index?section=new-deadline" class="nav-item">➕ Novo Prazo</a>
                     <a href="index?section=history" class="nav-item">📜 Histórico</a>
-                    <a href="fees" class="nav-item active">💰 Honorários</a>
+                    
                     <?php if ($isPremium): ?>
+                        <a href="fees" class="nav-item active">💰 Honorários</a>
                         <a href="index?section=converter" class="nav-item">🔄 Conversor PDF/Áudio</a>
                     <?php else: ?>
+                        <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
                         <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
                     <?php endif; ?>
+
                     <a href="subscription" class="nav-item">⭐ Assinatura</a>
                 </nav>
             </aside>
