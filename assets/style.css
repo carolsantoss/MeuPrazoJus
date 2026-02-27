@@ -21,6 +21,11 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+html {
+    overflow-y: scroll;
+    /* Força a barra de rolagem sempre aparecer para evitar saltos horizontais */
+}
+
 body {
     background: var(--bg-dark);
     color: var(--text-main);

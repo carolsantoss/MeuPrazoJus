@@ -47,7 +47,7 @@ try {
     
     if ($user) {
         $usageCount = $userManager->incrementUsage($user['id']);
-        $_SESSION['calculations'] = $usageCount; // Sync session
+        $_SESSION['calculations'] = $usageCount;
         
         require_once __DIR__ . '/../src/DeadlineManager.php';
         $dlManager = new DeadlineManager();
