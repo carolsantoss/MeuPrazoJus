@@ -9,17 +9,18 @@ class FeeManager {
     }
 
     public function save($userId, $data) {
-        $id = uniqid('fee_');
-        $stmt = $this->db->prepare("INSERT INTO fees (id, user_id, total, installments, startDate, lawyers) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO fees (user_id, total, installments, start_date, lawyers, results) VALUES (?, ?, ?, ?, ?, ?)");
         
         $stmt->execute([
-            $id,
             $userId,
             $data['total'],
             $data['installments'],
             $data['startDate'],
-            json_encode($data['lawyers'])
+            json_encode($data['lawyers']),
+            json_encode([])
         ]);
+        
+        $id = $this->db->lastInsertId();
         
         return array_merge(['id' => $id, 'created_at' => date('Y-m-d H:i:s')], $data);
     }
@@ -41,6 +42,7 @@ class FeeManager {
         $items = $stmt->fetchAll();
         foreach ($items as &$item) {
             $item['lawyers'] = json_decode($item['lawyers'], true);
+            $item['startDate'] = $item['start_date'];
         }
 
         return [
