@@ -705,7 +705,12 @@ const dropZoneAudio = document.getElementById('drop-zone-audio');
 if (dropZoneAudio) {
     inputAudio.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            document.getElementById('audio-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;
+            document.getElementById('audio-file-info').innerHTML = `
+                <div class="upload-item">
+                    <span>${e.target.files[0].name}</span>
+                    <button class="remove-btn" onclick="removeSingleFile('input-audio', 'audio-file-info', 'btn-convert-audio')">&times;</button>
+                </div>
+            `;
             document.getElementById('btn-convert-audio').disabled = false;
         }
     });
@@ -770,8 +775,19 @@ const dropZoneVideo = document.getElementById('drop-zone-video');
 if (dropZoneVideo) {
     inputVideo.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            document.getElementById('video-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;
+            document.getElementById('video-file-info').innerHTML = `
+                <div class="upload-item">
+                    <span>${e.target.files[0].name}</span>
+                    <button class="remove-btn" onclick="removeSingleFile('input-video', 'video-file-info', 'btn-convert-video')">&times;</button>
+                </div>
+            `;
             document.getElementById('btn-convert-video').disabled = false;
         }
     });
+}
+
+function removeSingleFile(inputId, infoId, btnId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(infoId).innerHTML = '';
+    document.getElementById(btnId).disabled = true;
 }
