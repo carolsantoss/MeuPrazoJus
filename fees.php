@@ -195,7 +195,7 @@ let currentHistoryPage = 1;
 async function loadHistory(page = 1) {
     try {
         currentHistoryPage = page;
-        const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
+        const res = await fetch(`api/fees?page=${page}&limit=10&v=${Date.now()}`);
         const data = await res.json();
         
         const tbody = document.getElementById('fee-history-table-body');
@@ -238,7 +238,11 @@ async function loadHistory(page = 1) {
 
         renderPagination(data.page, data.total_pages);
 
-    } catch (e) { console.error('Error loading history', e); }
+    } catch (e) { 
+        console.error('Error loading history', e); 
+        const tbody = document.getElementById('fee-history-table-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #f87171;">Erro ao carregar os dados.</td></tr>';
+    }
 }
 
 function renderPagination(current, total) {
@@ -363,7 +367,7 @@ async function calculateFees() {
     }
 
     try {
-        await fetch('api/fees.php', {
+        await fetch('api/fees', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

@@ -27,7 +27,7 @@ if ($method === 'POST') {
         $result = $manager->save($userId, $input);
         if (ob_get_length()) ob_clean();
         echo json_encode(['success' => true, 'data' => $result]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         if (ob_get_length()) ob_clean();
         http_response_code(500);
         echo json_encode(['error' => $e->getMessage()]);
@@ -41,7 +41,7 @@ if ($method === 'POST') {
         $data = $manager->getByUser($userId, $page, $limit);
         if (ob_get_length()) ob_clean();
         echo json_encode($data);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         if (ob_get_length()) ob_clean();
         http_response_code(500);
         echo json_encode(['error' => $e->getMessage()]);
