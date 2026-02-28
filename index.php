@@ -1,4 +1,7 @@
 <?php 
+header("Cross-Origin-Opener-Policy: same-origin");
+header("Cross-Origin-Embedder-Policy: require-corp");
+
 session_start(); 
 if (isset($_SESSION['user_id'])) {
     require_once 'src/UserManager.php';
