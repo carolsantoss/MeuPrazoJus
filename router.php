@@ -1,28 +1,25 @@
 <?php
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = ltrim($path, '/');
 
-header("Cross-Origin-Opener-Policy: same-origin");
-header("Cross-Origin-Embedder-Policy: require-corp");
-header("Access-Control-Allow-Origin: *");
+// If the path is empty, serve index.php
+if (empty($path)) {
+    require 'index.php';
+    return true;
+}
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$file = __DIR__ . $uri;
-
-if ($uri !== '/' && file_exists($file) && !is_dir($file)) {
+// If it's a real file (like assets, images), let the built-in server serve it
+if (file_exists(__DIR__ . '/' . $path)) {
     return false;
 }
 
-$phpFile = $file . '.php';
-if (file_exists($phpFile) && !is_dir($phpFile)) {
-    include $phpFile;
-    exit;
+// If the file with .php exists, serve it (for clean URLs like /login -> login.php)
+if (file_exists(__DIR__ . '/' . $path . '.php')) {
+    require __DIR__ . '/' . $path . '.php';
+    return true;
 }
 
-if (is_dir($file)) {
-    $indexFile = rtrim($file, '/') . '/index.php';
-    if (file_exists($indexFile)) {
-        include $indexFile;
-        exit;
-    }
-}
-
-return false;
+// Otherwise return 404 header and let it handle naturally
+header("HTTP/1.0 404 Not Found");
+echo "404 Not Found.";
+return true;

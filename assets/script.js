@@ -33,7 +33,7 @@ let jurisdictionsData = null;
 
 async function loadJurisdictions() {
     try {
-        const res = await fetch('api/jurisdictions?v=' + Date.now());
+        const res = await fetch('/api/jurisdictions?v=' + Date.now());
         jurisdictionsData = await res.json();
         console.log('Jurisdictions Loaded:', jurisdictionsData);
 
@@ -210,7 +210,7 @@ function setupCalculator(formId, suffix) {
         btn.disabled = true;
 
         try {
-            const response = await fetch('api/calculate', {
+            const response = await fetch('/api/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, court, processType })
@@ -277,7 +277,7 @@ function setupCalculator(formId, suffix) {
 
 async function loadDeadlines() {
     try {
-        const res = await fetch('api/deadlines');
+        const res = await fetch('/api/deadlines');
         const data = await res.json();
 
         if (data.error) return;
@@ -378,7 +378,7 @@ function setupGoogleCalendar(data, suffix = '') {
 
 async function logout() {
     try {
-        const res = await fetch('api/auth?action=logout');
+        const res = await fetch('/api/auth?action=logout');
         const data = await res.json();
         if (data.success) {
             window.location.href = 'login';

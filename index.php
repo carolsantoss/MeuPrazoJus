@@ -202,13 +202,13 @@ if (isset($_SESSION['user_id'])) {
                             $limit = 5;
                         ?>
 
-                        <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
-                        <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
-                        <button class="nav-item" onclick="showSection('history')">📜 Histórico</button>
+                        <a href="#" class="nav-item active" onclick="showSection('dashboard'); return false;">📊 Prazos</a>
+                        <a href="#" class="nav-item" onclick="showSection('new-deadline'); return false;">➕ Novo Prazo</a>
+                        <a href="#" class="nav-item" onclick="showSection('history'); return false;">📜 Histórico</a>
                         
                         <?php if ($isPremium): ?>
                             <a href="fees" class="nav-item">💰 Honorários</a>
-                            <button class="nav-item" onclick="showSection('converter')">🔄 Conversor PDF/Áudio</button>
+                            <a href="#" class="nav-item" onclick="showSection('converter'); return false;">🔄 Conversor PDF/Áudio</a>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
