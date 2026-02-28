@@ -202,13 +202,13 @@ if (isset($_SESSION['user_id'])) {
                             $limit = 5;
                         ?>
 
-                        <button class="nav-item active" onclick="showSection('dashboard')">📊 Prazos</button>
-                        <button class="nav-item" onclick="showSection('new-deadline')">➕ Novo Prazo</button>
-                        <button class="nav-item" onclick="showSection('history')">📜 Histórico</button>
+                        <a href="#" class="nav-item active" onclick="showSection('dashboard'); return false;">📊 Prazos</a>
+                        <a href="#" class="nav-item" onclick="showSection('new-deadline'); return false;">➕ Novo Prazo</a>
+                        <a href="#" class="nav-item" onclick="showSection('history'); return false;">📜 Histórico</a>
                         
                         <?php if ($isPremium): ?>
                             <a href="fees" class="nav-item">💰 Honorários</a>
-                            <button class="nav-item" onclick="showSection('converter')">🔄 Conversor PDF/Áudio</button>
+                            <a href="#" class="nav-item" onclick="showSection('converter'); return false;">🔄 Conversor PDF/Áudio</a>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
@@ -389,19 +389,19 @@ if (isset($_SESSION['user_id'])) {
                             </div>
 
                             <div id="converter-pdf-panel">
-                                <div class="upload-zone" id="drop-zone-pdf">
+                                <label class="upload-zone" id="drop-zone-pdf" for="input-images" style="display: block; cursor: pointer;">
                                     <p>Arraste imagens (JPG, PNG) aqui ou clique para selecionar</p>
                                     <input type="file" id="input-images" accept="image/jpeg, image/png" multiple style="display:none">
-                                </div>
+                                </label>
                                 <div id="preview-list" style="margin: 15px 0;"></div>
                                 <button id="btn-convert-pdf" class="btn btn-primary btn-block" disabled>Gerar PDF</button>
                             </div>
 
                             <div id="converter-audio-panel" style="display:none;">
-                                <div class="upload-zone" id="drop-zone-audio">
+                                <label class="upload-zone" id="drop-zone-audio" for="input-audio" style="display: block; cursor: pointer;">
                                     <p>Selecione áudio (OGG, OPUS, WAV) para converter em MP3</p>
                                     <input type="file" id="input-audio" accept=".ogg,.opus,.wav" style="display:none">
-                                </div>
+                                </label>
                                 <div id="audio-file-info" style="margin: 15px 0; color: #aaa;"></div>
                                 <div class="alert-box" style="margin-top: 15px; background: rgba(255,193,7,0.1); color: #ffca2c; padding: 10px; border-radius: 5px; font-size: 0.9rem;">
                                     ⚠️ A conversão de áudio pode levar alguns instantes.
@@ -410,10 +410,10 @@ if (isset($_SESSION['user_id'])) {
                             </div>
 
                             <div id="converter-video-panel" style="display:none;">
-                                <div class="upload-zone" id="drop-zone-video">
+                                <label class="upload-zone" id="drop-zone-video" for="input-video" style="display: block; cursor: pointer;">
                                     <p>Selecione vídeo (MOV, AVI, WEBM) para converter em MP4</p>
                                     <input type="file" id="input-video" accept=".mov,.avi,.webm" style="display:none">
-                                </div>
+                                </label>
                                 <div id="video-file-info" style="margin: 15px 0; color: #aaa;"></div>
                                 <button id="btn-convert-video" class="btn btn-primary btn-block" disabled>Converter para MP4</button>
                             </div>

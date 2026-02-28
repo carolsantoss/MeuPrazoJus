@@ -9,8 +9,8 @@ header('Content-Type: application/json');
 ob_start();
 
 function json_response($data, $code = 200) {
-    ob_clean();
-    http_response_code(200); 
+    if (ob_get_length()) ob_clean();
+    http_response_code($code); 
     echo json_encode($data);
     exit;
 }
@@ -18,7 +18,7 @@ function json_response($data, $code = 200) {
 register_shutdown_function(function() {
     $error = error_get_last();
     if ($error && ($error['type'] === E_ERROR || $error['type'] === E_PARSE || $error['type'] === E_COMPILE_ERROR)) {
-        ob_clean();
+        if (ob_get_length()) ob_clean();
         $msg = "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']}";
         error_log($msg);
         echo json_encode(['error' => 'Erro interno crítico. Consulte o log.', 'debug_msg' => $msg]);
@@ -28,6 +28,7 @@ register_shutdown_function(function() {
 try {
     require_once __DIR__ . '/../config.php';
     require_once __DIR__ . '/../src/UserManager.php';
+    $userManager = new UserManager();
     
     if (!isset($_SESSION['user_id'])) {
         json_response(['error' => 'Usuário não autenticado'], 401);
@@ -36,11 +37,20 @@ try {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
+    $billingType = $data['billingType'] ?? 'CREDIT_CARD';
+
     if (!$data || empty($data['cpfCnpj'])) {
-        json_response(['error' => 'CPF/CNPJ inválido'], 400);
+        json_response(['error' => 'Dados de pagamento incompletos'], 400);
+    }
+    
+    if ($billingType === 'CREDIT_CARD' && empty($data['creditCard'])) {
+        json_response(['error' => 'Dados de cartão incompletos'], 400);
     }
 
     $cpfCnpj = preg_replace('/[^0-9]/', '', $data['cpfCnpj']);
+    $cc_data = $data['creditCard'] ?? [];
+    $remoteIp = $_SERVER['REMOTE_ADDR'] ?? '10.0.0.1';
+    if ($remoteIp === '::1' || $remoteIp === '127.0.0.1') { $remoteIp = '10.0.0.1'; /* mockup pra testes local */ }
     $user_id = $_SESSION['user_id'];
     $user_name = $_SESSION['user_name'];
     $user_email = $_SESSION['user_email'];
@@ -105,16 +115,31 @@ try {
     
     $payment_data = [
         "customer" => $customer_id,
-        "billingType" => "UNDEFINED",
+        "billingType" => $billingType,
         "value" => 50.00,
         "dueDate" => $dueDate,
-        "description" => "Assinatura Anual MeuPrazoJus",
-        "externalReference" => $user_id,
-        "callback" => [
-            "successUrl" => $callbackUrl,
-            "autoRedirect" => true
-        ]
+        "description" => "Assinatura Anual MeuPrazoJus - " . $billingType,
+        "externalReference" => $user_id
     ];
+
+    if ($billingType === 'CREDIT_CARD') {
+        $payment_data["creditCard"] = [
+            "holderName" => $cc_data['holderName'],
+            "number" => $cc_data['number'],
+            "expiryMonth" => $cc_data['expiryMonth'],
+            "expiryYear" => $cc_data['expiryYear'],
+            "ccv" => $cc_data['ccv']
+        ];
+        $payment_data["creditCardHolderInfo"] = [
+            "name" => $user_name,
+            "email" => $user_email,
+            "cpfCnpj" => $cpfCnpj,
+            "postalCode" => "01001000",
+            "addressNumber" => "1",
+            "phone" => "11999999999"
+        ];
+        $payment_data["remoteIp"] = $remoteIp;
+    }
 
     $ch = curl_init(ASAAS_URL . "/payments");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -136,21 +161,49 @@ try {
     
     error_log("Payment Processed - User: $user_id - HTTP: $http_code");
 
-    if (isset($result['invoiceUrl'])) {
-        json_response([
+    if (isset($result['status']) && in_array($result['status'], ['CONFIRMED', 'RECEIVED', 'PENDING', 'AWAITING_RISK_ANALYSIS'])) {
+        
+        $response_data = [
             'success' => true,
-            'invoiceUrl' => $result['invoiceUrl']
-        ]);
+            'status' => $result['status'],
+            'payment_id' => $result['id'] ?? '',
+            'billingType' => $billingType
+        ];
+        
+        if ($billingType === 'CREDIT_CARD' && ($result['status'] === 'CONFIRMED' || $result['status'] === 'RECEIVED')) {
+            // Aprove internally immediately since it is credit card
+            $userManager->setSubscription($user_id, 'premium', date('Y-m-d', strtotime('+1 year')));
+            $_SESSION['is_subscribed'] = true;
+        } elseif ($billingType === 'PIX') {
+            // we need to get Pix QR CODE
+            $chQr = curl_init(ASAAS_URL . "/payments/" . $result['id'] . "/pixQrCode");
+            curl_setopt($chQr, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($chQr, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($chQr, CURLOPT_SSL_VERIFYPEER, false);
+            $pixResponse = curl_exec($chQr);
+            curl_close($chQr);
+            
+            $pixData = json_decode($pixResponse, true);
+            $response_data['pix'] = [
+                'encodedImage' => $pixData['encodedImage'] ?? '',
+                'payload' => $pixData['payload'] ?? '',
+                'expirationDate' => $pixData['expirationDate'] ?? ''
+            ];
+        } elseif ($billingType === 'BOLETO') {
+            $response_data['boletoUrl'] = $result['bankSlipUrl'] ?? '';
+            $response_data['invoiceUrl'] = $result['invoiceUrl'] ?? '';
+        }
+        
+        json_response($response_data);
     } else {
-        $msg = isset($result['errors'][0]['description']) ? $result['errors'][0]['description'] : 'Erro ao processar pagamento.';
+        $msg = isset($result['errors'][0]['description']) ? $result['errors'][0]['description'] : 'Transação não aprovada pela operadora.';
         json_response([
             'error' => $msg,
             'details' => $result
         ], 500);
     }
-
 } catch (Throwable $e) {
-    ob_clean();
+    if (ob_get_length()) ob_clean();
     $msg = "Exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine();
     error_log($msg);
     json_response(['error' => 'Erro interno no servidor', 'debug_msg' => $msg], 500);

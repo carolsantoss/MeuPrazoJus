@@ -107,7 +107,7 @@
 
             try {
                 const formData = new FormData(e.target);
-                const res = await fetch('api/auth.php?action=register', {
+                const res = await fetch('/api/auth.php?action=register', {
                     method: 'POST',
                     body: formData
                 });

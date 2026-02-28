@@ -1,41 +1,35 @@
 <?php
-// api/webhook_asaas.php
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/UserManager.php';
 
-$json = file_get_contents('php://input');
-$data = json_decode($json, true);
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
-if (!$data || !isset($data['event'])) {
+if (!$data) {
     http_response_code(400);
-    exit('Invalid payload');
+    exit;
 }
 
-$log_file = '../payment.log';
-$log_entry = date('Y-m-d H:i:s') . " - Asaas Webhook Received: " . $json . PHP_EOL;
-file_put_contents($log_file, $log_entry, FILE_APPEND);
+$event = $data['event'] ?? '';
 
-$event = $data['event'];
-$payment = $data['payment'];
-
-// Se pagamento confirmado ou recebido com sucesso
-if ($event === 'PAYMENT_RECEIVED' || $event === 'PAYMENT_CONFIRMED') {
-    $user_id = $payment['externalReference'] ?? null;
+// Quando o pagamento via Pix ou Boleto compensar na conta
+if ($event === 'PAYMENT_CONFIRMED' || $event === 'PAYMENT_RECEIVED') {
+    $payment = $data['payment'] ?? [];
     
-    if ($user_id) {
+    // O externalReference foi preenchido com o user_id na hora de gerar o pagamento
+    if (!empty($payment['externalReference'])) {
+        $user_id = $payment['externalReference'];
+        
         $userManager = new UserManager();
         
-        // Verifica se usuário existe
-        $user = $userManager->getUserById($user_id);
-        if ($user) {
-            // Renovar por 1 ano
-            $expiryDate = date('Y-m-d H:i:s', strtotime('+1 year'));
-            $userManager->setSubscription($user_id, 'premium', $expiryDate);
-            
-            file_put_contents($log_file, date('Y-m-d H:i:s') . " - Subscription updated via Webhook for user $user_id" . PHP_EOL, FILE_APPEND);
-        }
+        // Ativa a conta premium por 1 ano
+        $endDate = date('Y-m-d', strtotime('+1 year'));
+        $userManager->setSubscription($user_id, 'premium', $endDate);
+        
+        error_log("Webhook Processado [PIX/Boleto]: Assinatura renovada para User_ID: " . $user_id);
     }
 }
 
+// Retorna 200 OK para o Asaas saber que recebemos
 http_response_code(200);
-echo "OK";
+echo json_encode(['status' => 'received']);

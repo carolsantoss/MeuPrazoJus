@@ -33,7 +33,7 @@ let jurisdictionsData = null;
 
 async function loadJurisdictions() {
     try {
-        const res = await fetch('api/jurisdictions?v=' + Date.now());
+        const res = await fetch('/api/jurisdictions?v=' + Date.now());
         jurisdictionsData = await res.json();
         console.log('Jurisdictions Loaded:', jurisdictionsData);
 
@@ -210,7 +210,7 @@ function setupCalculator(formId, suffix) {
         btn.disabled = true;
 
         try {
-            const response = await fetch('api/calculate', {
+            const response = await fetch('/api/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ startDate, days, type: typeVal, state, city, cityName, matter, vara, court, processType })
@@ -277,7 +277,7 @@ function setupCalculator(formId, suffix) {
 
 async function loadDeadlines() {
     try {
-        const res = await fetch('api/deadlines');
+        const res = await fetch('/api/deadlines');
         const data = await res.json();
 
         if (data.error) return;
@@ -378,7 +378,7 @@ function setupGoogleCalendar(data, suffix = '') {
 
 async function logout() {
     try {
-        const res = await fetch('api/auth?action=logout');
+        const res = await fetch('/api/auth?action=logout');
         const data = await res.json();
         if (data.success) {
             window.location.href = 'login';
@@ -541,8 +541,6 @@ const dropZonePdf = document.getElementById('drop-zone-pdf');
 const inputImages = document.getElementById('input-images');
 
 if (dropZonePdf) {
-    dropZonePdf.addEventListener('click', () => inputImages.click());
-
     dropZonePdf.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZonePdf.classList.add('dragover');
@@ -628,11 +626,18 @@ function readFileAsDataURL(file) {
 
 // --- FFMPEG ---
 
-const { createFFmpeg, fetchFile } = FFmpeg;
 let ffmpeg = null;
+let fetchFile = null;
 
 async function loadFFmpeg() {
     if (ffmpeg) return;
+
+    if (!window.FFmpeg) {
+        throw new Error("FFmpeg script did not load correctly.");
+    }
+
+    const { createFFmpeg, fetchFile: ff } = window.FFmpeg;
+    fetchFile = ff;
 
     ffmpeg = createFFmpeg({ log: true });
 
@@ -698,7 +703,6 @@ if (btnConvertAudio) {
 const inputAudio = document.getElementById('input-audio');
 const dropZoneAudio = document.getElementById('drop-zone-audio');
 if (dropZoneAudio) {
-    dropZoneAudio.addEventListener('click', () => inputAudio.click());
     inputAudio.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             document.getElementById('audio-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;
@@ -764,7 +768,6 @@ if (btnConvertVideo) {
 const inputVideo = document.getElementById('input-video');
 const dropZoneVideo = document.getElementById('drop-zone-video');
 if (dropZoneVideo) {
-    dropZoneVideo.addEventListener('click', () => inputVideo.click());
     inputVideo.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             document.getElementById('video-file-info').innerText = "Arquivo selecionado: " + e.target.files[0].name;

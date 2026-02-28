@@ -2,6 +2,12 @@ Options +FollowSymLinks -MultiViews
 RewriteEngine On
 RewriteBase /
 
+# 0. Habilitar suporte ao SharedArrayBuffer (usado pelo FFmpeg WASM)
+<IfModule mod_headers.c>
+    Header set Cross-Origin-Opener-Policy "same-origin"
+    Header set Cross-Origin-Embedder-Policy "require-corp"
+</IfModule>
+
 # 1. Redirecionar acesso direto a .php para URL sem extensão (estético)
 # MAS NÃO redirecionar requisições POST (formulários/login) para não perder dados!
 RewriteCond %{REQUEST_METHOD} !POST
