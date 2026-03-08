@@ -139,4 +139,35 @@ class UserManager {
 
         return ['success' => true];
     }
+
+    public function createPasswordReset($email) {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        if (!$stmt->fetch()) return false;
+
+        $token = bin2hex(random_bytes(32));
+        $createdAt = date('Y-m-d H:i:s');
+        
+        $stmt = $this->db->prepare("INSERT INTO password_resets (email, token, created_at) VALUES (?, ?, ?)");
+        $stmt->execute([$email, $token, $createdAt]);
+        
+        return $token;
+    }
+
+    public function resetPassword($token, $newPassword) {
+        $stmt = $this->db->prepare("SELECT email FROM password_resets WHERE token = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR) ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$token]);
+        $reset = $stmt->fetch();
+        
+        if (!$reset) return ['success' => false, 'error' => 'Token inválido ou expirado.'];
+        
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE email = ?");
+        $stmt->execute([$hash, $reset['email']]);
+        
+        $stmt = $this->db->prepare("DELETE FROM password_resets WHERE email = ?");
+        $stmt->execute([$reset['email']]);
+        
+        return ['success' => true];
+    }
 }

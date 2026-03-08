@@ -58,22 +58,7 @@ if (isset($_SESSION['user_id'])) {
                 <h1>Domine seus Prazos</h1>
                 <p class="subtitle">Simule prazos rapidamente ou faça login para gerenciar seus processos com segurança.</p>
                 
-                <div class="features-row">
-                    <div class="feature-box">
-                        <h3>📅 Novo CPC</h3>
-                        <p>Contagem em dias úteis com suspensão automática no recesso.</p>
-                    </div>
-                     <div class="feature-box">
-                        <h3>⚖️ Dias Corridos</h3>
-                        <p>Opção para prazos penais e materiais.</p>
-                    </div>
-                     <div class="feature-box">
-                        <h3>🔒 Segurança</h3>
-                        <p>Histórico completo e seguro na nuvem (apenas usuários logados).</p>
-                    </div>
-                </div>
-
-                <div class="calculator-card">
+                <div class="calculator-card" style="margin-bottom: 4rem;">
                     <h3 style="text-align:center; color:white; margin-bottom:1rem;">Faça uma simulação gratuita</h3>
                     <form id="calc-form">
                         <div class="form-group">
@@ -118,7 +103,6 @@ if (isset($_SESSION['user_id'])) {
                                 <option value="physical">Físico</option>
                             </select>
                         </div>
-
 
                         <div class="form-group">
                             <label for="start_date">Data da Publicação / Intimação</label>
@@ -177,6 +161,21 @@ if (isset($_SESSION['user_id'])) {
                          <button id="btn-pdf" class="btn btn-secondary" style="width:100%; margin-top:10px;">📄 Baixar PDF Detalhado</button>
                     </div>
                 </div>
+
+                <div class="features-row">
+                    <div class="feature-box">
+                        <h3>📅 Novo CPC</h3>
+                        <p>Contagem em dias úteis com suspensão automática no recesso.</p>
+                    </div>
+                     <div class="feature-box">
+                        <h3>⚖️ Dias Corridos</h3>
+                        <p>Opção para prazos penais e materiais.</p>
+                    </div>
+                     <div class="feature-box">
+                        <h3>🔒 Segurança</h3>
+                        <p>Histórico completo e seguro na nuvem (apenas usuários logados).</p>
+                    </div>
+                </div>
             </div>
 
         <?php else: ?>
@@ -218,8 +217,11 @@ if (isset($_SESSION['user_id'])) {
                         <?php endif; ?>
 
                         <a href="subscription" class="nav-item">⭐ Assinatura</a>
-                        <a href="#" class="nav-item" onclick="showSection('profile'); return false;">👤 Editar Perfil</a>
                     </nav>
+
+                    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                        <a href="#" class="nav-item" onclick="showSection('profile'); return false;">👤 Editar Perfil</a>
+                    </div>
                 </aside>
 
                 <div class="dash-content">

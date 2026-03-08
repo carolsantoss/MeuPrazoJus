@@ -121,6 +121,45 @@ if ($action === 'register') {
         if (ob_get_length()) ob_clean();
         echo json_encode(['error' => $result['error']]);
     }
+} elseif ($action === 'forgot_password') {
+    $email = $data['email'] ?? '';
+    if (!$email) {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => 'Email é obrigatório']);
+        exit;
+    }
+
+    $token = $userManager->createPasswordReset($email);
+    if ($token) {
+        // Enviar e-mail com o link de recuperação
+        $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/reset?token=" . $token;
+        $subject = "Recuperacao de Senha - MeuPrazoJus";
+        $message = "Você solicitou a recuperação de senha. Clique no link para redefinir: " . $resetLink;
+        $headers = "From: suporte@meuprazojus.com.br\r\n";
+        
+        // Vamos usar a função mail(), se houver servidor SMTP configurado ela funcionará
+        // Se não houver, no ambiente de desenvolvimento iremos logar ou assumir apenas como teste
+        @mail($email, $subject, $message, $headers);
+
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['success' => true]);
+    } else {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => 'Se o e-mail estiver cadastrado, um link de recuperação será enviado.']); // Mensagem genérica por segurança
+    }
+} elseif ($action === 'reset_password') {
+    $token = $data['token'] ?? '';
+    $password = $data['password'] ?? '';
+
+    if (!$token || !$password) {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => 'Token e senha são obrigatórios']);
+        exit;
+    }
+
+    $result = $userManager->resetPassword($token, $password);
+    if (ob_get_length()) ob_clean();
+    echo json_encode($result);
 } else {
     if (ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Ação inválida']);

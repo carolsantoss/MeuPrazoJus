@@ -1,9 +1,16 @@
+<?php
+$token = $_GET['token'] ?? '';
+if (!$token) {
+    header("Location: login");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MeuPrazoJus</title>
+    <title>Redefinir Senha - MeuPrazoJus</title>
     <link rel="stylesheet" href="assets/style.css?v=<?php echo filemtime('assets/style.css'); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <?php include 'src/google_adsense.php'; ?>
@@ -15,7 +22,7 @@
             <nav>
                 <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
-                    <a href="index" class="btn btn-ghost">Voltar</a>
+                    <a href="login" class="btn btn-ghost">Cancelar</a>
                 </div>
             </nav>
         </div>
@@ -23,14 +30,14 @@
 
     <main class="auth-wrapper">
         <div class="auth-card">
-            <h2 class="auth-title">Entrar</h2>
-            <form id="login-form">
+            <h2 class="auth-title">Nova Senha</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: var(--text-muted);">
+                Digite abaixo a sua nova senha.
+            </p>
+            <form id="reset-form">
+                <input type="hidden" id="token" value="<?php echo htmlspecialchars($token); ?>">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Senha</label>
+                    <label for="password">Nova Senha</label>
                     <div class="password-field-wrapper">
                         <input type="password" id="password" required>
                         <span class="password-toggle" id="toggle-password">
@@ -38,15 +45,9 @@
                         </span>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Acessar</button>
+                <button type="submit" class="btn btn-primary btn-block">Salvar Senha</button>
                 <div id="msg" style="margin-top:1rem; text-align:center;"></div>
             </form>
-            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
-                Não tem conta? <a href="register" style="color: var(--primary); text-decoration: none;">Cadastre-se</a>
-            </p>
-            <p style="text-align: center; margin-top: 0.5rem; color: var(--text-muted);">
-                <a href="forgot" style="color: var(--text-muted); text-decoration: underline; font-size: 0.9rem;">Esqueci minha senha</a>
-            </p>
         </div>
     </main>
 
@@ -65,41 +66,45 @@
             }
         });
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        document.getElementById('reset-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
             const password = document.getElementById('password').value;
+            const token = document.getElementById('token').value;
             const msg = document.getElementById('msg');
             
-            // Set success/loading color
+            btn.innerText = 'Salvando...';
+            btn.disabled = true;
             msg.style.color = '#10b981'; // Green
-            msg.innerText = 'Autenticando...';
+            msg.innerText = 'Aguarde...';
 
             try {
-                const res = await fetch('/api/auth?action=login', {
+                const res = await fetch('/api/auth.php?action=reset_password', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, password})
+                    body: JSON.stringify({token, password})
                 });
-                const text = await res.text();
-                try {
-                    const data = JSON.parse(text);
-                    if(data.success) {
-                        window.location.href = 'index';
-                    } else {
-                        // Set error color
-                        msg.style.color = '#f87171'; // Red
-                        msg.innerText = data.error;
-                    }
-                } catch(e) {
-                    console.error('Server response was not JSON:', text);
-                    msg.style.color = '#f87171';
-                    msg.innerText = 'Erro no servidor. Verifique o banco de dados.';
+                
+                const data = await res.json();
+                
+                if(data.success) {
+                    msg.style.color = '#10b981';
+                    msg.innerText = 'Senha alterada com sucesso! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = 'login';
+                    }, 2000);
+                } else {
+                    msg.style.color = '#f87171'; // Red
+                    msg.innerText = data.error || 'Não foi possível alterar a senha.';
                 }
             } catch (e) {
                 console.error(e);
                 msg.style.color = '#f87171';
-                msg.innerText = 'Erro de conexão.';
+                msg.innerText = 'Erro de conexão ou sistema.';
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         });
     </script>
