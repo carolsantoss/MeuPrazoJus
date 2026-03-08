@@ -80,4 +80,63 @@ class UserManager {
         $stmt = $this->db->prepare("UPDATE users SET subscription_status = ?, subscription_end = ? WHERE id = ?");
         return $stmt->execute([$status, $endDate, $id]);
     }
+
+    public function updateProfile($id, $newName, $newPhone, $newEmail = null, $newPassword = null) {
+        $stmt = $this->db->prepare("SELECT name, email, last_name_change FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $user = $stmt->fetch();
+        if (!$user) return ['success' => false, 'error' => 'Usuário não encontrado'];
+
+        $updates = [];
+        $params = [];
+
+        if ($newName !== $user['name']) {
+            if ($user['last_name_change']) {
+                $lastChange = new DateTime($user['last_name_change']);
+                $now = new DateTime();
+                $diff = $now->diff($lastChange)->days;
+                if ($diff < 15) {
+                    return ['success' => false, 'error' => 'O nome só pode ser alterado uma vez a cada 15 dias. Faltam ' . (15 - $diff) . ' dias.'];
+                }
+            }
+            $updates[] = 'name = ?';
+            $params[] = $newName;
+            $updates[] = 'last_name_change = ?';
+            $params[] = date('Y-m-d H:i:s');
+        }
+
+        if ($newPhone !== null && $newPhone !== '') {
+           $updates[] = 'phone = ?';
+           $params[] = $newPhone;
+        }
+
+        if ($newEmail !== null && $newEmail !== $user['email']) {
+            $checkStmt = $this->db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $checkStmt->execute([$newEmail, $id]);
+            if ($checkStmt->fetch()) {
+                return ['success' => false, 'error' => 'Este email já está em uso por outra conta.'];
+            }
+            $updates[] = 'email = ?';
+            $params[] = $newEmail;
+        }
+
+        if (!empty($newPassword)) {
+            $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+            $updates[] = 'password = ?';
+            $params[] = $hash;
+        }
+
+        if (count($updates) > 0) {
+            $params[] = $id;
+            $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+            try {
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute($params);
+            } catch (PDOException $e) {
+                return ['success' => false, 'error' => 'Erro ao atualizar dados: ' . $e->getMessage()];
+            }
+        }
+
+        return ['success' => true];
+    }
 }

@@ -218,6 +218,7 @@ if (isset($_SESSION['user_id'])) {
                         <?php endif; ?>
 
                         <a href="subscription" class="nav-item">⭐ Assinatura</a>
+                        <a href="#" class="nav-item" onclick="showSection('profile'); return false;">👤 Editar Perfil</a>
                     </nav>
                 </aside>
 
@@ -267,6 +268,34 @@ if (isset($_SESSION['user_id'])) {
                                     <li>Carregando...</li>
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="section-profile" class="dash-section" style="display:none">
+                        <h2 style="text-align: center;">Editar Perfil</h2>
+                        <div class="calculator-card" style="margin: 0 auto; max-width: 500px; width: 100%;">
+                            <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;">
+                                Atualize os dados do seu cadastro. O nome só pode ser alterado uma vez a cada 15 dias.
+                            </p>
+                            <form id="profile-form">
+                                <div class="form-group">
+                                    <label for="profile-name">Nome Completo</label>
+                                    <input type="text" id="profile-name" name="name" required value="<?php echo htmlspecialchars($u['name'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-phone">WhatsApp / Telefone</label>
+                                    <input type="text" id="profile-phone" name="phone" required value="<?php echo htmlspecialchars($u['phone'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-email">Email</label>
+                                    <input type="email" id="profile-email" name="email" required value="<?php echo htmlspecialchars($u['email'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-password">Nova Senha (deixe em branco para não alterar)</label>
+                                    <input type="password" id="profile-password" name="password" placeholder="Sua nova senha">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Salvar Alterações</button>
+                            </form>
                         </div>
                     </div>
 

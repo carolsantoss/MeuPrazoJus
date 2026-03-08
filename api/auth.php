@@ -91,6 +91,36 @@ if ($action === 'register') {
         if (ob_get_length()) ob_clean();
         echo json_encode(['error' => 'Não autenticado']);
     }
+} elseif ($action === 'update_profile') {
+    if (!isset($_SESSION['user_id'])) {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => 'Não autenticado']);
+        exit;
+    }
+
+    $name = $data['name'] ?? '';
+    $phone = $data['phone'] ?? '';
+    $email = $data['email'] ?? null;
+    $password = $data['password'] ?? null;
+
+    if (!$name || !$phone) {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => 'Nome e telefone são obrigatórios']);
+        exit;
+    }
+
+    $result = $userManager->updateProfile($_SESSION['user_id'], $name, $phone, $email, $password);
+    if ($result['success']) {
+        $_SESSION['user_name'] = $name;
+        if ($email) {
+            $_SESSION['user_email'] = $email;
+        }
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['success' => true]);
+    } else {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['error' => $result['error']]);
+    }
 } else {
     if (ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Ação inválida']);

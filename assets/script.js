@@ -511,32 +511,26 @@ function setupPDF(data, suffix) {
     });
 }
 
-// --- Converter Functionality ---
 
 let converterFiles = [];
 
 function switchConverterTab(type) {
-    // Hide all panels
     document.getElementById('converter-pdf-panel').style.display = 'none';
     document.getElementById('converter-audio-panel').style.display = 'none';
     document.getElementById('converter-video-panel').style.display = 'none';
 
-    // Reset active buttons
     ['pdf', 'audio', 'video'].forEach(t => {
         document.getElementById(`btn-tab-${t}`).classList.remove('btn-primary');
         document.getElementById(`btn-tab-${t}`).classList.add('btn-ghost');
     });
 
-    // Show active
     document.getElementById(`converter-${type}-panel`).style.display = 'block';
 
-    // Set active button
     const activeBtn = document.getElementById(`btn-tab-${type}`);
     activeBtn.classList.remove('btn-ghost');
     activeBtn.classList.add('btn-primary');
 }
 
-// PDF Converter Drop Zone
 const dropZonePdf = document.getElementById('drop-zone-pdf');
 const inputImages = document.getElementById('input-images');
 
@@ -585,7 +579,6 @@ function removeFile(el, name) {
     document.getElementById('btn-convert-pdf').disabled = converterFiles.length === 0;
 }
 
-// Generate PDF from Images
 const btnConvertPdf = document.getElementById('btn-convert-pdf');
 if (btnConvertPdf) {
     btnConvertPdf.addEventListener('click', async () => {
@@ -596,7 +589,6 @@ if (btnConvertPdf) {
             const file = converterFiles[i];
             const imgData = await readFileAsDataURL(file);
 
-            // Get Image Props
             const imgProps = doc.getImageProperties(imgData);
             const pdfWidth = doc.internal.pageSize.getWidth();
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
@@ -607,7 +599,6 @@ if (btnConvertPdf) {
 
         doc.save("MeusDocumentos.pdf");
 
-        // Reset
         converterFiles = [];
         document.getElementById('preview-list').innerHTML = '';
         btnConvertPdf.disabled = true;
@@ -623,8 +614,6 @@ function readFileAsDataURL(file) {
         reader.readAsDataURL(file);
     });
 }
-
-// --- FFMPEG ---
 
 let ffmpeg = null;
 let fetchFile = null;
@@ -790,4 +779,53 @@ function removeSingleFile(inputId, infoId, btnId) {
     document.getElementById(inputId).value = '';
     document.getElementById(infoId).innerHTML = '';
     document.getElementById(btnId).disabled = true;
+}
+
+const profileForm = document.getElementById('profile-form');
+if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = profileForm.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = 'Salvando...';
+        btn.disabled = true;
+
+        try {
+            const formData = new FormData(profileForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const res = await fetch('/api/auth.php?action=update_profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                alert('Perfil atualizado com sucesso!');
+                window.location.reload();
+            } else {
+                alert(result.error || 'Erro ao atualizar perfil.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro de conexão ou sistema.');
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    const profilePhone = document.getElementById('profile-phone');
+    if (profilePhone) {
+        profilePhone.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 10) value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+            else if (value.length > 6) value = value.replace(/^(\d{2})(\d{4,5})(\d{0,4}).*/, "($1) $2-$3");
+            else if (value.length > 2) value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+            else value = value.replace(/^(\d*)/, "($1");
+            e.target.value = value;
+        });
+    }
 }
