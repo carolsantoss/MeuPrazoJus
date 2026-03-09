@@ -131,33 +131,33 @@ if ($action === 'register') {
 
     $token = $userManager->createPasswordReset($email);
     if ($token) {
-        // Enviar e-mail com o link de recuperação
-        $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/reset?token=" . $token;
-        $subject = "Recuperacao de Senha - MeuPrazoJus";
-        $message = "Você solicitou a recuperação de senha. Clique no link para redefinir: " . $resetLink;
+        $subject = "Codigo de Recuperacao - MeuPrazoJus";
+        $message = "Você solicitou a recuperação de senha. Seu código de 6 digitos é: " . $token . "\n\nSe não foi você, ignore este e-mail.";
         $headers = "From: suporte@meuprazojus.com.br\r\n";
         
-        // Vamos usar a função mail(), se houver servidor SMTP configurado ela funcionará
-        // Se não houver, no ambiente de desenvolvimento iremos logar ou assumir apenas como teste
+        // ENVIO DO EMAIL COM MAIL NATIVO:
+        // IMPORTANTE: Isso funcionará normalmente em ambiente de hospedagem web (Hostinger, Locaweb, cPanel).
+        // No localhost (Windows), isso pode não enviar ou dar timeout porque não há SMTP configurado localmente.
         @mail($email, $subject, $message, $headers);
 
         if (ob_get_length()) ob_clean();
         echo json_encode(['success' => true]);
     } else {
         if (ob_get_length()) ob_clean();
-        echo json_encode(['error' => 'Se o e-mail estiver cadastrado, um link de recuperação será enviado.']); // Mensagem genérica por segurança
+        echo json_encode(['error' => 'Se o e-mail estiver cadastrado, um código de recuperação será enviado.']); // Mensagem genérica por segurança
     }
 } elseif ($action === 'reset_password') {
-    $token = $data['token'] ?? '';
+    $email = $data['email'] ?? '';
+    $token = strtoupper(trim($data['token'] ?? ''));
     $password = $data['password'] ?? '';
 
-    if (!$token || !$password) {
+    if (!$email || !$token || !$password) {
         if (ob_get_length()) ob_clean();
-        echo json_encode(['error' => 'Token e senha são obrigatórios']);
+        echo json_encode(['error' => 'E-mail, código e senha são obrigatórios']);
         exit;
     }
 
-    $result = $userManager->resetPassword($token, $password);
+    $result = $userManager->resetPassword($email, $token, $password);
     if (ob_get_length()) ob_clean();
     echo json_encode($result);
 } else {

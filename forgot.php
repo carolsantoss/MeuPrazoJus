@@ -25,14 +25,14 @@
         <div class="auth-card">
             <h2 class="auth-title">Recuperar Senha</h2>
             <p style="text-align: center; margin-bottom: 2rem; color: var(--text-muted);">
-                Digite seu e-mail abaixo e enviaremos um link para você redefinir sua senha.
+                Digite seu e-mail abaixo e enviaremos um código de 6 dígitos para você redefinir sua senha.
             </p>
             <form id="forgot-form">
                 <div class="form-group">
                     <label for="email">E-mail Cadastrado</label>
                     <input type="email" id="email" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Enviar Link</button>
+                <button type="submit" class="btn btn-primary btn-block">Enviar Código</button>
                 <div id="msg" style="margin-top:1rem; text-align:center;"></div>
             </form>
         </div>
@@ -62,10 +62,16 @@
                 
                 if(data.success) {
                     msg.style.color = '#10b981';
-                    msg.innerText = 'Link de recuperação enviado para o seu e-mail.';
+                    msg.innerText = 'Código enviado para o seu e-mail. Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = 'reset.php?email=' + encodeURIComponent(email);
+                    }, 1500);
                 } else {
                     msg.style.color = '#10b981';
-                    msg.innerText = data.error || 'Link de recuperação enviado se o e-mail estiver cadastrado.';
+                    msg.innerText = data.error || 'Código enviado se o e-mail estiver cadastrado.';
+                    setTimeout(() => {
+                        window.location.href = 'reset.php?email=' + encodeURIComponent(email);
+                    }, 1500);
                 }
             } catch (e) {
                 console.error(e);

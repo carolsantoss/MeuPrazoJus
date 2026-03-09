@@ -24,7 +24,6 @@ class UserManager {
                 'calculations_count' => 0
             ];
         } catch (PDOException $e) {
-            // Likely duplicate email
             return false;
         }
     }
@@ -35,7 +34,6 @@ class UserManager {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Check expiration
             if ($user['subscription_status'] === 'premium' && !empty($user['subscription_end'])) {
                 $endDate = new DateTime($user['subscription_end']);
                 $now = new DateTime();
@@ -145,7 +143,7 @@ class UserManager {
         $stmt->execute([$email]);
         if (!$stmt->fetch()) return false;
 
-        $token = bin2hex(random_bytes(32));
+        $token = strtoupper(substr(bin2hex(random_bytes(4)), 0, 6)); // 6 caracteres, ex: 9ASGQ7
         $createdAt = date('Y-m-d H:i:s');
         
         $stmt = $this->db->prepare("INSERT INTO password_resets (email, token, created_at) VALUES (?, ?, ?)");
@@ -154,19 +152,19 @@ class UserManager {
         return $token;
     }
 
-    public function resetPassword($token, $newPassword) {
-        $stmt = $this->db->prepare("SELECT email FROM password_resets WHERE token = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR) ORDER BY created_at DESC LIMIT 1");
-        $stmt->execute([$token]);
+    public function resetPassword($email, $token, $newPassword) {
+        $stmt = $this->db->prepare("SELECT email FROM password_resets WHERE email = ? AND token = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR) ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$email, $token]);
         $reset = $stmt->fetch();
         
-        if (!$reset) return ['success' => false, 'error' => 'Token inválido ou expirado.'];
+        if (!$reset) return ['success' => false, 'error' => 'Código inválido ou expirado.'];
         
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE email = ?");
-        $stmt->execute([$hash, $reset['email']]);
+        $stmt->execute([$hash, $email]);
         
         $stmt = $this->db->prepare("DELETE FROM password_resets WHERE email = ?");
-        $stmt->execute([$reset['email']]);
+        $stmt->execute([$email]);
         
         return ['success' => true];
     }

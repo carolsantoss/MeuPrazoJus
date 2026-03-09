@@ -1,6 +1,7 @@
 <?php
+$emailParam = $_GET['email'] ?? '';
 $token = $_GET['token'] ?? '';
-if (!$token) {
+if (!$emailParam && !$token) {
     header("Location: login");
     exit;
 }
@@ -32,10 +33,17 @@ if (!$token) {
         <div class="auth-card">
             <h2 class="auth-title">Nova Senha</h2>
             <p style="text-align: center; margin-bottom: 2rem; color: var(--text-muted);">
-                Digite abaixo a sua nova senha.
+                Digite o código de 6 dígitos que você recebeu no e-mail e decida sua nova senha.
             </p>
             <form id="reset-form">
-                <input type="hidden" id="token" value="<?php echo htmlspecialchars($token); ?>">
+                <div class="form-group">
+                    <label for="email">E-mail Cadastrado</label>
+                    <input type="email" id="email" required value="<?php echo htmlspecialchars($emailParam); ?>" readonly style="background: rgba(0,0,0,0.4); opacity: 0.7; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="token">Código de Recuperação</label>
+                    <input type="text" id="token" required value="<?php echo htmlspecialchars($token); ?>" maxlength="6" style="text-transform: uppercase; font-family: monospace; letter-spacing: 2px;" placeholder="Ex: 9ASGQ7">
+                </div>
                 <div class="form-group">
                     <label for="password">Nova Senha</label>
                     <div class="password-field-wrapper">
@@ -70,20 +78,21 @@ if (!$token) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
             const originalText = btn.innerText;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const token = document.getElementById('token').value;
             const msg = document.getElementById('msg');
             
             btn.innerText = 'Salvando...';
             btn.disabled = true;
-            msg.style.color = '#10b981'; // Green
+            msg.style.color = '#10b981';
             msg.innerText = 'Aguarde...';
 
             try {
                 const res = await fetch('/api/auth.php?action=reset_password', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({token, password})
+                    body: JSON.stringify({email, token, password})
                 });
                 
                 const data = await res.json();
@@ -95,7 +104,7 @@ if (!$token) {
                         window.location.href = 'login';
                     }, 2000);
                 } else {
-                    msg.style.color = '#f87171'; // Red
+                    msg.style.color = '#f87171';
                     msg.innerText = data.error || 'Não foi possível alterar a senha.';
                 }
             } catch (e) {
