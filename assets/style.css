@@ -564,6 +564,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding-right: 1.5rem;
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 120px);
 }
 
 .user-info {
@@ -941,5 +944,24 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         right: 1rem;
         font-size: 0.8rem;
         padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .dashboard-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 2rem;
     }
 }

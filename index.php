@@ -38,7 +38,6 @@ if (isset($_SESSION['user_id'])) {
                         <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
                     <?php else: ?>
                         <a href="login" class="btn btn-ghost">Entrar</a>
-                        <a href="subscription" class="btn btn-primary">Assinar Agora</a>
                     <?php endif; ?>
                 </div>
             </nav>
@@ -164,16 +163,16 @@ if (isset($_SESSION['user_id'])) {
 
                 <div class="features-row">
                     <div class="feature-box">
-                        <h3>📅 Novo CPC</h3>
-                        <p>Contagem em dias úteis com suspensão automática no recesso.</p>
+                        <h3>☁️ Histórico na Nuvem</h3>
+                        <p>Salve e gerencie todos os seus prazos com segurança de qualquer lugar do mundo.</p>
                     </div>
                      <div class="feature-box">
-                        <h3>⚖️ Dias Corridos</h3>
-                        <p>Opção para prazos penais e materiais.</p>
+                        <h3>💰 Módulo de Honorários</h3>
+                        <p>Calcule cobranças de forma simples e faça a gestão financeira da sua advocacia.</p>
                     </div>
                      <div class="feature-box">
-                        <h3>🔒 Segurança</h3>
-                        <p>Histórico completo e seguro na nuvem (apenas usuários logados).</p>
+                        <h3>🚀 Ferramentas Exclusivas</h3>
+                        <p>Integração com Google Agenda e conversor inteligente de PDF e áudio para texto.</p>
                     </div>
                 </div>
             </div>
