@@ -829,3 +829,295 @@ if (profileForm) {
         });
     }
 }
+
+function setupFeesEvents() {
+    const feeStart = document.getElementById('fee-start-date');
+    if (feeStart) {
+        feeStart.valueAsDate = new Date();
+    }
+
+    const feeInput = document.getElementById('fee-total');
+    if (feeInput) {
+        feeInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, "");
+            value = (value / 100).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            e.target.value = value;
+        });
+    }
+
+    const addLawyerBtn = document.getElementById('add-lawyer-btn');
+    if (addLawyerBtn) {
+        addLawyerBtn.addEventListener('click', () => {
+            const container = document.getElementById('lawyers-list');
+            const div = document.createElement('div');
+            div.className = 'lawyer-input-group';
+            div.style.display = 'flex';
+            div.style.gap = '0.5rem';
+            div.innerHTML = `
+                <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;">
+                <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;">
+                <button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>
+            `;
+            container.appendChild(div);
+
+            div.querySelector('.remove-lawyer').addEventListener('click', () => div.remove());
+        });
+    }
+
+    const feeForm = document.getElementById('fee-form');
+    if (feeForm) {
+        feeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            calculateFees();
+        });
+        loadFeeHistory();
+    }
+}
+
+let currentFeeHistoryPage = 1;
+
+async function loadFeeHistory(page = 1) {
+    try {
+        currentFeeHistoryPage = page;
+        const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
+        const data = await res.json();
+
+        const tbody = document.getElementById('fee-history-table-body');
+
+        if (data.error || !data.items) {
+            console.error('API Error:', data.error || 'No items');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Erro ao carregar histórico.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (data.items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum cálculo salvo ainda.</td></tr>';
+            return;
+        }
+
+        data.items.forEach(item => {
+            const tr = document.createElement('tr');
+
+            const safeDateStr = item.created_at ? item.created_at.replace(' ', 'T') : '';
+            const date = safeDateStr ? new Date(safeDateStr).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : '-';
+
+            tr.innerHTML = `
+                <td>${date}</td>
+                <td>${formatCurrency(item.total)}</td>
+                <td>${item.installments}x</td>
+                <td><button class="btn btn-ghost view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button></td>
+            `;
+            tr.querySelector('.view-btn').onclick = () => loadFeeCalculation(item);
+            tbody.appendChild(tr);
+        });
+
+        renderFeePagination(data.page, data.total_pages);
+
+    } catch (e) {
+        console.error('Error loading history', e);
+        const tbody = document.getElementById('fee-history-table-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #f87171;">Erro ao carregar os dados.</td></tr>';
+    }
+}
+
+function renderFeePagination(current, total) {
+    const container = document.getElementById('pagination-controls');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (total <= 1) return;
+
+    const prev = document.createElement('button');
+    prev.className = 'btn btn-ghost';
+    prev.innerText = '←';
+    prev.disabled = current === 1;
+    prev.onclick = () => loadFeeHistory(current - 1);
+    container.appendChild(prev);
+
+    const span = document.createElement('span');
+    span.innerText = `${current} / ${total}`;
+    span.style.color = 'var(--text-muted)';
+    container.appendChild(span);
+
+    const next = document.createElement('button');
+    next.className = 'btn btn-ghost';
+    next.innerText = '→';
+    next.disabled = current === total;
+    next.onclick = () => loadFeeHistory(current + 1);
+    container.appendChild(next);
+}
+
+function loadFeeCalculation(item) {
+    document.getElementById('fee-total').value = formatCurrency(item.total);
+    document.getElementById('fee-installments').value = item.installments;
+    document.getElementById('fee-start-date').value = item.startDate;
+
+    const container = document.getElementById('lawyers-list');
+    container.innerHTML = '';
+
+    let lawyersData = item.lawyers;
+    if (lawyersData.length > 0 && typeof lawyersData[0] === 'string') {
+        const splitPercent = 100 / lawyersData.length;
+        lawyersData = lawyersData.map(name => ({ name, percent: splitPercent }));
+    }
+
+    lawyersData.forEach((l, idx) => {
+        const div = document.createElement('div');
+        div.className = 'lawyer-input-group';
+        div.style.display = 'flex';
+        div.style.gap = '0.5rem';
+        div.innerHTML = `
+            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;" value="${l.name}">
+            <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;" value="${l.percent}">
+            ${idx > 0 ? '<button type="button" class="btn btn-ghost remove-lawyer" style="color: #f87171;">&times;</button>' : ''}
+        `;
+        container.appendChild(div);
+
+        const btn = div.querySelector('.remove-lawyer');
+        if (btn) btn.addEventListener('click', () => div.remove());
+    });
+
+    const tbody = document.getElementById('fee-table-body');
+    tbody.innerHTML = '';
+
+    const installValue = item.total / item.installments;
+
+    const [y, m, d] = item.startDate.split('-').map(Number);
+    let currentDate = new Date(y, m - 1, d, 12, 0, 0);
+
+    for (let i = 1; i <= item.installments; i++) {
+        const row = document.createElement('tr');
+        const dateFmt = currentDate.toLocaleDateString('pt-BR');
+        const gcalLink = generateFeeGCalLink(currentDate, installValue, i, item.installments);
+
+        let distributionText = lawyersData.map(l => {
+            const share = installValue * (l.percent / 100);
+            return `${l.name} (${parseFloat(l.percent).toFixed(2)}%): ${formatCurrency(share)}`;
+        }).join('<br>');
+
+        row.innerHTML = `
+            <td>${i}x</td>
+            <td>${dateFmt}</td>
+            <td>${formatCurrency(installValue)}</td>
+            <td><small style="font-size: 0.85rem; color: var(--text-muted)">${distributionText}</small></td>
+            <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
+        `;
+        tbody.appendChild(row);
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    document.getElementById('fee-summary').innerText = `Total: ${formatCurrency(item.total)}`;
+    document.getElementById('fee-results').style.display = 'block';
+
+    document.getElementById('fee-results').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function calculateFees() {
+    const rawValue = document.getElementById('fee-total').value;
+    const total = parseFloat(rawValue.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const installments = parseInt(document.getElementById('fee-installments').value);
+    const startDateStr = document.getElementById('fee-start-date').value;
+
+    const lawyerInputs = document.querySelectorAll('.lawyer-input-group');
+    const lawyers = [];
+    let totalPercent = 0;
+
+    lawyerInputs.forEach(div => {
+        const name = div.querySelector('.lawyer-name').value.trim();
+        const percent = parseFloat(div.querySelector('.lawyer-percent').value) || 0;
+
+        if (name) {
+            lawyers.push({ name, percent });
+            totalPercent += percent;
+        }
+    });
+
+    if (isNaN(total) || total <= 0) {
+        alert("Digite um valor válido.");
+        return;
+    }
+
+    if (Math.abs(totalPercent - 100) > 0.1) {
+        alert(`A soma das porcentagens deve ser 100%. Atual: ${totalPercent}%`);
+        return;
+    }
+
+    try {
+        await fetch('api/fees.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                total,
+                installments,
+                startDate: startDateStr,
+                lawyers
+            })
+        });
+        loadFeeHistory(1);
+    } catch (e) {
+        console.error('Error saving calculation', e);
+    }
+
+    const tbody = document.getElementById('fee-table-body');
+    tbody.innerHTML = '';
+
+    const installValue = total / installments;
+
+    const [y, m, d] = startDateStr.split('-').map(Number);
+    let currentDate = new Date(y, m - 1, d, 12, 0, 0);
+
+    for (let i = 1; i <= installments; i++) {
+        const row = document.createElement('tr');
+        const dateFmt = currentDate.toLocaleDateString('pt-BR');
+        const gcalLink = generateFeeGCalLink(currentDate, installValue, i, installments);
+
+        let distributionText = lawyers.map(l => {
+            const share = installValue * (l.percent / 100);
+            return `${l.name} (${l.percent}%): ${formatCurrency(share)}`;
+        }).join('<br>');
+
+        row.innerHTML = `
+            <td>${i}x</td>
+            <td>${dateFmt}</td>
+            <td>${formatCurrency(installValue)}</td>
+            <td><small style="font-size: 0.85rem; color: var(--text-muted)">${distributionText}</small></td>
+            <td><a href="${gcalLink}" target="_blank" class="gcal-icon">📅 Agendar</a></td>
+        `;
+        tbody.appendChild(row);
+
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    document.getElementById('fee-summary').innerText = `Total: ${formatCurrency(total)}`;
+    document.getElementById('fee-results').style.display = 'block';
+}
+
+function formatCurrency(val) {
+    return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function generateFeeGCalLink(date, val, current, total) {
+    const title = encodeURIComponent(`Recebimento Honorários (${current}/${total})`);
+
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${y}${m}${d}`;
+
+    const details = encodeURIComponent(`Recebimento de honorários: ${formatCurrency(val)}`);
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&details=${details}`;
+}
+
+document.addEventListener('DOMContentLoaded', setupFeesEvents);

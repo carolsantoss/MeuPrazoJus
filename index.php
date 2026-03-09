@@ -161,6 +161,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
+                <h2 style="text-align: center; margin-bottom: 2rem; color: var(--text-main); font-size: 2.25rem;">Benefícios de ser um Assinante</h2>
                 <div class="features-row">
                     <div class="feature-box">
                         <h3>☁️ Histórico na Nuvem</h3>
@@ -208,7 +209,7 @@ if (isset($_SESSION['user_id'])) {
                         <a href="#" class="nav-item" onclick="showSection('history'); return false;">📜 Histórico</a>
                         
                         <?php if ($isPremium): ?>
-                            <a href="fees" class="nav-item">💰 Honorários</a>
+                            <a href="#" class="nav-item" onclick="showSection('fees'); return false;">💰 Honorários</a>
                             <a href="#" class="nav-item" onclick="showSection('converter'); return false;">🔄 Conversor PDF/Áudio</a>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
@@ -297,6 +298,92 @@ if (isset($_SESSION['user_id'])) {
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">Salvar Alterações</button>
                             </form>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div id="section-fees" class="dash-section" style="display:none;">
+                        <h2 style="text-align: center;">Calculadora de Honorários</h2>
+                        <div class="calculator-card" style="margin: 0 auto; max-width: 800px; width: 100%;">
+                            <p style="text-align: center; margin-bottom: 2.5rem; color: var(--text-muted); font-size: 0.95rem;">Organize o recebimento e divisão de valores.</p>
+
+                            <form id="fee-form">
+                                <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Valor Total</label>
+                                        <input type="text" id="fee-total" required placeholder="R$ 0,00">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Nº Parcelas</label>
+                                        <input type="number" id="fee-installments" min="1" value="1" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Data 1ª Parcela</label>
+                                        <input type="date" id="fee-start-date" required>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label style="display: flex; justify-content: space-between; align-items: center;">
+                                        Advogados Participantes
+                                        <button type="button" class="btn btn-ghost" id="add-lawyer-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; color: var(--primary); border: 1px solid var(--glass-border);">+ Adicionar Advogado</button>
+                                    </label>
+                                    <div id="lawyers-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                                        <div class="lawyer-input-group" style="display: flex; gap: 0.5rem;">
+                                            <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;">
+                                            <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">Calcular Parcelas</button>
+                            </form>
+                        </div>
+
+                        <div id="fee-results" style="display:none; margin: 2rem auto; max-width: 800px; width: 100%;" class="calculator-card">
+                            <h3 style="margin-bottom: 1.5rem; color: white; display: block;">Planejamento de Recebimento</h3>
+                            <div class="table-responsive">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data</th>
+                                            <th>Valor Total</th>
+                                            <th>Por Advogado</th>
+                                            <th>Agenda</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fee-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="fee-total" id="fee-summary" style="margin-top: 1.5rem; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--primary);"></div>
+                        </div>
+
+                        <div id="fee-history-container" class="calculator-card" style="margin: 2rem auto; max-width: 800px; width: 100%;">
+                            <h3 style="margin-bottom: 1.5rem; color: white;">Histórico de Cálculos</h3>
+                            <div class="table-responsive">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data Criado</th>
+                                            <th>Valor Total</th>
+                                            <th>Parcelas</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fee-history-table-body">
+                                        <tr><td colspan="4" style="text-align:center">Carregando histórico...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="pagination-controls" style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
+                            </div>
                         </div>
                     </div>
 
