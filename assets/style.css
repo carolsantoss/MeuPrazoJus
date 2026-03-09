@@ -1,12 +1,8 @@
 :root {
     --primary: #c5a059;
-    /* Elegant Gold */
     --primary-dark: #a38141;
-    /* Darker Gold */
     --secondary: #1e293b;
-    /* Slate 800 */
     --bg-dark: #040914;
-    /* Ultra deep twilight blue/black */
     --glass: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(197, 160, 89, 0.15);
     --glass-hover: rgba(197, 160, 89, 0.06);
@@ -23,7 +19,6 @@
 
 html {
     overflow-y: scroll;
-    /* Força a barra de rolagem sempre aparecer para evitar saltos horizontais */
 }
 
 body {
@@ -36,7 +31,6 @@ body {
     line-height: 1.6;
 }
 
-/* Sophisticated ambient background glows */
 body::before {
     content: '';
     position: fixed;
@@ -70,14 +64,12 @@ body::after {
     padding: 0 1.5rem;
 }
 
-/* Header */
 header {
     padding: 1.25rem 0;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background: rgba(4, 9, 20, 0.7);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    /* very subtle */
     position: sticky;
     top: 0;
     z-index: 50;
@@ -125,7 +117,6 @@ nav {
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #040914;
-    /* Dark text on gold for high contrast and luxury */
     font-weight: 600;
     box-shadow: 0 4px 15px -3px rgba(197, 160, 89, 0.3);
 }
@@ -214,7 +205,6 @@ p.subtitle {
     font-weight: 400;
 }
 
-/* Glass Cards */
 .card,
 .calculator-card,
 .auth-card,
@@ -262,7 +252,6 @@ p.subtitle {
     font-size: 0.95rem;
 }
 
-/* Forms */
 .form-group {
     margin-bottom: 1.5rem;
     text-align: left;
@@ -307,7 +296,6 @@ select option {
     color: white;
 }
 
-/* Fix Date Picker Icon Color */
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(0.8) sepia(1) hue-rotate(10deg) saturate(2);
     opacity: 0.8;
@@ -327,7 +315,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin-top: 1.5rem;
 }
 
-/* Results */
 #results-area,
 #results-area-dash {
     margin-top: 2rem;
@@ -619,7 +606,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     color: var(--text-muted);
     padding: 0.85rem 1rem;
     margin: 0;
-    /* Reset default browser button margins */
     border-radius: 0.5rem;
     cursor: pointer;
     font-weight: 500;
@@ -627,7 +613,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     transition: all 0.2s;
     font-size: 0.95rem;
     line-height: 1.6;
-    /* Force buttons and links to exactly the same height */
     font-family: inherit;
     display: flex;
     align-items: center;
@@ -648,13 +633,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     border-left: 3px solid var(--primary);
     border-radius: 0 0.5rem 0.5rem 0;
     outline: 1px solid transparent;
-    /* Prevent text rendering shifts */
 }
 
 .dash-content {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 .dash-section {
@@ -666,7 +653,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin-bottom: 2rem;
 }
 
-/* Stats */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -695,7 +681,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     color: var(--primary);
 }
 
-/* Lists */
 .lists-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -765,7 +750,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     border-radius: 0.25rem;
 }
 
-/* Custom Tables */
 .glass-table {
     width: 100%;
     border-collapse: collapse;
@@ -796,7 +780,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     overflow-x: auto;
 }
 
-/* Upload Zone */
 .upload-zone {
     border: 2px dashed var(--glass-border);
     border-radius: 1rem;
@@ -835,7 +818,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     font-size: 1.2rem;
 }
 
-/* Footer styles */
 .main-footer {
     background: rgba(4, 9, 20, 0.9);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -923,7 +905,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     display: none;
 }
 
-/* Feedback Corner Button */
 .feedback-corner {
     position: fixed;
     bottom: 2rem;

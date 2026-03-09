@@ -300,7 +300,6 @@ if (isset($_SESSION['user_id'])) {
                             </form>
                         </div>
                     </div>
-                    </div>
 
                     <div id="section-fees" class="dash-section" style="display:none;">
                         <h2 style="text-align: center;">Calculadora de Honorários</h2>

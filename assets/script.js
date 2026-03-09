@@ -19,7 +19,6 @@ function showSection(id) {
 
     if (id === 'dashboard') loadDeadlines();
 
-    // Atualiza a URL sem recarregar
     const url = new URL(window.location);
     if (id === 'dashboard') {
         url.searchParams.delete('section');
