@@ -539,7 +539,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin: 0 auto;
     gap: 3rem;
     padding: 0;
-    min-height: 60vh;
+    min-height: 80vh;
 }
 
 .sidebar {
@@ -553,21 +553,21 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     padding-right: 1.5rem;
     position: sticky;
     top: 100px;
-    height: calc(100vh - 120px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    height: calc(100vh - 200px);
+    overflow: hidden;
+    align-self: flex-start;
 }
 
-/* Custom Scrollbar for Sidebar */
-.sidebar::-webkit-scrollbar {
+/* Custom Scrollbar for side-nav */
+.side-nav::-webkit-scrollbar {
     width: 6px;
 }
 
-.sidebar::-webkit-scrollbar-track {
+.side-nav::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+.side-nav::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
 }
@@ -596,6 +596,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     gap: 0.25rem;
     width: 100%;
     align-items: stretch;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.5rem;
 }
 
 .nav-item {
@@ -641,7 +645,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex-direction: column;
     min-width: 0;
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .dash-section {
