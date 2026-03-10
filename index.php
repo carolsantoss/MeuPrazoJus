@@ -98,6 +98,13 @@ if (isset($_SESSION['user_id'])) {
                             </select>
                         </div>
 
+                        <div class="form-group" id="deadline-type-group" style="display:none;">
+                            <label for="deadline-type">Tipo de Prazo Legal / Lei</label>
+                            <select id="deadline-type" name="deadline-type">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="start_date">Data da Publicação / Intimação</label>
                             <input type="date" id="start_date" name="start_date" required value="<?php echo date('Y-m-d'); ?>">
@@ -447,6 +454,13 @@ if (isset($_SESSION['user_id'])) {
                                     <select id="process-type-dash" name="process-type">
                                         <option value="electronic">Eletrônico</option>
                                         <option value="physical">Físico</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="deadline-type-group-dash" style="display:none;">
+                                    <label for="deadline-type-dash">Tipo de Prazo Legal / Lei</label>
+                                    <select id="deadline-type-dash" name="deadline-type">
+                                        <option value="">Selecione...</option>
                                     </select>
                                 </div>
 
