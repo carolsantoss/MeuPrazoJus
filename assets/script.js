@@ -377,7 +377,7 @@ function setupGoogleCalendar(data, suffix = '') {
 
 async function logout() {
     try {
-        const res = await fetch('/api/auth.php?action=logout');
+        const res = await fetch('/api/auth?action=logout');
         const data = await res.json();
         if (data.success) {
             window.location.href = 'login';

@@ -44,12 +44,7 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </header>
     
-    <script>
-     async function logout() {
-        await fetch('api/auth?action=logout');
-        window.location.reload();
-     }
-    </script>
+
 
     <main>
         <?php if(!isset($_SESSION['user_id'])): ?>
