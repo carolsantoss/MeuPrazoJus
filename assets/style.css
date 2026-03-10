@@ -399,7 +399,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     background: #e2e8f0;
 }
 
-/* Auth Pages */
 .auth-container {
     padding-top: 2rem;
     width: 100%;
@@ -448,7 +447,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     padding: 2rem;
 }
 
-/* Subscription Grid */
 .pricing-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -512,7 +510,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex-shrink: 0;
 }
 
-/* Landing specific */
 .landing-hero {
     display: flex;
     flex-direction: column;
@@ -531,7 +528,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     justify-content: center;
 }
 
-/* Dashboard Layout */
 .dashboard-container {
     display: flex;
     width: 100%;
@@ -539,7 +535,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin: 0 auto;
     gap: 3rem;
     padding: 0;
-    min-height: 80vh;
+    height: calc(100vh - 120px - 8rem);
+    min-height: 500px;
 }
 
 .sidebar {
@@ -551,14 +548,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding-right: 1.5rem;
-    position: sticky;
-    top: 100px;
-    height: calc(100vh - 200px);
+    height: 100%;
     overflow: hidden;
     align-self: flex-start;
 }
 
-/* Custom Scrollbar for side-nav */
 .side-nav::-webkit-scrollbar {
     width: 6px;
 }
@@ -596,6 +590,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     gap: 0.25rem;
     width: 100%;
     align-items: stretch;
+    justify-content: flex-start;
+    /* Forces buttons to stick together */
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -645,7 +641,24 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     flex-direction: column;
     min-width: 0;
     width: 100%;
+    overflow-y: auto;
+    /* Allow middle content to scroll internally */
     overflow-x: hidden;
+    padding-right: 1rem;
+}
+
+/* Scrollbar for dash-content */
+.dash-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dash-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dash-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
 .dash-section {

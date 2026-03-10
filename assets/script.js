@@ -882,7 +882,14 @@ async function loadFeeHistory(page = 1) {
     try {
         currentFeeHistoryPage = page;
         const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
-        const data = await res.json();
+        const text = await res.text();
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (err) {
+            throw new Error(`Parse failed: ${text.substring(0, 50)}`);
+        }
 
         const tbody = document.getElementById('fee-history-table-body');
 
@@ -926,8 +933,37 @@ async function loadFeeHistory(page = 1) {
     } catch (e) {
         console.error('Error loading history', e);
         const tbody = document.getElementById('fee-history-table-body');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #f87171;">Erro ao carregar os dados.</td></tr>';
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #f87171;">Erro ao carregar: ${e.message}</td></tr>`;
+        }
     }
+}
+
+function loadFeeCalculation(item) {
+    document.getElementById('fee-total').value = parseFloat(item.total).toFixed(2);
+    document.getElementById('fee-installments').value = item.installments;
+    document.getElementById('fee-start-date').value = item.startDate.split('T')[0];
+
+    const list = document.getElementById('lawyers-list');
+    list.innerHTML = '';
+    if (item.lawyers && Array.isArray(item.lawyers)) {
+        item.lawyers.forEach(l => {
+            const row = document.createElement('div');
+            row.className = 'lawyer-input-group';
+            row.style = 'display: flex; gap: 0.5rem;';
+            row.innerHTML = `
+                <input type="text" class="lawyer-name" placeholder="Nome do Advogado" required style="flex: 2;" value="${l.name}">
+                <input type="number" class="lawyer-percent" placeholder="%" min="0" max="100" required style="width: 80px;" value="${l.percent}">
+                <button type="button" class="btn btn-ghost remove-lawyer-btn" style="padding: 0 0.5rem;">🗑️</button>
+            `;
+            row.querySelector('.remove-lawyer-btn').onclick = () => row.remove();
+            list.appendChild(row);
+        });
+    }
+
+    // Trigger calculation
+    calculateFees();
+    document.getElementById('fee-results').scrollIntoView({ behavior: 'smooth' });
 }
 
 function renderFeePagination(current, total) {
