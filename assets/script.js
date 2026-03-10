@@ -881,7 +881,7 @@ let currentFeeHistoryPage = 1;
 async function loadFeeHistory(page = 1) {
     try {
         currentFeeHistoryPage = page;
-        const res = await fetch(`/api/h_calc.php?page=${page}&limit=10&v=${Date.now()}`);
+        const res = await fetch(`api/h_calc?page=${page}&limit=10&v=${Date.now()}`);
         const text = await res.text();
 
         let data;
@@ -1089,7 +1089,7 @@ async function calculateFees() {
     }
 
     try {
-        await fetch('/api/h_calc.php', {
+        await fetch('api/h_calc', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
