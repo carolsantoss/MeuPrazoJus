@@ -46,7 +46,7 @@ if (isset($_SESSION['user_id'])) {
     
     <script>
      async function logout() {
-        await fetch('api/auth.php?action=logout');
+        await fetch('api/auth?action=logout');
         window.location.reload();
      }
     </script>
@@ -217,11 +217,11 @@ if (isset($_SESSION['user_id'])) {
                         <?php endif; ?>
 
                         <a href="subscription" class="nav-item">⭐ Assinatura</a>
+                        
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                            <a href="#" class="nav-item" onclick="showSection('profile'); return false;">👤 Editar Perfil</a>
+                        </div>
                     </nav>
-
-                    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-                        <a href="#" class="nav-item" onclick="showSection('profile'); return false;">👤 Editar Perfil</a>
-                    </div>
                 </aside>
 
                 <div class="dash-content">
