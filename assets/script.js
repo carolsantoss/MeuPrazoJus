@@ -377,7 +377,7 @@ function setupGoogleCalendar(data, suffix = '') {
 
 async function logout() {
     try {
-        const res = await fetch('/api/auth?action=logout');
+        const res = await fetch('/api/auth.php?action=logout');
         const data = await res.json();
         if (data.success) {
             window.location.href = 'login';
@@ -793,7 +793,7 @@ if (profileForm) {
             const formData = new FormData(profileForm);
             const data = Object.fromEntries(formData.entries());
 
-            const res = await fetch('/api/auth.php?action=update_profile', {
+            const res = await fetch('/api/user_settings.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -881,7 +881,7 @@ let currentFeeHistoryPage = 1;
 async function loadFeeHistory(page = 1) {
     try {
         currentFeeHistoryPage = page;
-        const res = await fetch(`api/fees.php?page=${page}&limit=10&v=${Date.now()}`);
+        const res = await fetch(`/api/h_calc.php?page=${page}&limit=10&v=${Date.now()}`);
         const text = await res.text();
 
         let data;
@@ -1089,7 +1089,7 @@ async function calculateFees() {
     }
 
     try {
-        await fetch('api/fees.php', {
+        await fetch('/api/h_calc.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
