@@ -40,8 +40,7 @@
     </header>
 
     <main class="flex-1 bg-slate-900 border-b border-slate-700 relative flex items-center justify-center">
-        <!-- O BunkerWeb (WAF) frequentemente bloqueia JS fetch() mas permite iframes normais -->
-        <iframe src="?hash=<?php echo urlencode($doc_hash); ?>&view_pdf=1" class="w-full h-full border-none" title="Documento Original"></iframe>
+        <iframe src="uploads/original_<?php echo htmlspecialchars($doc_hash); ?>.pdf" class="w-full h-full border-none" title="Documento Original"></iframe>
     </main>
 
     <footer class="bg-dark_card p-4 md:px-8 md:py-5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
