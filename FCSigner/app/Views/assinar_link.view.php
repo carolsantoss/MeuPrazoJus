@@ -312,7 +312,7 @@
         });
 
         // Carregar PDF como blob para bypassar bloqueio COEP do WAF
-        const pdfUrl = 'uploads/original_<?php echo $doc_hash; ?>.pdf';
+        const pdfUrl = '?hash=<?php echo urlencode($doc_hash); ?>&view_pdf=1';
         fetch(pdfUrl)
             .then(res => {
                 if (!res.ok) throw new Error('PDF nao encontrado');

@@ -22,6 +22,17 @@ if ($docData['status'] == 'Assinado') {
 
 $contratante = $docData['contratante'] ?? 'Titular da Conta';
 
+if (isset($_GET['view_pdf']) && $_GET['view_pdf'] == '1') {
+    $caminhoPdf = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
+    if (file_exists($caminhoPdf)) {
+        header('Content-Type: application/pdf');
+        header('Content-Length: ' . filesize($caminhoPdf));
+        header('Content-Disposition: inline; filename="documento.pdf"');
+        readfile($caminhoPdf);
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cpf = $_POST['cpf'] ?? '';
     $celular = $_POST['celular'] ?? '';
