@@ -2,12 +2,12 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
+    header("Location: /login");
     exit();
 }
 
 if (empty($_SESSION['is_subscribed'])) {
-    header('Location: ../subscription.php');
+    header('Location: /subscription');
     exit;
 }
 ?>

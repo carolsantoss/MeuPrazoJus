@@ -1,27 +1,15 @@
 Options -Indexes
 
-# Bloquear acesso a arquivos sensíveis
 <FilesMatch "^(\.env|\.ini|\.log|composer\.json|package\.json)$">
     Require all denied
 </FilesMatch>
 
-# Bloquear visualização de arquivos ocultos
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
 
 RewriteEngine On
 
-# Forçar HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Remover a extensão .php
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [NC,L]
-
-# Roteamento básico, opcional se for usar um index.php centralizado
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
