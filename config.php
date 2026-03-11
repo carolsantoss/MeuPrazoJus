@@ -37,6 +37,8 @@ define('BASE_PATH', __DIR__);
 
 date_default_timezone_set('America/Sao_Paulo');
 
-// Asaas Credentials
 define('ASAAS_API_KEY', env('ASAAS_API_KEY', ''));
 define('ASAAS_URL', env('ASAAS_URL', 'https://sandbox.asaas.com/api/v3'));
+
+define('SMTP_USER', env('SMTP_USER', 'noreply.fctech@gmail.com'));
+define('SMTP_PASS', env('SMTP_PASS', ''));

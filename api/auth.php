@@ -131,17 +131,39 @@ if ($action === 'register') {
 
     $token = $userManager->createPasswordReset($email);
     if ($token) {
-        $subject = "Codigo de Recuperacao - MeuPrazoJus";
-        $message = "Você solicitou a recuperação de senha. Seu código de 6 digitos é: " . $token . "\n\nSe não foi você, ignore este e-mail.";
-        $headers = "From: suporte@meuprazojus.com.br\r\n";
-        
-        // ENVIO DO EMAIL COM MAIL NATIVO:
-        // IMPORTANTE: Isso funcionará normalmente em ambiente de hospedagem web (Hostinger, Locaweb, cPanel).
-        // No localhost (Windows), isso pode não enviar ou dar timeout porque não há SMTP configurado localmente.
-        @mail($email, $subject, $message, $headers);
+        require_once __DIR__ . '/../config.php';
+        require_once __DIR__ . '/../src/PHPMailer/Exception.php';
+        require_once __DIR__ . '/../src/PHPMailer/PHPMailer.php';
+        require_once __DIR__ . '/../src/PHPMailer/SMTP.php';
 
-        if (ob_get_length()) ob_clean();
-        echo json_encode(['success' => true]);
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USER;
+            $mail->Password   = SMTP_PASS;
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom(SMTP_USER, 'MeuPrazoJus');
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Código de Recuperação - MeuPrazoJus';
+            $mail->Body    = "Você solicitou a recuperação de senha.<br><br>Seu código de 6 dígitos é: <b>" . $token . "</b><br><br>Se não foi você, ignore este e-mail.";
+            $mail->AltBody = "Você solicitou a recuperação de senha. Seu código de 6 dígitos é: " . $token . "\n\nSe não foi você, ignore este e-mail.";
+
+            $mail->send();
+
+            if (ob_get_length()) ob_clean();
+            echo json_encode(['success' => true]);
+        } catch (\PHPMailer\PHPMailer\Exception $e) {
+            if (ob_get_length()) ob_clean();
+            echo json_encode(['error' => 'Falha ao enviar o e-mail verifique a Senha de Aplicativo no .env. Erro interno: ' . $mail->ErrorInfo]);
+        }
     } else {
         if (ob_get_length()) ob_clean();
         echo json_encode(['error' => 'Se o e-mail estiver cadastrado, um código de recuperação será enviado.']); // Mensagem genérica por segurança
