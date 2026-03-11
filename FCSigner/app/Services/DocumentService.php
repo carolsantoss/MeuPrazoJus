@@ -12,10 +12,13 @@ class DocumentService
         if ($assinatura_base64 && strpos($assinatura_base64, 'data:image') === 0) {
             $data = explode(',', $assinatura_base64);
             $imgData = base64_decode(end($data));
-            $tmpImg = sys_get_temp_dir() . '/' . uniqid('sig_') . '.png';
+            $isJpeg = strpos($assinatura_base64, 'data:image/jpeg') === 0;
+            $ext = $isJpeg ? 'jpg' : 'png';
+            $type = $isJpeg ? 'JPEG' : 'PNG';
+            $tmpImg = sys_get_temp_dir() . '/' . uniqid('sig_') . '.' . $ext;
             file_put_contents($tmpImg, $imgData);
             
-            $pdf->Image($tmpImg, 75, $y, 60, 0, 'PNG');
+            $pdf->Image($tmpImg, 75, $y, 60, 0, $type);
             unlink($tmpImg);
             
             $pdf->SetY($y + 25);
