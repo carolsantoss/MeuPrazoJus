@@ -99,7 +99,7 @@
                         <div class="flex items-center gap-3 mt-2">
                             <input type="text" value="<?php echo htmlspecialchars($_GET['link_assinatura']); ?>" readonly class="flex-1 bg-slate-800/50 border border-brand/30 rounded-lg px-4 py-2.5 text-sm font-mono text-slate-400">
                             <a href="<?php echo htmlspecialchars($_GET['link_assinatura']); ?>" target="_blank" class="bg-brand hover:bg-brand/80 text-white px-4 py-2.5 rounded-lg font-medium transition-colors text-sm whitespace-nowrap">
-                                Simular: Abrir Link
+                                Abrir Link
                             </a>
                         </div>
                     </div>

@@ -126,6 +126,22 @@
             document.getElementById('coletaModal').classList.add('hidden');
             document.getElementById('coletaModal').classList.remove('flex');
         }
+
+        const inputCpf = document.querySelector('input[name="cpf"]');
+        if (inputCpf) {
+            inputCpf.addEventListener('input', function (e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+                e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' : '') + x[3] + (x[4] ? '-' + x[4] : '');
+            });
+        }
+
+        const inputTel = document.querySelector('input[name="celular"]');
+        if (inputTel) {
+            inputTel.addEventListener('input', function (e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+        }
     </script>
 </body>
 </html>
