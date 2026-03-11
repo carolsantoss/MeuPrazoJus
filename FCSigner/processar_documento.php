@@ -46,9 +46,7 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "
 $host = $_SERVER['HTTP_HOST'];
 $base_dir = dirname($_SERVER['REQUEST_URI']);
 
-$linkSimulado = $protocol . "://" . $host . $base_dir . "/assinar_link.php?hash=" . $docHash . 
-                "&contratante=" . urlencode($contratante) . 
-                "&contratado=" . urlencode($contratado);
+$linkSimulado = $protocol . "://" . $host . $base_dir . "/assinar_link.php?hash=" . $docHash;
 
 header("Location: index.php?link_assinatura=" . urlencode($linkSimulado));
 exit();

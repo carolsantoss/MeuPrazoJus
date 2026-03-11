@@ -53,15 +53,14 @@
                 </div>
             </div>
 
+            <div class="mb-4 hidden">
+                <input type="hidden" name="nome_contratante" value="<?php echo htmlspecialchars($_SESSION['user_name']); ?>">
+            </div>
+            
             <div class="grid grid-cols-1 gap-5 mb-8">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Contratante</label>
-                    <input type="text" name="nome_contratante" value="<?php echo htmlspecialchars($_SESSION['user_name']); ?>" readonly class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-400 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium cursor-not-allowed">
-                    <p class="text-xs text-slate-500 mt-1">Vinculado ao titular da conta.</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Contratado</label>
-                    <input type="text" name="nome_contratado" required placeholder="Ex: Maria Oliveira" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Signatário / Outra Parte (opcional)</label>
+                    <input type="text" name="nome_contratado" placeholder="Será preenchido pela própria pessoa na assinatura" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium">
                 </div>
             </div>
 

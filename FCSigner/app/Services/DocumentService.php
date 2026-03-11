@@ -7,15 +7,29 @@ class DocumentService
         return @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $str) ?: $str;
     }
 
-    private function drawSignatureBlock($pdf, $name, $cpf) {
-        $firstName = explode(' ', trim($name))[0];
-        $pdf->SetFont('Times', 'I', 32);
-        $pdf->SetTextColor(120, 120, 120);
-        $pdf->Cell(0, 12, $this->decodeTxt($firstName), 0, 1, 'C');
-        
+    private function drawSignatureBlock($pdf, $name, $cpf, $assinatura_base64 = null) {
         $y = $pdf->GetY();
+        if ($assinatura_base64 && strpos($assinatura_base64, 'data:image') === 0) {
+            $data = explode(',', $assinatura_base64);
+            $imgData = base64_decode(end($data));
+            $tmpImg = sys_get_temp_dir() . '/' . uniqid('sig_') . '.png';
+            file_put_contents($tmpImg, $imgData);
+            
+            $pdf->Image($tmpImg, 75, $y, 60, 0, 'PNG');
+            unlink($tmpImg);
+            
+            $pdf->SetY($y + 25);
+        } else {
+            $firstName = explode(' ', trim($name))[0];
+            $pdf->SetFont('Times', 'I', 32);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->Cell(0, 12, $this->decodeTxt($firstName), 0, 1, 'C');
+            $pdf->SetY($pdf->GetY() + 5);
+        }
+        
+        $yLinha = $pdf->GetY();
         $pdf->SetDrawColor(30, 30, 30);
-        $pdf->Line(70, $y, 140, $y);
+        $pdf->Line(70, $yLinha, 140, $yLinha);
         $pdf->Ln(2);
         
         $pdf->SetFont('Helvetica', 'B', 10);
@@ -64,7 +78,7 @@ class DocumentService
         $pdf->SetY($pdf->GetY() + 4);
     }
 
-    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $contratado, $cpf, $celular) {
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $contratado, $cpf, $celular, $assinatura_base64 = null) {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         
         $pdf = new \setasign\Fpdi\Fpdi();
@@ -110,7 +124,7 @@ class DocumentService
         $ip_con = $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         
         $this->drawSignatureBlock($pdf, $contratante, 'CPF Vinculado à Conta'); 
-        $this->drawSignatureBlock($pdf, $contratado, $cpf);
+        $this->drawSignatureBlock($pdf, $contratado, $cpf, $assinatura_base64);
         
         $pdf->Ln(5);
         $pdf->SetFont('Helvetica', 'B', 10);

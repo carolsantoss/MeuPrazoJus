@@ -139,7 +139,14 @@
                             <?php foreach ($documentos as $doc): ?>
                                 <tr class="hover:bg-slate-800/50 transition-colors">
                                     <td class="px-6 py-4 font-medium text-slate-200">
-                                        <?php echo htmlspecialchars($doc['title']); ?>
+                                        <?php if ($doc['status'] === 'Pendente'): ?>
+                                            <div class="cursor-pointer group flex items-center gap-2 hover:text-brand transition-colors" onclick="copyLink('<?php echo $doc['document_hash']; ?>')" title="Clique para copiar o link de assinatura">
+                                                <?php echo htmlspecialchars($doc['title']); ?>
+                                                <svg class="w-4 h-4 text-slate-500 group-hover:text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($doc['title']); ?>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4">
                                         <?php echo date('d/m/Y H:i', strtotime($doc['created_at'])); ?>
@@ -208,9 +215,14 @@
             }
         }
 
-        function fecharModal() {
-            document.getElementById('upgradeModal').classList.add('hidden');
-            document.getElementById('upgradeModal').classList.remove('flex');
+        function copyLink(hash) {
+            const path = window.location.pathname.replace(/\/index\.php$/, '');
+            const url = window.location.origin + path + '/assinar_link.php?hash=' + hash;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link de assinatura copiado com sucesso!');
+            }).catch(err => {
+                alert('Erro ao copiar link, copie manualmente: ' + url);
+            });
         }
     </script>
 </body>

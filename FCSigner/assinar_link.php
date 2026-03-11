@@ -1,18 +1,32 @@
 <?php
 session_start();
 
-$doc_hash = $_GET['hash'] ?? '';
-$nome_pre_preenchido = $_GET['contratado'] ?? ''; 
+require_once __DIR__ . '/../src/Database.php';
+$pdo = Database::getInstance()->getConnection();
 
+$doc_hash = $_GET['hash'] ?? '';
 if (!$doc_hash) {
     die("Link inválido.");
 }
 
+$stmtId = $pdo->prepare("SELECT d.id, d.status, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
+$stmtId->execute([$doc_hash]);
+$docData = $stmtId->fetch();
+
+if (!$docData) {
+    die("Documento não encontrado.");
+}
+if ($docData['status'] == 'Assinado') {
+    die("Este documento já foi assinado.");
+}
+
+$contratante = $docData['contratante'] ?? 'Titular da Conta';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cpf = $_POST['cpf'] ?? '';
     $celular = $_POST['celular'] ?? '';
-    $contratante = $_GET['contratante'] ?? 'Contratante';
-    $contratado = $nome_pre_preenchido;
+    $contratado = $_POST['nome_signatario'] ?? 'Signatário';
+    $assinatura_base64 = $_POST['signature_image'] ?? null;
 
     require 'vendor/autoload.php';
     require_once 'app/Services/DocumentService.php';
@@ -29,23 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $contratante, 
         $contratado, 
         $cpf, 
-        $celular
+        $celular,
+        $assinatura_base64
     );
 
-    require_once __DIR__ . '/../src/Database.php';
-    $pdo = Database::getInstance()->getConnection();
+    $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+    $stmtUpdate->execute(['/uploads/' . $nomeArquivoFinal, $docData['id']]);
     
-    $stmtId = $pdo->prepare("SELECT id FROM documents WHERE document_hash = ?");
-    $stmtId->execute([$doc_hash]);
-    $docData = $stmtId->fetch();
-    
-    if ($docData) {
-        $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        $stmtUpdate->execute(['/uploads/' . $nomeArquivoFinal, $docData['id']]);
-        
-        $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
-        $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $_SERVER['REMOTE_ADDR']]);
-    }
+    $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
+    $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $_SERVER['REMOTE_ADDR']]);
 
     header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
     exit();

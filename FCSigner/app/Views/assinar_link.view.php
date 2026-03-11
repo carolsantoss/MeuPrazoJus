@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assinar Documento - FCSign.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -34,7 +35,7 @@
             <h1 class="text-lg font-medium text-slate-200 hidden sm:block">Revisão de Documento</h1>
         </div>
         <div class="text-sm text-slate-400">
-            Assinante: <strong class="text-slate-200"><?php echo htmlspecialchars($nome_pre_preenchido); ?></strong>
+            Assinando documento seguro
         </div>
     </header>
 
@@ -64,8 +65,8 @@
         </button>
     </footer>
 
-    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4">
-        <div class="bg-dark_card border border-slate-700 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8">
             <div class="p-6 border-b border-slate-700">
                 <h3 class="text-lg font-bold text-white">Verificação de Identidade</h3>
                 <p class="text-sm text-slate-400 mt-1">Confirme seus dados para continuar.</p>
@@ -73,12 +74,8 @@
             
             <form action="" method="POST" class="p-6">
                 <div class="mb-5">
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome Completo</label>
-                    <input type="text" value="<?php echo htmlspecialchars($nome_pre_preenchido); ?>" readonly class="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-400 cursor-not-allowed">
-                    <p class="text-xs text-brand mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Solicitado pelo criador do documento.
-                    </p>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome Completo do Signatário (*)</label>
+                    <input type="text" name="nome_signatario" required placeholder="Digite seu nome completo" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
                 </div>
 
                 <div class="mb-5">
@@ -89,6 +86,34 @@
                 <div class="mb-8">
                     <label class="block text-sm font-medium text-slate-300 mb-2">Telefone Celular (*)</label>
                     <input type="text" name="celular" required placeholder="(00) 00000-0000" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Sua Assinatura (*)</label>
+                    <div class="border border-slate-600 rounded-lg overflow-hidden bg-slate-800">
+                        <div class="flex border-b border-slate-700 bg-slate-900">
+                            <button type="button" id="tab-draw" class="flex-1 py-2 text-sm font-medium text-brand border-b-2 border-brand" onclick="switchTab('draw')">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                DESENHAR
+                            </button>
+                            <button type="button" id="tab-type" class="flex-1 py-2 text-sm font-medium text-slate-400 hover:text-slate-200" onclick="switchTab('type')">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                ESCREVER
+                            </button>
+                        </div>
+                        
+                        <div id="area-draw" class="relative bg-white h-40">
+                            <canvas id="signature-pad" class="w-full h-full touch-none cursor-crosshair"></canvas>
+                            <button type="button" onclick="clearSignature()" class="absolute bottom-2 right-4 text-xs font-semibold text-slate-500 hover:text-red-500 transition-colors bg-white/80 px-2 py-1 rounded">Limpar</button>
+                        </div>
+                        
+                        <div id="area-type" class="hidden bg-white h-40 flex items-center justify-center p-6 text-center overflow-x-hidden">
+                            <div id="typed-signature" class="text-black whitespace-nowrap" style="font-family: 'Caveat', cursive; font-size: 3rem; line-height: 1;">Seu Nome</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="signature_type" id="signature_type" value="draw">
+                    <input type="hidden" name="signature_image" id="signature_image" required>
                 </div>
 
                 <div class="flex gap-4">
@@ -120,6 +145,9 @@
         function mostrarModal() {
             document.getElementById('coletaModal').classList.remove('hidden');
             document.getElementById('coletaModal').classList.add('flex');
+            if (document.getElementById('signature_type').value === 'draw') {
+                setTimeout(resizeCanvas, 50);
+            }
         }
 
         function fecharModal() {
@@ -142,6 +170,141 @@
                 e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
             });
         }
+        
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false;
+        
+        function resizeCanvas() {
+            const rect = canvas.parentNode.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#0f172a';
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const evt = e.touches ? e.touches[0] : e;
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            hasSignature = true;
+            ctx.beginPath();
+            const pos = getPos(e);
+            ctx.moveTo(pos.x, pos.y);
+            if(e.cancelable) e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            if(e.cancelable) e.preventDefault();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+        }
+
+        const nameInput = document.querySelector('input[name="nome_signatario"]');
+        const typedPreview = document.getElementById('typed-signature');
+        if (nameInput) {
+            nameInput.addEventListener('input', (e) => {
+                typedPreview.textContent = e.target.value || 'Seu Nome';
+            });
+        }
+
+        function switchTab(tab) {
+            document.getElementById('signature_type').value = tab;
+            const tabDrawInfo = document.getElementById('tab-draw');
+            const tabTypeInfo = document.getElementById('tab-type');
+            
+            if (tab === 'draw') {
+                tabDrawInfo.classList.add('text-brand', 'border-b-2', 'border-brand');
+                tabDrawInfo.classList.remove('text-slate-400', 'hover:text-slate-200');
+                
+                tabTypeInfo.classList.remove('text-brand', 'border-b-2', 'border-brand');
+                tabTypeInfo.classList.add('text-slate-400', 'hover:text-slate-200');
+                
+                document.getElementById('area-draw').classList.remove('hidden');
+                document.getElementById('area-type').classList.add('hidden');
+                resizeCanvas();
+            } else {
+                tabTypeInfo.classList.add('text-brand', 'border-b-2', 'border-brand');
+                tabTypeInfo.classList.remove('text-slate-400', 'hover:text-slate-200');
+                
+                tabDrawInfo.classList.remove('text-brand', 'border-b-2', 'border-brand');
+                tabDrawInfo.classList.add('text-slate-400', 'hover:text-slate-200');
+                
+                document.getElementById('area-type').classList.remove('hidden');
+                document.getElementById('area-type').classList.add('flex');
+                document.getElementById('area-draw').classList.add('hidden');
+                
+                typedPreview.textContent = nameInput.value || 'Seu Nome';
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const sigType = document.getElementById('signature_type').value;
+            const sigInput = document.getElementById('signature_image');
+            
+            if (sigType === 'draw') {
+                if (!hasSignature) {
+                    e.preventDefault();
+                    alert('Por favor, desenhe sua assinatura para continuar.');
+                    return;
+                }
+                sigInput.value = canvas.toDataURL('image/png');
+            } else {
+                const nameVal = nameInput.value.trim();
+                if (!nameVal) {
+                    e.preventDefault();
+                    alert('Por favor, preencha seu nome para gerar a assinatura.');
+                    return;
+                }
+                
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = 400;
+                offCanvas.height = 150;
+                const octx = offCanvas.getContext('2d');
+
+                octx.fillStyle = "#ffffff";
+                octx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+                
+                octx.fillStyle = "#0f172a";
+                octx.font = "400 48px 'Caveat', cursive";
+                octx.textAlign = "center";
+                octx.textBaseline = "middle";
+                octx.fillText(nameVal, offCanvas.width / 2, offCanvas.height / 2);
+                
+                sigInput.value = offCanvas.toDataURL('image/png');
+            }
+        });
     </script>
 </body>
 </html>
