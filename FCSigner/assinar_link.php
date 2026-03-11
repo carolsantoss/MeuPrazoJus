@@ -30,6 +30,9 @@ if (isset($_GET['view_pdf']) && $_GET['view_pdf'] == '1') {
         header('Content-Disposition: inline; filename="documento.pdf"');
         readfile($caminhoPdf);
         exit;
+    } else {
+        http_response_code(404);
+        die("Documento original não encontrado no servidor.");
     }
 }
 
