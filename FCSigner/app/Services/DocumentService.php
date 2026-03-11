@@ -1,0 +1,150 @@
+<?php
+namespace App\Services;
+
+class DocumentService
+{
+    private function decodeTxt($str) {
+        return @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $str) ?: $str;
+    }
+
+    private function drawSignatureBlock($pdf, $name, $cpf) {
+        $firstName = explode(' ', trim($name))[0];
+        $pdf->SetFont('Times', 'I', 32);
+        $pdf->SetTextColor(120, 120, 120);
+        $pdf->Cell(0, 12, $this->decodeTxt($firstName), 0, 1, 'C');
+        
+        $y = $pdf->GetY();
+        $pdf->SetDrawColor(30, 30, 30);
+        $pdf->Line(70, $y, 140, $y);
+        $pdf->Ln(2);
+        
+        $pdf->SetFont('Helvetica', 'B', 10);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(0, 5, $this->decodeTxt($name), 0, 1, 'C');
+        
+        $pdf->SetFont('Helvetica', 'B', 9);
+        $pdf->Cell(0, 5, $this->decodeTxt($cpf), 0, 1, 'C');
+        
+        $pdf->SetFont('Helvetica', '', 9);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 5, $this->decodeTxt("Signatário"), 0, 1, 'C');
+        $pdf->Ln(8);
+    }
+
+    private function drawHistoryItem($pdf, $date, $time, $iconType, $name, $actionText) {
+        $yStart = $pdf->GetY();
+        
+        $pdf->SetFont('Helvetica', '', 9);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(10, $yStart);
+        $pdf->MultiCell(25, 4, $this->decodeTxt("$date\n$time"), 0, 'R');
+        
+        $pdf->SetXY(38, $yStart);
+        $pdf->SetFont('Helvetica', '', 14);
+        if ($iconType == 'create') {
+            $pdf->SetTextColor(150, 150, 150);
+            $pdf->Cell(10, 8, '+', 0, 0, 'C');
+        } elseif ($iconType == 'view') {
+            $pdf->SetTextColor(59, 130, 246);
+            $pdf->Cell(10, 8, 'O', 0, 0, 'C'); 
+        } elseif ($iconType == 'sign') {
+            $pdf->SetTextColor(34, 197, 94);
+            $pdf->Cell(10, 8, 'V', 0, 0, 'C'); 
+        }
+        
+        $pdf->SetLeftMargin(55);
+        $pdf->SetXY(55, $yStart);
+        $pdf->SetFont('Helvetica', 'B', 9);
+        $pdf->SetTextColor(50, 50, 50);
+        $pdf->Write(5, $this->decodeTxt($name . " "));
+        $pdf->SetFont('Helvetica', '', 9);
+        $pdf->Write(5, $this->decodeTxt($actionText));
+        $pdf->Ln(8);
+        $pdf->SetLeftMargin(10); 
+        $pdf->SetY($pdf->GetY() + 4);
+    }
+
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $contratado, $cpf, $celular) {
+        $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
+        
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pageCount = $pdf->setSourceFile($caminhoOriginal);
+
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $templateId = $pdf->importPage($pageNo);
+            $size = $pdf->getTemplateSize($templateId);
+            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+            $pdf->useTemplate($templateId);
+
+            $pdf->SetFont('Helvetica', '', 9);
+            $pdf->SetTextColor(100, 100, 100);
+            $textoFooter = $this->decodeTxt("Assinado por: $contratante e $contratado | Validar em $urlValidacao");
+            $pdf->SetXY(10, $size['height'] - 10);
+            $pdf->Cell(0, 10, $textoFooter, 0, 0, 'C');
+        }
+
+        $pdf->AddPage();
+        $pdf->SetAutoPageBreak(true, 20);
+        
+        $pdf->SetFont('Helvetica', 'B', 24);
+        $pdf->SetTextColor(15, 23, 42); 
+        $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+        $pdf->SetTextColor(59, 130, 246); 
+        $pdf->Cell(10, 10, '.', 0, 0, 'L');
+        
+        $pdf->SetFont('Helvetica', '', 8);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(80, 10);
+        $dtStr = date('d M Y \à\s H:i');
+        $pdf->MultiCell(0, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+        
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Line(10, 25, 200, 25);
+        $pdf->Ln(15);
+        
+        $pdf->SetFont('Helvetica', 'B', 16);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(0, 15, $this->decodeTxt('Página de assinaturas'), 0, 1, 'C');
+        $pdf->Ln(10);
+        
+        $ip_con = $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
+        
+        $this->drawSignatureBlock($pdf, $contratante, 'CPF Vinculado à Conta'); 
+        $this->drawSignatureBlock($pdf, $contratado, $cpf);
+        
+        $pdf->Ln(5);
+        $pdf->SetFont('Helvetica', 'B', 10);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+        $pdf->Ln(5);
+
+        $d = date('d M Y');
+        $t = date('H:i:s');
+        $this->drawHistoryItem($pdf, $d, $t, 'create', $contratante, "criou este documento.");
+        $this->drawHistoryItem($pdf, $d, $t, 'view', $contratante, "(Titular da Conta) visualizou este documento por meio do IP $ip_con.");
+        $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
+        $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
+        $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
+
+        $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
+        if(!file_exists($qrPath)){
+            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
+            @file_put_contents($qrPath, @file_get_contents($qrUrl));
+        }
+        if(file_exists($qrPath) && filesize($qrPath) > 0) {
+            $yQR = $pdf->GetY();
+            if ($yQR > 230) {
+                $pdf->AddPage();
+                $yQR = 20;
+            }
+            $pdf->Image($qrPath, 170, $yQR, 25, 25, 'PNG');
+        }
+
+        $nomeArquivoFinal = "documento_" . $doc_hash . ".pdf";
+        $pdf->Output('F', __DIR__ . '/../../uploads/' . $nomeArquivoFinal);
+        
+        return $nomeArquivoFinal;
+    }
+}
