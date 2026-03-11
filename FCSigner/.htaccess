@@ -7,6 +7,8 @@ php_value post_max_size 25M
     Header always unset Cross-Origin-Opener-Policy
     Header always unset Cross-Origin-Embedder-Policy
     Header always set Cross-Origin-Resource-Policy "cross-origin"
+    Header always unset X-Frame-Options
+    Header always unset Content-Security-Policy
 </IfModule>
 
 <FilesMatch "^(\.env|\.ini|\.log|composer\.json|package\.json)$">
