@@ -40,12 +40,8 @@
     </header>
 
     <main class="flex-1 bg-slate-900 border-b border-slate-700 relative flex items-center justify-center">
-        <div id="pdf-loading" class="text-slate-400 flex flex-col items-center gap-3">
-            <svg class="w-10 h-10 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            <span class="text-sm">Carregando documento...</span>
-        </div>
-        <object id="pdf-viewer" type="application/pdf" class="w-full h-full border-none hidden"
-            data="" title="Documento Original"></object>
+        <!-- O BunkerWeb (WAF) frequentemente bloqueia JS fetch() mas permite iframes normais -->
+        <iframe src="?hash=<?php echo urlencode($doc_hash); ?>&view_pdf=1" class="w-full h-full border-none" title="Documento Original"></iframe>
     </main>
 
     <footer class="bg-dark_card p-4 md:px-8 md:py-5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
@@ -310,25 +306,6 @@
                 sigInput.value = offCanvas.toDataURL('image/jpeg', 0.4);
             }
         });
-
-        // Carregar PDF como blob para bypassar bloqueio COEP do WAF
-        const pdfUrl = '?hash=<?php echo urlencode($doc_hash); ?>&view_pdf=1';
-        fetch(pdfUrl)
-            .then(res => {
-                if (!res.ok) throw new Error('PDF nao encontrado');
-                return res.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                const viewer = document.getElementById('pdf-viewer');
-                viewer.setAttribute('data', blobUrl);
-                viewer.classList.remove('hidden');
-                document.getElementById('pdf-loading').style.display = 'none';
-            })
-            .catch(() => {
-                document.getElementById('pdf-loading').innerHTML = 
-                    '<p class="text-red-400 text-sm">Não foi possível carregar o documento. O link pode ter expirado.</p>';
-            });
     </script>
 </body>
 </html>
