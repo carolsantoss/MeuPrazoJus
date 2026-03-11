@@ -5,6 +5,7 @@
     Header always set Access-Control-Allow-Origin "*"
 </IfModule>
 
-# Bloquear execução de scripts, mas permitir servir arquivos normais
-Options -ExecCGI
-php_flag engine off
+<FilesMatch "\.(php|php[34578]|phtml|pl|py|cgi)$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI -Indexes
