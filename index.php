@@ -52,6 +52,12 @@ if (isset($_SESSION['user_id'])) {
                 <h1>Domine seus Prazos</h1>
                 <p class="subtitle">Simule prazos rapidamente ou faça login para gerenciar seus processos com segurança.</p>
                 
+                <div style="display: flex; justify-content: center; margin-bottom: 2.5rem; margin-top: -0.5rem;">
+                    <span style="background: rgba(197, 160, 89, 0.1); border: 1px solid rgba(197, 160, 89, 0.3); color: #dfc690; padding: 0.5rem 1.25rem; border-radius: 2rem; font-weight: 500; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        ⚖️ <strong style="color: white; font-weight: 700;">+28.450</strong> prazos processuais simulados
+                    </span>
+                </div>
+
                 <div class="calculator-card" style="margin-bottom: 4rem;">
                     <h3 style="text-align:center; color:white; margin-bottom:1rem;">Faça uma simulação gratuita</h3>
                     <form id="calc-form">
