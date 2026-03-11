@@ -57,7 +57,7 @@ function populateJurisdictions(suffix) {
 
     const matterSelect = document.getElementById('matter' + suffix);
     if (matterSelect) {
-        matterSelect.innerHTML = '<option value="">Geral</option>';
+        matterSelect.innerHTML = '<option value="">Selecione...</option>';
         jurisdictionsData.matters.forEach(m => {
             const opt = document.createElement('option');
             opt.value = m.id;
@@ -69,7 +69,7 @@ function populateJurisdictions(suffix) {
 
     const varaSelect = document.getElementById('vara' + suffix);
     if (varaSelect && jurisdictionsData.varas) {
-        varaSelect.innerHTML = '<option value="">Geral</option>';
+        varaSelect.innerHTML = '<option value="">Selecione...</option>';
         jurisdictionsData.varas.forEach(v => {
             const opt = document.createElement('option');
             opt.value = v.name;
@@ -143,7 +143,7 @@ function setupJurisdictionListeners(suffix) {
             const varaSelect = document.getElementById('vara' + suffix);
             if (varaSelect && jurisdictionsData.varas) {
                 const currentVara = varaSelect.value;
-                varaSelect.innerHTML = '<option value="">Geral</option>';
+                varaSelect.innerHTML = '<option value="">Selecione...</option>';
                 jurisdictionsData.varas.forEach(v => {
                     if (!matterId || v.matter === matterId) {
                         const opt = document.createElement('option');

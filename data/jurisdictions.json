@@ -22619,87 +22619,6 @@
             ]
         },
         {
-            "id": "FISCAL",
-            "name": "Execução Fiscal (LEF)",
-            "default_type": "working",
-            "deadlines": [
-                {
-                    "name": "Citação (pagar\/garantir)",
-                    "days": 5,
-                    "type": "working",
-                    "ref": "LEF art. 8º"
-                },
-                {
-                    "name": "Embargos à execução fiscal",
-                    "days": 30,
-                    "type": "working",
-                    "ref": "LEF art. 16"
-                },
-                {
-                    "name": "Impugnação da Fazenda",
-                    "days": 30,
-                    "type": "working",
-                    "ref": "LEF art. 17"
-                },
-                {
-                    "name": "Edital de citação",
-                    "days": 30,
-                    "type": "calendar",
-                    "ref": "LEF art. 8º, IV"
-                }
-            ]
-        },
-        {
-            "id": "MANDAMUS",
-            "name": "Mandado de Segurança",
-            "default_type": "calendar",
-            "deadlines": [
-                {
-                    "name": "Prazo decadencial (impetrar)",
-                    "days": 120,
-                    "type": "calendar",
-                    "ref": "Lei 12.016 art. 23"
-                },
-                {
-                    "name": "Informações autoridade coatora",
-                    "days": 10,
-                    "type": "calendar",
-                    "ref": "Lei 12.016 art. 7º, I"
-                },
-                {
-                    "name": "Parecer do MP",
-                    "days": 10,
-                    "type": "calendar",
-                    "ref": "Lei 12.016 art. 12"
-                },
-                {
-                    "name": "Prazo para sentença",
-                    "days": 30,
-                    "type": "calendar",
-                    "ref": "Lei 12.016 art. 12, p. único"
-                }
-            ]
-        },
-        {
-            "id": "ELECTRONIC",
-            "name": "Processo Eletrônico",
-            "default_type": "calendar",
-            "deadlines": [
-                {
-                    "name": "Consulta eletrônica (prazo técnico)",
-                    "days": 10,
-                    "type": "calendar",
-                    "ref": "Lei 11.419 art. 5º §3º"
-                },
-                {
-                    "name": "Intimação STJ (AREsp 2.492.606)",
-                    "days": 10,
-                    "type": "calendar",
-                    "ref": "Notícia STJ"
-                }
-            ]
-        },
-        {
             "id": "TAX",
             "name": "Tributário",
             "default_type": "working",
@@ -22745,14 +22664,6 @@
         {
             "name": "Juizado Especial da Fazenda Pública (JEFAZ)",
             "matter": "JUIZADOS"
-        },
-        {
-            "name": "Vara de Execução Fiscal",
-            "matter": "FISCAL"
-        },
-        {
-            "name": "Mandado de Segurança",
-            "matter": "MANDAMUS"
         },
         {
             "name": "Vara de Família",

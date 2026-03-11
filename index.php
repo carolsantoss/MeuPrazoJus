@@ -72,7 +72,7 @@ if (isset($_SESSION['user_id'])) {
                         <div class="form-group">
                             <label for="matter">Matéria / Área</label>
                             <select id="matter" name="matter">
-                                <option value="">Geral</option>
+                                <option value="">Selecione...</option>
                             </select>
                         </div>
 
@@ -86,7 +86,7 @@ if (isset($_SESSION['user_id'])) {
                         <div class="form-group" id="vara-group">
                             <label for="vara">Vara / Juízo</label>
                             <select id="vara" name="vara">
-                                <option value="">Geral</option>
+                                <option value="">Selecione...</option>
                             </select>
                         </div>
 
@@ -431,7 +431,7 @@ if (isset($_SESSION['user_id'])) {
                                 <div class="form-group">
                                     <label for="matter-dash">Matéria / Área</label>
                                     <select id="matter-dash" name="matter">
-                                        <option value="">Geral</option>
+                                        <option value="">Selecione...</option>
                                     </select>
                                 </div>
 
@@ -445,7 +445,7 @@ if (isset($_SESSION['user_id'])) {
                                 <div class="form-group" id="vara-group-dash">
                                     <label for="vara-dash">Vara / Juízo</label>
                                     <select id="vara-dash" name="vara">
-                                        <option value="">Geral</option>
+                                        <option value="">Selecione...</option>
                                     </select>
                                 </div>
 
