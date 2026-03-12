@@ -22,10 +22,11 @@ if (!is_dir(__DIR__ . '/uploads')) {
 }
 
 $nomeArquivoOriginal = "uploads/original_" . $docHash . ".pdf";
-$destinoCompleto = __DIR__ . '/' . $nomeArquivoOriginal;
+$destinoCompleto = __DIR__ . '/uploads/original_' . $docHash . '.pdf';
 
 if (!move_uploaded_file($tmpPath, $destinoCompleto)) {
-    die("Erro ao salvar o arquivo físico no servidor. Verifique as permissões de gravação da pasta uploads/ no seu servidor cPanel (precisa ser 755 ou 777).");
+    $error = error_get_last();
+    die("Erro ao salvar arquivo. [tmp: {$tmpPath}] [dest: {$destinoCompleto}] [err: " . print_r($error, true) . "]");
 }
 
 require_once __DIR__ . '/../src/Database.php';
