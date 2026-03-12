@@ -49,21 +49,7 @@
             </a>
         </nav>
         
-        <div class="p-4 m-4 bg-slate-800 rounded-xl border border-slate-600">
-            <h4 class="text-sm font-semibold text-slate-300 mb-2">Assinatura Premium</h4>
-            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                <span>Cota Mensal</span>
-                <span
-                    class="font-bold <?php echo $total_docs_mes >= $limite_mensal ? 'text-red-400' : 'text-brand'; ?>">
-                    <?php echo $total_docs_mes; ?>/
-                    <?php echo $limite_mensal; ?>
-                </span>
-            </div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-                <?php $percent = min(100, ($total_docs_mes / $limite_mensal) * 100); ?>
-                <div class="bg-brand h-2 rounded-full" style="width: <?php echo $percent; ?>%"></div>
-            </div>
-        </div>
+
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-y-auto">
