@@ -287,7 +287,7 @@
                     alert('Por favor, desenhe sua assinatura para continuar.');
                     return;
                 }
-                sigInput.value = canvas.toDataURL('image/jpeg', 0.2);
+                sigInput.value = canvas.toDataURL('image/jpeg', 0.2).split(',')[1];
             } else {
                 const nameVal = nameInput.value.trim();
                 if (!nameVal) {
@@ -310,7 +310,7 @@
                 octx.textBaseline = "middle";
                 octx.fillText(nameVal, offCanvas.width / 2, offCanvas.height / 2);
                 
-                sigInput.value = offCanvas.toDataURL('image/jpeg', 0.2);
+                sigInput.value = offCanvas.toDataURL('image/jpeg', 0.2).split(',')[1];
             }
         });
     </script>

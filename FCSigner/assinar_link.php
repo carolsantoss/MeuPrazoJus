@@ -40,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Em vez de enviar o Base64 enorme todo pelo form hidden, 
     // vamos criar um mecanismo pro backend pegar de um temp post futuro se o body estourar,
     // ou garantir que ele aceite o base64 (que agora é jpeg e 90% menor).
+    if ($assinatura_base64 && strpos($assinatura_base64, 'data:') !== 0) {
+        $assinatura_base64 = 'data:image/jpeg;base64,' . $assinatura_base64;
+    }
+
     require 'vendor/autoload.php';
     require_once 'app/Services/DocumentService.php';
 
