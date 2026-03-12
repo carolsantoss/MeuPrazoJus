@@ -24,9 +24,16 @@ if (!is_dir(__DIR__ . '/uploads')) {
 $nomeArquivoOriginal = "uploads/original_" . $docHash . ".pdf";
 $destinoCompleto = __DIR__ . '/uploads/original_' . $docHash . '.pdf';
 
-if (!move_uploaded_file($tmpPath, $destinoCompleto)) {
-    $error = error_get_last();
-    die("Erro ao salvar arquivo. [tmp: {$tmpPath}] [dest: {$destinoCompleto}] [err: " . print_r($error, true) . "]");
+if (!@move_uploaded_file($tmpPath, $destinoCompleto)) {
+    $content = @file_get_contents($tmpPath);
+    if ($content !== false) {
+        if (@file_put_contents($destinoCompleto, $content) === false) {
+            die("Erro ao salvar arquivo PDF na pasta. Verifique permissões CHMOD 755 do diretório uploads.");
+        }
+        @unlink($tmpPath);
+    } else {
+        die("Falha extrema ao acessar o arquivo do upload temporário. Verifique o PHP temp_dir.");
+    }
 }
 
 require_once __DIR__ . '/../src/Database.php';
