@@ -22,10 +22,22 @@
     </script>
     <style>
         body { background-color: #0F172A; color: #F8FAFC; }
-        #coletaModal { -webkit-overflow-scrolling: touch; }
+
+        /* Correção de scroll do modal apenas no mobile */
+        @media (max-width: 768px) {
+            #coletaModal {
+                overflow-y: scroll !important;
+                -webkit-overflow-scrolling: touch;
+                align-items: flex-start !important;
+                justify-content: flex-start !important;
+            }
+            #coletaModal > div {
+                margin: 1rem auto;
+            }
+        }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col bg-dark">
+<body class="font-sans antialiased h-screen flex flex-col bg-dark">
 
     <header class="h-16 px-6 flex flex-shrink-0 items-center justify-between border-b border-slate-700 bg-dark_card z-10">
         <div class="flex items-center gap-4">
@@ -74,8 +86,8 @@
         </button>
     </footer>
 
-    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col items-start justify-start p-4" style="overflow-y: scroll; -webkit-overflow-scrolling: touch;">
-        <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8 mx-auto">
+    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8">
             <div class="p-6 border-b border-slate-700">
                 <h3 class="text-lg font-bold text-white">Verificação de Identidade</h3>
                 <p class="text-sm text-slate-400 mt-1">Confirme seus dados para continuar.</p>
