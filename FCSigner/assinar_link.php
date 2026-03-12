@@ -22,18 +22,12 @@ if ($docData['status'] == 'Assinado') {
 
 $contratante = $docData['contratante'] ?? 'Titular da Conta';
 
-if (isset($_GET['view_pdf']) && $_GET['view_pdf'] == '1') {
-    $caminhoPdf = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
-    if (file_exists($caminhoPdf)) {
-        header('Content-Type: application/pdf');
-        header('Content-Length: ' . filesize($caminhoPdf));
-        header('Content-Disposition: inline; filename="documento.pdf"');
-        readfile($caminhoPdf);
-        exit;
-    } else {
-        http_response_code(404);
-        die("Documento original não encontrado no servidor.");
-    }
+$caminhoPdf = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
+$pdf_base64 = '';
+if (file_exists($caminhoPdf)) {
+    $pdf_base64 = base64_encode(file_get_contents($caminhoPdf));
+}
+else {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -46,24 +40,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once 'app/Services/DocumentService.php';
 
     $caminhoOriginal = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
-    if(!file_exists($caminhoOriginal)) {
+    if (!file_exists($caminhoOriginal)) {
         die("Arquivo original não encontrado para gerar a assinatura.");
     }
-    
+
     $documentService = new \App\Services\DocumentService();
     $nomeArquivoFinal = $documentService->assinarDocumento(
-        $caminhoOriginal, 
-        $doc_hash, 
-        $contratante, 
-        $contratado, 
-        $cpf, 
+        $caminhoOriginal,
+        $doc_hash,
+        $contratante,
+        $contratado,
+        $cpf,
         $celular,
         $assinatura_base64
     );
 
     $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
     $stmtUpdate->execute(['/uploads/' . $nomeArquivoFinal, $docData['id']]);
-    
+
     $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
     $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $_SERVER['REMOTE_ADDR']]);
 

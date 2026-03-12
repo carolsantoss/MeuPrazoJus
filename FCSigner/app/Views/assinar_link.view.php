@@ -40,7 +40,15 @@
     </header>
 
     <main class="flex-1 bg-slate-900 border-b border-slate-700 relative flex items-center justify-center">
-        <iframe src="uploads/original_<?php echo htmlspecialchars($doc_hash); ?>.pdf" class="w-full h-full border-none" title="Documento Original"></iframe>
+        <?php if (!empty($pdf_base64)): ?>
+            <object data="data:application/pdf;base64,<?php echo $pdf_base64; ?>" type="application/pdf" class="w-full h-full border-none" title="Documento Original">
+                <iframe src="data:application/pdf;base64,<?php echo $pdf_base64; ?>" class="w-full h-full border-none" title="Documento Original"></iframe>
+            </object>
+        <?php else: ?>
+            <div class="text-slate-400 flex flex-col items-center gap-3">
+                <p class="text-red-400 text-sm">Não foi possível carregar o documento fisico no servidor.</p>
+            </div>
+        <?php endif; ?>
     </main>
 
     <footer class="bg-dark_card p-4 md:px-8 md:py-5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
