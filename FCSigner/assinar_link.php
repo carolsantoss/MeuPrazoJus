@@ -74,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
         exit();
     } catch (\Throwable $e) {
-        http_response_code(500);
-        die("ERRO FATAL PHP: " . $e->getMessage() . " na linha " . $e->getLine() . " de " . $e->getFile());
+        http_response_code(200); // Forçando 200 para o BunkerWeb não mascarar a mensagem
+        die("<div style='padding:20px; background:#ffdce0; color:#900; font-family:sans-serif; border: 1px solid #900;'><strong>ERRO FATAL PHP:</strong><br><br>" . htmlspecialchars($e->getMessage()) . "<br><br><strong>Arquivo:</strong> " . htmlspecialchars($e->getFile()) . " <strong>na linha</strong> " . $e->getLine() . "</div>");
     }
 }
 ?>
