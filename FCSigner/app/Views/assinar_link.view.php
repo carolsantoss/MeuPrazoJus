@@ -23,19 +23,19 @@
     <style>
         body { background-color: #0F172A; color: #F8FAFC; }
 
-        /* Correção de scroll do modal apenas no mobile */
+        /* Modal scroll fix */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
         #coletaModal {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             align-items: flex-start !important;
         }
         #coletaModal > div {
-            margin: auto;
-        }
-        @media (max-width: 768px) {
-            #coletaModal > div {
-                margin: 1rem auto;
-            }
+            margin: 1rem auto;
         }
     </style>
 </head>
@@ -88,7 +88,7 @@
         </button>
     </footer>
 
-    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4 overflow-y-auto">
+    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col p-4" style="overflow-y:auto; -webkit-overflow-scrolling:touch;">
         <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8">
             <div class="p-6 border-b border-slate-700">
                 <h3 class="text-lg font-bold text-white">Verificação de Identidade</h3>
@@ -166,16 +166,23 @@
         }
 
         function mostrarModal() {
-            document.getElementById('coletaModal').classList.remove('hidden');
-            document.getElementById('coletaModal').classList.add('flex');
+            const modal = document.getElementById('coletaModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.scrollTop = 0;
+            // Trava o scroll do body para o modal não rolar o fundo
+            document.body.classList.add('modal-open');
             if (document.getElementById('signature_type').value === 'draw') {
                 setTimeout(resizeCanvas, 50);
             }
         }
 
         function fecharModal() {
-            document.getElementById('coletaModal').classList.add('hidden');
-            document.getElementById('coletaModal').classList.remove('flex');
+            const modal = document.getElementById('coletaModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            // Libera o scroll do body
+            document.body.classList.remove('modal-open');
         }
 
         const inputCpf = document.querySelector('input[name="cpf"]');
