@@ -300,19 +300,25 @@
                 }
                 
                 const offCanvas = document.createElement('canvas');
-                offCanvas.width = 400;
-                offCanvas.height = 150;
+                offCanvas.width = 700;
+                offCanvas.height = 160;
                 const octx = offCanvas.getContext('2d');
 
                 octx.fillStyle = "#ffffff";
                 octx.fillRect(0, 0, offCanvas.width, offCanvas.height);
-                
+
                 octx.fillStyle = "#0f172a";
-                octx.font = "400 48px 'Caveat', cursive";
                 octx.textAlign = "center";
                 octx.textBaseline = "middle";
+
+                let fontSize = 52;
+                octx.font = `400 ${fontSize}px 'Caveat', cursive`;
+                while (octx.measureText(nameVal).width > offCanvas.width - 40 && fontSize > 20) {
+                    fontSize -= 2;
+                    octx.font = `400 ${fontSize}px 'Caveat', cursive`;
+                }
                 octx.fillText(nameVal, offCanvas.width / 2, offCanvas.height / 2);
-                
+
                 sigInput.value = offCanvas.toDataURL('image/jpeg', 0.2).split(',')[1];
             }
         });

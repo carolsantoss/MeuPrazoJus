@@ -2,7 +2,8 @@ Options +FollowSymLinks -MultiViews
 RewriteEngine On
 RewriteBase /
 
-# 0. Habilitar suporte ao SharedArrayBuffer (usado pelo FFmpeg WASM)
+RewriteRule ^validar/([a-zA-Z0-9_\-]+)$ FCSigner/validar.php?hash=$1 [QSA,L]
+
 <IfModule mod_headers.c>
     Header set Cross-Origin-Opener-Policy "same-origin"
     Header set Cross-Origin-Embedder-Policy "require-corp"
