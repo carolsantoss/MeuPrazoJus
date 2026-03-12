@@ -85,6 +85,7 @@ class DocumentService
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         
         $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf->SetAutoPageBreak(false);
         $pageCount = $pdf->setSourceFile($caminhoOriginal);
 
         for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
@@ -96,13 +97,12 @@ class DocumentService
             $pdf->SetFont('Helvetica', '', 8);
             $pdf->SetTextColor(80, 80, 80);
             $textoFooter = $this->decodeTxt("Assinado por: $contratante e $contratado | Validar em $urlValidacao");
-            // Centralizando certinho na base da página respeitando 15mm de margem inferior para não cortar na impressão.
-            $pdf->SetXY(10, $size['height'] - 15);
+            $pdf->SetXY(10, $size['height'] - 10);
             $pdf->Cell($size['width'] - 20, 10, $textoFooter, 0, 0, 'C');
         }
 
-        $pdf->AddPage();
         $pdf->SetAutoPageBreak(true, 20);
+        $pdf->AddPage();
         
         $pdf->SetFont('Helvetica', 'B', 24);
         $pdf->SetTextColor(15, 23, 42); 
