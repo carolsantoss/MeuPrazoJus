@@ -24,13 +24,15 @@
         body { background-color: #0F172A; color: #F8FAFC; }
 
         /* Correção de scroll do modal apenas no mobile */
+        #coletaModal {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            align-items: flex-start !important;
+        }
+        #coletaModal > div {
+            margin: auto;
+        }
         @media (max-width: 768px) {
-            #coletaModal {
-                overflow-y: scroll !important;
-                -webkit-overflow-scrolling: touch;
-                align-items: flex-start !important;
-                justify-content: flex-start !important;
-            }
             #coletaModal > div {
                 margin: 1rem auto;
             }
@@ -225,15 +227,16 @@
             ctx.beginPath();
             const pos = getPos(e);
             ctx.moveTo(pos.x, pos.y);
-            if(e.cancelable) e.preventDefault();
+            // Não impede o scroll ao iniciar — só previne quando já está desenhando
         }
 
         function draw(e) {
             if (!isDrawing) return;
+            // Só impede o scroll da página enquanto estiver desenhando ativamente
+            if(e.cancelable) e.preventDefault();
             const pos = getPos(e);
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
-            if(e.cancelable) e.preventDefault();
         }
 
         function stopDrawing() {
@@ -245,7 +248,9 @@
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
 
-        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        // touchstart pode ser passivo (não bloqueia scroll ao tocar)
+        canvas.addEventListener('touchstart', startDrawing, {passive: true});
+        // touchmove precisa ser não-passivo para poder chamar preventDefault quando desenhando
         canvas.addEventListener('touchmove', draw, {passive: false});
         canvas.addEventListener('touchend', stopDrawing);
 
