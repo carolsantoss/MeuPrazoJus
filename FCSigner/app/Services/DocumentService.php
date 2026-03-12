@@ -112,9 +112,9 @@ class DocumentService
         
         $pdf->SetFont('Helvetica', '', 8);
         $pdf->SetTextColor(100, 100, 100);
-        $pdf->SetXY(80, 10);
+        $pdf->SetXY(75, 12);
         $dtStr = date('d M Y \à\s H:i');
-        $pdf->MultiCell(60, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+        $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
         
         // Colocar o QR code já no cabeçalho superior direito da Página de Assinaturas
         $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
@@ -123,12 +123,14 @@ class DocumentService
             @file_put_contents($qrPath, @file_get_contents($qrUrl));
         }
         if(file_exists($qrPath) && filesize($qrPath) > 0) {
-            $pdf->Image($qrPath, 175, 10, 25, 25, 'PNG');
+            $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
         }
         
         $pdf->SetDrawColor(200, 200, 200);
-        $pdf->Line(10, 25, 200, 25);
-        $pdf->Ln(15);
+        $pdf->Line(10, 32, 200, 32);
+        // Garante que o cursor do PDF desça a partir da nova linha antes de começar o título
+        $pdf->SetY(32);
+        $pdf->Ln(10);
         
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(15, 23, 42);
