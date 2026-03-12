@@ -93,11 +93,12 @@ class DocumentService
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templateId);
 
-            $pdf->SetFont('Helvetica', '', 9);
-            $pdf->SetTextColor(100, 100, 100);
+            $pdf->SetFont('Helvetica', '', 8);
+            $pdf->SetTextColor(80, 80, 80);
             $textoFooter = $this->decodeTxt("Assinado por: $contratante e $contratado | Validar em $urlValidacao");
-            $pdf->SetXY(10, $size['height'] - 10);
-            $pdf->Cell(0, 10, $textoFooter, 0, 0, 'C');
+            // Centralizando certinho na base da página respeitando 15mm de margem inferior para não cortar na impressão.
+            $pdf->SetXY(10, $size['height'] - 15);
+            $pdf->Cell($size['width'] - 20, 10, $textoFooter, 0, 0, 'C');
         }
 
         $pdf->AddPage();
@@ -113,7 +114,17 @@ class DocumentService
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(80, 10);
         $dtStr = date('d M Y \à\s H:i');
-        $pdf->MultiCell(0, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+        $pdf->MultiCell(60, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+        
+        // Colocar o QR code já no cabeçalho superior direito da Página de Assinaturas
+        $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
+        if(!file_exists($qrPath)){
+            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
+            @file_put_contents($qrPath, @file_get_contents($qrUrl));
+        }
+        if(file_exists($qrPath) && filesize($qrPath) > 0) {
+            $pdf->Image($qrPath, 175, 10, 25, 25, 'PNG');
+        }
         
         $pdf->SetDrawColor(200, 200, 200);
         $pdf->Line(10, 25, 200, 25);
@@ -143,21 +154,6 @@ class DocumentService
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
-
-        $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
-        if(!file_exists($qrPath)){
-            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
-            @file_put_contents($qrPath, @file_get_contents($qrUrl));
-        }
-        if(file_exists($qrPath) && filesize($qrPath) > 0) {
-            $yQR = $pdf->GetY();
-            if ($yQR > 230) {
-                $pdf->AddPage();
-                $yQR = 20;
-            }
-            $pdf->Image($qrPath, 170, $yQR, 25, 25, 'PNG');
-        }
-
         $nomeArquivoFinal = "documento_" . $doc_hash . ".pdf";
         $pdf->Output('F', __DIR__ . '/../../uploads/' . $nomeArquivoFinal);
         
