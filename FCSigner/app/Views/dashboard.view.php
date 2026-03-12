@@ -164,9 +164,12 @@
                                             <?php echo htmlspecialchars($doc['status']); ?>
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-6 py-4 text-right flex justify-end gap-3">
                                         <a href="trilha_auditoria.php?doc_id=<?php echo $doc['id']; ?>"
                                             class="text-brand hover:text-blue-400 hover:underline">Auditoria</a>
+                                        <a href="excluir_documento.php?id=<?php echo $doc['id']; ?>"
+                                            onclick="return confirm('Tem certeza que deseja apagar este documento permanentemente? Isso removerá o arquivo do servidor imediatamente.');"
+                                            class="text-red-500 hover:text-red-400 hover:underline">Excluir</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

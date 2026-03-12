@@ -56,7 +56,8 @@ $stmt->execute([
 $document_id = $pdo->lastInsertId();
 
 $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, ip_address, geolocation) VALUES (?, 'Criou', ?, ?, 'Sistema')");
-$stmtLog->execute([$document_id, $contratante, $_SERVER['REMOTE_ADDR']]);
+$ip_cli = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
+$stmtLog->execute([$document_id, $contratante, $ip_cli]);
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];

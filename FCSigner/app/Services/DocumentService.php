@@ -123,8 +123,7 @@ class DocumentService
         $pdf->SetTextColor(15, 23, 42);
         $pdf->Cell(0, 15, $this->decodeTxt('Página de assinaturas'), 0, 1, 'C');
         $pdf->Ln(10);
-        
-        $ip_con = $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
+        $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         
         $this->drawSignatureBlock($pdf, $contratante, 'CPF Vinculado à Conta'); 
         $this->drawSignatureBlock($pdf, $contratado, $cpf, $assinatura_base64);

@@ -219,11 +219,11 @@ if (isset($_SESSION['user_id'])) {
                         <?php if ($isPremium): ?>
                             <a href="#" class="nav-item" onclick="showSection('fees'); return false;">💰 Honorários</a>
                             <a href="#" class="nav-item" onclick="showSection('converter'); return false;">🔄 Conversor PDF/Áudio</a>
-                            <a href="FCSigner/" class="nav-item" target="_blank">✍️ Assinar Docs</a>
+                            <a href="FCSigner/" class="nav-item" target="_blank">✍️ Assinar Documentos</a>
                         <?php else: ?>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Honorários</a>
                             <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Conversor</a>
-                            <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Assinar Docs</a>
+                            <a href="#" class="nav-item disabled-link" title="Assine para ter acesso" onclick="return false;">🔒 Assinar Documentos</a>
                         <?php endif; ?>
 
                         <a href="subscription" class="nav-item">⭐ Assinatura</a>
