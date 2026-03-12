@@ -74,9 +74,9 @@ class UserManager {
         return $stmt->fetchColumn();
     }
 
-    public function setSubscription($id, $status, $endDate = null) {
-        $stmt = $this->db->prepare("UPDATE users SET subscription_status = ?, subscription_end = ? WHERE id = ?");
-        return $stmt->execute([$status, $endDate, $id]);
+    public function setSubscription($id, $status, $endDate = null, $plan = null) {
+        $stmt = $this->db->prepare("UPDATE users SET subscription_status = ?, subscription_end = ?, subscription_plan = ? WHERE id = ?");
+        return $stmt->execute([$status, $endDate, $plan, $id]);
     }
 
     public function updateProfile($id, $newName, $newPhone, $newEmail = null, $newPassword = null) {

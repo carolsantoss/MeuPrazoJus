@@ -176,8 +176,9 @@ try {
         
         if ($billingType === 'CREDIT_CARD' && ($result['status'] === 'CONFIRMED' || $result['status'] === 'RECEIVED')) {
             // Aprove internally immediately since it is credit card
-            $userManager->setSubscription($user_id, 'premium', $subscription_expiry);
+            $userManager->setSubscription($user_id, 'premium', $subscription_expiry, $plano);
             $_SESSION['is_subscribed'] = true;
+            $_SESSION['subscription_plan'] = $plano;
         } elseif ($billingType === 'PIX') {
             // we need to get Pix QR CODE
             $chQr = curl_init(ASAAS_URL . "/payments/" . $result['id'] . "/pixQrCode");

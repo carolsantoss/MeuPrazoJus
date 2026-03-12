@@ -51,6 +51,7 @@ if ($action === 'register') {
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['is_subscribed'] = (($user['subscription_status'] ?? 'free') === 'premium');
         $_SESSION['subscription_end'] = $user['subscription_end'] ?? null;
+        $_SESSION['subscription_plan'] = $user['subscription_plan'] ?? null;
         if (ob_get_length()) ob_clean();
         echo json_encode([
             'success' => true,
@@ -82,9 +83,10 @@ if ($action === 'register') {
     }
 } elseif ($action === 'cancel_subscription') {
     if (isset($_SESSION['user_id'])) {
-        $userManager->setSubscription($_SESSION['user_id'], 'free', null);
+        $userManager->setSubscription($_SESSION['user_id'], 'free', null, null);
         $_SESSION['is_subscribed'] = false;
         $_SESSION['subscription_end'] = null;
+        $_SESSION['subscription_plan'] = null;
         if (ob_get_length()) ob_clean();
         echo json_encode(['success' => true]);
     } else {

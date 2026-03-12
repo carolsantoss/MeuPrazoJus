@@ -61,9 +61,22 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Assinatura de Documentos (FCSigner)</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
-                <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
+                <?php
+                $user_plan = $_SESSION['subscription_plan'] ?? '';
+                $is_subscribed = isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed'];
+                
+                // Fallback: se for assinado mas sem plano definido, assume anual
+                if ($is_subscribed && empty($user_plan)) {
+                    $user_plan = 'anual';
+                }
+
+                $is_mensal_active = $is_subscribed && $user_plan === 'mensal';
+                ?>
+                <?php if($is_mensal_active): ?>
                     <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
                     <button id="cancel-sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
+                <?php elseif($is_subscribed): ?>
+                    <button class="btn btn-ghost btn-block" disabled style="opacity: 0.4; cursor: not-allowed; border: 1px solid var(--glass-border)">Assinar Mensal</button>
                 <?php else: ?>
                     <button id="sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border);" onclick="subscribePlan('mensal')">Assinar Mensal</button>
                 <?php endif; ?>
@@ -82,9 +95,14 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Assinatura de Documentos (FCSigner)</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
-                <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
+                <?php
+                $is_anual_active = $is_subscribed && $user_plan === 'anual';
+                ?>
+                <?php if($is_anual_active): ?>
                     <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
                     <button id="cancel-sub-btn" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
+                <?php elseif($is_subscribed): ?>
+                    <button class="btn btn-primary btn-block" disabled style="opacity: 0.4; cursor: not-allowed;">Assinar Anual</button>
                 <?php else: ?>
                     <button id="sub-btn" class="btn btn-primary btn-block" onclick="subscribePlan('anual')">Assinar Anual</button>
                 <?php endif; ?>
@@ -108,8 +126,19 @@
                 btn.innerText = "Cancelando...";
                 btn.disabled = true;
                 try {
-                    const res = await fetch('api/auth.php?action=cancel_subscription');
-                    const data = await res.json();
+                    const res = await fetch('api/auth.php?action=cancel_subscription', {
+                        credentials: 'same-origin'
+                    });
+                    
+                    const text = await res.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Resposta não-JSON:", text);
+                        throw new Error("Resposta inválida do servidor.");
+                    }
+
                     if (data.success) {
                         alert("Assinatura cancelada com sucesso!");
                         window.location.reload();
@@ -119,7 +148,8 @@
                         btn.disabled = false;
                     }
                 } catch (e) {
-                    alert("Erro de sistema. Tente novamente.");
+                    console.error("Erro no cancelamento:", e);
+                    alert("Erro de sistema: " + e.message + ". Verifique o console para detalhes.");
                     btn.innerText = "Cancelar Assinatura";
                     btn.disabled = false;
                 }
