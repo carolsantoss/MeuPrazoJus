@@ -57,7 +57,7 @@
                 <input type="hidden" name="nome_contratante" value="<?php echo htmlspecialchars($_SESSION['user_name']); ?>">
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 items-end">
                 <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2">Seu CPF (Titular)</label>
                     <input type="text" name="cpf_contratante" placeholder="000.000.000-00" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium">
