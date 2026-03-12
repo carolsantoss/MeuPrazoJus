@@ -38,6 +38,10 @@ try {
     $data = json_decode($input, true);
     
     $billingType = $data['billingType'] ?? 'CREDIT_CARD';
+    $plano = in_array($data['plano'] ?? '', ['mensal', 'anual']) ? $data['plano'] : 'anual';
+    $plan_value = ($plano === 'mensal') ? 19.99 : 215.89;
+    $plan_label = ($plano === 'mensal') ? 'Mensal' : 'Anual';
+    $subscription_expiry = ($plano === 'mensal') ? date('Y-m-d', strtotime('+1 month')) : date('Y-m-d', strtotime('+1 year'));
 
     if (!$data || empty($data['cpfCnpj'])) {
         json_response(['error' => 'Dados de pagamento incompletos'], 400);
@@ -116,9 +120,9 @@ try {
     $payment_data = [
         "customer" => $customer_id,
         "billingType" => $billingType,
-        "value" => 50.00,
+        "value" => $plan_value,
         "dueDate" => $dueDate,
-        "description" => "Assinatura Anual MeuPrazoJus - " . $billingType,
+        "description" => "Assinatura $plan_label MeuPrazoJus - $billingType",
         "externalReference" => $user_id
     ];
 
@@ -172,7 +176,7 @@ try {
         
         if ($billingType === 'CREDIT_CARD' && ($result['status'] === 'CONFIRMED' || $result['status'] === 'RECEIVED')) {
             // Aprove internally immediately since it is credit card
-            $userManager->setSubscription($user_id, 'premium', date('Y-m-d', strtotime('+1 year')));
+            $userManager->setSubscription($user_id, 'premium', $subscription_expiry);
             $_SESSION['is_subscribed'] = true;
         } elseif ($billingType === 'PIX') {
             // we need to get Pix QR CODE

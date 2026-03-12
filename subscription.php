@@ -31,8 +31,8 @@
         <h1>Escolha seu Plano</h1>
         <p class="subtitle">Desbloqueie cálculos ilimitados e integração total.</p>
 
-        <div class="pricing-grid">
-            <!-- Free -->
+        <div class="pricing-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); max-width: 900px; margin: 0 auto;">
+            <!-- Trial -->
             <div class="pricing-card">
                 <h3>Trial</h3>
                 <div class="price">R$ 0</div>
@@ -40,6 +40,7 @@
                 <ul class="features-list">
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Contagem Novo CPC</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Integração Google Agenda</li>
                 </ul>
                 <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
                     <button class="btn btn-ghost btn-block" disabled style="opacity: 0.5; cursor: not-allowed; border: 1px solid var(--glass-border)">Inativo</button>
@@ -48,65 +49,85 @@
                 <?php endif; ?>
             </div>
 
-            <!-- Premium -->
-            <div class="pricing-card featured">
-                <h3>Anual</h3>
-                <div class="price">R$ 50</div>
-                <div class="period">por ano</div>
+            <!-- Mensal -->
+            <div class="pricing-card">
+                <h3>Mensal</h3>
+                <div class="price">R$ 19<span style="font-size:1.2rem;font-weight:600">,99</span></div>
+                <div class="period">por mês</div>
                 <ul class="features-list">
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Integração Google Agenda</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Acesso a Honorários</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Assinatura de Documentos (FCSigner)</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
+                </ul>
+                <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
+                    <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
+                    <button id="cancel-sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
+                <?php else: ?>
+                    <button id="sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border);" onclick="subscribePlan('mensal')">Assinar Mensal</button>
+                <?php endif; ?>
+            </div>
+
+            <!-- Anual -->
+            <div class="pricing-card featured" style="position: relative;">
+                <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981, #059669); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.5px;">🏷️ ECONOMIZE 10%</div>
+                <h3>Anual</h3>
+                <div class="price">R$ 215<span style="font-size:1.2rem;font-weight:600">,89</span></div>
+                <div class="period">por ano <span style="color: #10b981; font-size: 0.8rem;">(≈ R$ 17,99/mês)</span></div>
+                <ul class="features-list">
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cálculos Ilimitados</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Integração Google Agenda</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Acesso a Honorários</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Assinatura de Documentos (FCSigner)</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
                 <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
                     <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
                     <button id="cancel-sub-btn" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
                 <?php else: ?>
-                    <button id="sub-btn" class="btn btn-primary btn-block">Assinar Agora</button>
+                    <button id="sub-btn" class="btn btn-primary btn-block" onclick="subscribePlan('anual')">Assinar Anual</button>
                 <?php endif; ?>
             </div>
         </div>
     </main>
 
     <script>
-        const subBtn = document.getElementById('sub-btn');
-        if (subBtn) {
-            subBtn.addEventListener('click', async () => {
-                if(!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>) {
-                    window.location.href = 'login';
-                    return;
-                }
-                // Redirect to dedicated checkout page
-                window.location.href = 'checkout';
-            });
+        function subscribePlan(plan) {
+            if(!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>) {
+                window.location.href = 'login';
+                return;
+            }
+            window.location.href = 'checkout?plano=' + plan;
         }
 
         const cancelBtn = document.getElementById('cancel-sub-btn');
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', async () => {
-                if(confirm("Tem certeza que deseja cancelar sua assinatura? Você perderá acesso aos recursos premium imediatamente.")) {
-                    cancelBtn.innerText = "Cancelando...";
-                    cancelBtn.disabled = true;
-                    try {
-                        const res = await fetch('/api/auth.php?action=cancel_subscription');
-                        const data = await res.json();
-                        if (data.success) {
-                            alert("Assinatura cancelada com sucesso!");
-                            window.location.reload();
-                        } else {
-                            alert("Erro ao cancelar: " + (data.error || "Desconhecido"));
-                            cancelBtn.innerText = "Cancelar Assinatura";
-                            cancelBtn.disabled = false;
-                        }
-                    } catch (e) {
-                        alert("Erro de sistema. Tente novamente.");
-                        cancelBtn.innerText = "Cancelar Assinatura";
-                        cancelBtn.disabled = false;
+        const cancelBtnMensal = document.getElementById('cancel-sub-btn-mensal');
+        async function doCancelSubscription(btn) {
+            if(confirm("Tem certeza que deseja cancelar sua assinatura? Você perderá acesso aos recursos premium imediatamente.")) {
+                btn.innerText = "Cancelando...";
+                btn.disabled = true;
+                try {
+                    const res = await fetch('/api/auth.php?action=cancel_subscription');
+                    const data = await res.json();
+                    if (data.success) {
+                        alert("Assinatura cancelada com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro ao cancelar: " + (data.error || "Desconhecido"));
+                        btn.innerText = "Cancelar Assinatura";
+                        btn.disabled = false;
                     }
+                } catch (e) {
+                    alert("Erro de sistema. Tente novamente.");
+                    btn.innerText = "Cancelar Assinatura";
+                    btn.disabled = false;
                 }
-            });
+            }
         }
+
+        if (cancelBtn) cancelBtn.addEventListener('click', () => doCancelSubscription(cancelBtn));
+        if (cancelBtnMensal) cancelBtnMensal.addEventListener('click', () => doCancelSubscription(cancelBtnMensal));
 
         async function logout() {
             await fetch('/api/auth.php?action=logout');

@@ -21,6 +21,21 @@ if (!isset($_SESSION['user_email'])) {
 $user_name = $_SESSION['user_name'] ?? 'Usuário';
 $user_email = $_SESSION['user_email'] ?? '';
 
+// Determine plan
+$plano = in_array($_GET['plano'] ?? '', ['mensal', 'anual']) ? $_GET['plano'] : 'anual';
+if ($plano === 'mensal') {
+    $plan_label = 'Mensal';
+    $plan_value = 19.99;
+    $plan_desc = 'Cálculos ilimitados, Integração Google Agenda e Suporte Prioritário por 1 mês.';
+    $plan_period = 'por mês';
+} else {
+    $plan_label = 'Anual';
+    $plan_value = 215.89;
+    $plan_desc = 'Cálculos ilimitados, Integração Google Agenda e Suporte Prioritário por 12 meses.';
+    $plan_period = 'por ano (10% de desconto)';
+}
+$plan_value_fmt = 'R$ ' . number_format($plan_value, 2, ',', '.');
+
 // Prevent double subscription
 if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
     header('Location: index');
@@ -129,18 +144,23 @@ if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
         <div class="checkout-container">
             <h2 style="margin-bottom: 2rem; text-align: center;">Finalizar Assinatura</h2>
             
+            <!-- Hidden input to carry plan to JS -->
+            <input type="hidden" id="plano-selecionado" value="<?php echo htmlspecialchars($plano); ?>">
+            <input type="hidden" id="plano-valor" value="<?php echo $plan_value; ?>">
+
             <div class="order-summary">
                 <div class="order-item">
                     <div class="item-info">
-                        <h3>Plano Anual</h3>
-                        <p>Cálculos ilimitados, Integração Google Agenda e Suporte Prioritário por 12 meses.</p>
+                        <h3>Plano <?php echo htmlspecialchars($plan_label); ?></h3>
+                        <p><?php echo htmlspecialchars($plan_desc); ?></p>
+                        <p style="font-size:0.8rem; color: #10b981; margin-top: 4px;"><?php echo htmlspecialchars($plan_period); ?></p>
                     </div>
-                    <div class="item-price">R$ 50,00</div>
+                    <div class="item-price"><?php echo $plan_value_fmt; ?></div>
                 </div>
                 
                 <div class="total-section">
                     <span class="total-label">Total a pagar:</span>
-                    <span class="total-amount">R$ 50,00</span>
+                    <span class="total-amount"><?php echo $plan_value_fmt; ?></span>
                 </div>
             </div>
 
@@ -309,7 +329,8 @@ if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']) {
 
             const payload_data = {
                 billingType: currentPaymentMethod,
-                cpfCnpj: cpfCnpj
+                cpfCnpj: cpfCnpj,
+                plano: document.getElementById('plano-selecionado').value
             };
 
             if (currentPaymentMethod === 'CREDIT_CARD') {
