@@ -21,6 +21,8 @@ php_value post_max_size 25M
 
 RewriteEngine On
 
+RewriteRule ^validar/([a-zA-Z0-9_\-]+)$ validar.php?hash=$1 [QSA,L]
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [NC,L]
