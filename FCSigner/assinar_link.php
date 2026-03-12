@@ -9,7 +9,7 @@ if (!$doc_hash) {
     die("Link inválido.");
 }
 
-$stmtId = $pdo->prepare("SELECT d.id, d.status, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
+$stmtId = $pdo->prepare("SELECT d.id, d.status, d.contratante_cpf, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
 $stmtId->execute([$doc_hash]);
 $docData = $stmtId->fetch();
 
@@ -21,6 +21,7 @@ if ($docData['status'] == 'Assinado') {
 }
 
 $contratante = $docData['contratante'] ?? 'Titular da Conta';
+$cpf_contratante = $docData['contratante_cpf'] ?? '';
 
 $caminhoPdf = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
 $pdf_base64 = '';
@@ -58,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $caminhoOriginal,
             $doc_hash,
             $contratante,
+            $cpf_contratante,
             $contratado,
             $cpf,
             $celular,

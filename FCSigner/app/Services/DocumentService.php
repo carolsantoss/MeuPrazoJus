@@ -81,7 +81,7 @@ class DocumentService
         $pdf->SetY($pdf->GetY() + 4);
     }
 
-    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $contratado, $cpf, $celular, $assinatura_base64 = null) {
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null) {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         
         $pdf = new \setasign\Fpdi\Fpdi();
@@ -136,8 +136,9 @@ class DocumentService
         $pdf->Ln(10);
         $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         
-        $this->drawSignatureBlock($pdf, $contratante, 'CPF Vinculado à Conta'); 
-        $this->drawSignatureBlock($pdf, $contratado, $cpf, $assinatura_base64);
+        $cpfStr = empty($cpf_contratante) ? 'CPF Vinculado à Conta' : ("CPF: " . $cpf_contratante);
+        $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
+        $this->drawSignatureBlock($pdf, $contratado, "CPF: " . $cpf, $assinatura_base64);
         
         $pdf->Ln(5);
         $pdf->SetFont('Helvetica', 'B', 10);

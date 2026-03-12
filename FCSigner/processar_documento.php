@@ -6,6 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $contratante = $_POST['nome_contratante'] ?? 'Contratante';
+$cpf_contratante = $_POST['cpf_contratante'] ?? null;
 $contratado = $_POST['nome_contratado'] ?? 'Contratado';
 
 if (!isset($_FILES['documento_pdf']) || $_FILES['documento_pdf']['error'] !== UPLOAD_ERR_OK) {
@@ -52,11 +53,17 @@ if (!@move_uploaded_file($tmpPath, $destinoCompleto)) {
 
 require_once __DIR__ . '/../src/Database.php';
 $pdo = Database::getInstance()->getConnection();
+
+try {
+    $pdo->exec("ALTER TABLE documents ADD COLUMN contratante_cpf VARCHAR(20) NULL AFTER user_id");
+} catch (\Throwable $t) {}
+
 $user_id = $_SESSION['user_id'] ?? 1;
 
-$stmt = $pdo->prepare("INSERT INTO documents (user_id, document_hash, title, status, original_hash, file_path) VALUES (?, ?, ?, 'Pendente', ?, ?)");
+$stmt = $pdo->prepare("INSERT INTO documents (user_id, contratante_cpf, document_hash, title, status, original_hash, file_path) VALUES (?, ?, ?, ?, 'Pendente', ?, ?)");
 $stmt->execute([
     $user_id,
+    $cpf_contratante,
     $docHash,
     $_FILES['documento_pdf']['name'] ?? 'Documento sem título',
     $originalHash,
