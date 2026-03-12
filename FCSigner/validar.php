@@ -26,7 +26,7 @@ $doc_hash = preg_replace('/[^a-zA-Z0-9_\-]/', '', $doc_hash);
 
 
 $stmtDoc = $pdo->prepare("
-    SELECT d.id, d.document_hash, d.status, d.file_path, d.created_at, d.updated_at,
+    SELECT d.id, d.document_hash, d.status, d.file_path, d.created_at, d.updated_at, d.title,
            u.name AS contratante_nome, d.contratante_cpf
     FROM documents d
     JOIN users u ON d.user_id = u.id
@@ -587,7 +587,13 @@ function actionIcon($action) {
     <p class="section-title">Documento assinado</p>
     <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
         <div>
-            <div style="font-weight:600; margin-bottom:4px;">documento_<?= htmlspecialchars($doc_hash) ?>.pdf</div>
+            <div style="font-weight:600; margin-bottom:4px;">
+                <?php 
+                $info = pathinfo($documento['title'] ?? 'Documento');
+                $nomeBase = $info['filename'] ?: 'Documento';
+                echo htmlspecialchars($nomeBase . "_Assinado.pdf");
+                ?>
+            </div>
             <div style="font-size:13px; color:var(--muted);">Versão final com página de assinaturas e QR code de validação.</div>
         </div>
         <a href="<?= htmlspecialchars($pdfUrl) ?>" target="_blank" class="btn-download">

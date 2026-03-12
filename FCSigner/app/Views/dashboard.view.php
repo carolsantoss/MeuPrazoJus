@@ -151,6 +151,9 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right flex justify-end gap-3">
+                                        <?php if ($doc['status'] === 'Assinado' && !empty($doc['file_path'])): ?>
+                                            <a href="<?php echo htmlspecialchars($doc['file_path']); ?>" download class="text-green-500 hover:text-green-400 hover:underline">Download</a>
+                                        <?php endif; ?>
                                         <a href="trilha_auditoria.php?doc_id=<?php echo $doc['id']; ?>"
                                             class="text-brand hover:text-blue-400 hover:underline">Auditoria</a>
                                         <a href="excluir_documento.php?id=<?php echo $doc['id']; ?>"

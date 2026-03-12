@@ -81,7 +81,7 @@ class DocumentService
         $pdf->SetY($pdf->GetY() + 4);
     }
 
-    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null) {
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento') {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         
         $pdf = new \setasign\Fpdi\Fpdi();
@@ -157,7 +157,9 @@ class DocumentService
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
-        $nomeArquivoFinal = "documento_" . $doc_hash . ".pdf";
+        $info = pathinfo($titulo);
+        $nomeBase = $info['filename'] ?: 'Documento';
+        $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
         $pdf->Output('F', __DIR__ . '/../../uploads/' . $nomeArquivoFinal);
         
         return $nomeArquivoFinal;

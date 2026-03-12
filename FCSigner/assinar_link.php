@@ -9,7 +9,7 @@ if (!$doc_hash) {
     die("Link inválido.");
 }
 
-$stmtId = $pdo->prepare("SELECT d.id, d.status, d.contratante_cpf, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
+$stmtId = $pdo->prepare("SELECT d.id, d.status, d.title, d.contratante_cpf, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
 $stmtId->execute([$doc_hash]);
 $docData = $stmtId->fetch();
 
@@ -37,10 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contratado = $_POST['nome_signatario'] ?? 'Signatário';
     $assinatura_base64 = $_POST['signature_image'] ?? null;
     
-    // O BunkerWeb/Cloudflare barra POSTs com strings muito longas. 
-    // Em vez de enviar o Base64 enorme todo pelo form hidden, 
-    // vamos criar um mecanismo pro backend pegar de um temp post futuro se o body estourar,
-    // ou garantir que ele aceite o base64 (que agora é jpeg e 90% menor).
     if ($assinatura_base64 && strpos($assinatura_base64, 'data:') !== 0) {
         $assinatura_base64 = 'data:image/jpeg;base64,' . $assinatura_base64;
     }
@@ -63,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $contratado,
             $cpf,
             $celular,
-            $assinatura_base64
+            $assinatura_base64,
+            $docData['title'] ?? 'Documento'
         );
 
         $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
@@ -76,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
         exit();
     } catch (\Throwable $e) {
-        http_response_code(200); // Forçando 200 para o BunkerWeb não mascarar a mensagem
+        http_response_code(200);
         die("<div style='padding:20px; background:#ffdce0; color:#900; font-family:sans-serif; border: 1px solid #900;'><strong>ERRO FATAL PHP:</strong><br><br>" . htmlspecialchars($e->getMessage()) . "<br><br><strong>Arquivo:</strong> " . htmlspecialchars($e->getFile()) . " <strong>na linha</strong> " . $e->getLine() . "</div>");
     }
 }
