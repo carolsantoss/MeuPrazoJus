@@ -47,30 +47,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require 'vendor/autoload.php';
     require_once 'app/Services/DocumentService.php';
 
-    $caminhoOriginal = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
-    if (!file_exists($caminhoOriginal)) {
-        die("Arquivo original não encontrado para gerar a assinatura.");
+    try {
+        $caminhoOriginal = __DIR__ . "/uploads/original_" . $doc_hash . ".pdf";
+        if (!file_exists($caminhoOriginal)) {
+            die("Arquivo original não encontrado para gerar a assinatura.");
+        }
+
+        $documentService = new \App\Services\DocumentService();
+        $nomeArquivoFinal = $documentService->assinarDocumento(
+            $caminhoOriginal,
+            $doc_hash,
+            $contratante,
+            $contratado,
+            $cpf,
+            $celular,
+            $assinatura_base64
+        );
+
+        $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        $stmtUpdate->execute(['/uploads/' . $nomeArquivoFinal, $docData['id']]);
+
+        $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
+        $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $_SERVER['REMOTE_ADDR']]);
+
+        header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
+        exit();
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        die("ERRO FATAL PHP: " . $e->getMessage() . " na linha " . $e->getLine() . " de " . $e->getFile());
     }
-
-    $documentService = new \App\Services\DocumentService();
-    $nomeArquivoFinal = $documentService->assinarDocumento(
-        $caminhoOriginal,
-        $doc_hash,
-        $contratante,
-        $contratado,
-        $cpf,
-        $celular,
-        $assinatura_base64
-    );
-
-    $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-    $stmtUpdate->execute(['/uploads/' . $nomeArquivoFinal, $docData['id']]);
-
-    $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
-    $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $_SERVER['REMOTE_ADDR']]);
-
-    header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
-    exit();
 }
 ?>
 <?php require_once __DIR__ . '/app/Views/assinar_link.view.php'; ?>
