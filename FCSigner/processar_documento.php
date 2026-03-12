@@ -31,7 +31,17 @@ if (!@move_uploaded_file($tmpPath, $destinoCompleto)) {
         $putResult = @file_put_contents($destinoCompleto, $content);
         if ($putResult === false) {
             $e = error_get_last();
-            die("Erro ao salvar arquivo PDF na pasta. Erro interno: " . print_r($e, true) . " | Destino: " . $destinoCompleto);
+            require_once __DIR__ . '/../src/Database.php';
+            die("<div style='padding:20px; font-family:sans-serif; max-width:600px; margin: 40px auto; border: 1px solid #ccc; border-radius:10px;'>
+                 <h2 style='color:#b91c1c;'>Acesso Negado à Pasta de Uploads</h2>
+                 <p>O servidor Linux (BunkerWeb / Ubuntu) em que este sistema está hospedado <strong>cortou as permissões do PHP ({$_SERVER['USER']})</strong> para guardar imagens ou PDFs na pasta <code>/FCSigner/uploads</code>.</p>
+                 <p>Como resolver definitivamente:<br>Peça ao administrador para acessar o terminal (SSH) do servidor e digitar os seguintes comandos como Root:</p>
+                 <div style='background:#1e293b; color:#fff; padding:15px; border-radius:5px; font-family:monospace; margin: 10px 0;'>
+                 sudo chown -R www-data:www-data " . __DIR__ . "/uploads<br>
+                 sudo chmod -R 777 " . __DIR__ . "/uploads
+                 </div>
+                 <p style='font-size:12px; color:#666;'>Detalhes Técnicos: " . htmlspecialchars(print_r($e, true)) . "</p>
+                 </div>");
         }
         @unlink($tmpPath);
     }
