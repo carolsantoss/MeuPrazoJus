@@ -220,11 +220,11 @@ class DocumentService
         $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
         
-        // Texto de conformidade na trilha final
-        $pdf->Ln(10);
-        $pdf->SetFont('Helvetica', 'I', 8);
+        // Texto de conformidade na trilha final (Fixo no rodapé para não quebrar página)
+        $pdf->SetY(-28); 
+        $pdf->SetFont('Helvetica', 'I', 7.5);
         $pdf->SetTextColor(120, 120, 120);
-        $pdf->MultiCell(0, 4, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
+        $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
 
         $dirDestino = __DIR__ . '/../../uploads/' . $doc_hash;
         if (!is_dir($dirDestino)) {
