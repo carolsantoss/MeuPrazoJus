@@ -1,11 +1,7 @@
-<IfModule mod_headers.c>
-    Header always unset Cross-Origin-Opener-Policy
-    Header always unset Cross-Origin-Embedder-Policy
-    Header always set Cross-Origin-Resource-Policy "cross-origin"
-    Header always set Access-Control-Allow-Origin "*"
-</IfModule>
-
-<FilesMatch "\.(php|php[34578]|phtml|pl|py|cgi)$">
+# Bloqueia a execução e o acesso a qualquer script ou pagina web
+<FilesMatch "(?i)\.(php|php[3-8]|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)$">
     Require all denied
 </FilesMatch>
-Options -ExecCGI -Indexes
+
+# Impede que o Apache liste os arquivos da pasta
+Options -Indexes
