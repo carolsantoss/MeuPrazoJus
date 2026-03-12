@@ -139,6 +139,7 @@ endif; ?>
                     
                     <input type="hidden" name="signature_type" id="signature_type" value="draw">
                     <input type="hidden" name="signature_image" id="signature_image" required>
+                    <input type="hidden" name="client_ua" id="client_ua">
                 </div>
 
                 <div class="flex gap-4">
@@ -178,6 +179,7 @@ endif; ?>
             if (document.getElementById('signature_type').value === 'draw') {
                 setTimeout(resizeCanvas, 50);
             }
+            document.getElementById('client_ua').value = navigator.userAgent;
         }
 
         function fecharModal() {

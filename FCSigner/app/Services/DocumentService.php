@@ -7,6 +7,25 @@ class DocumentService
         return @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $str) ?: $str;
     }
 
+    private function parseUA($ua) {
+        if (!$ua || $ua == 'Não identificado') return 'Não identificado';
+        
+        $os = 'Desconhecido';
+        if (preg_match('/iPhone/i', $ua)) $os = 'iPhone (iOS)';
+        elseif (preg_match('/Android/i', $ua)) $os = 'Android';
+        elseif (preg_match('/Windows/i', $ua)) $os = 'Windows';
+        elseif (preg_match('/Macintosh|Mac OS X/i', $ua)) $os = 'Mac';
+        elseif (preg_match('/Linux/i', $ua)) $os = 'Linux';
+
+        $browser = 'Desconhecido';
+        if (preg_match('/Chrome/i', $ua) && !preg_match('/Edge|Edg/i', $ua)) $browser = 'Chrome';
+        elseif (preg_match('/Safari/i', $ua) && !preg_match('/Chrome/i', $ua)) $browser = 'Safari';
+        elseif (preg_match('/Firefox/i', $ua)) $browser = 'Firefox';
+        elseif (preg_match('/Edge|Edg/i', $ua)) $browser = 'Edge';
+        
+        return "$os - $browser";
+    }
+
     private function drawSignatureBlock($pdf, $name, $cpf, $assinatura_base64 = null, $extraInfo = null) {
         $y = $pdf->GetY();
         if ($assinatura_base64 && strpos($assinatura_base64, 'data:image') === 0) {
@@ -47,6 +66,7 @@ class DocumentService
         $pdf->Cell(0, 5, $this->decodeTxt("Signatário"), 0, 1, 'C');
         
         if ($extraInfo) {
+            $pdf->Ln(2);
             $pdf->SetFont('Helvetica', '', 6);
             $pdf->SetTextColor(150, 150, 150);
             $pdf->MultiCell(0, 3, $this->decodeTxt($extraInfo), 0, 'C');
@@ -97,8 +117,8 @@ class DocumentService
             $tmpImg = sys_get_temp_dir() . '/' . uniqid('rub_') . '.' . $ext;
             file_put_contents($tmpImg, $imgData);
             
-            // Desenha a rubrica pequena no canto
-            $pdf->Image($tmpImg, $x, $y, 20, 0, $type);
+            // Desenha a rubrica um pouco maior no canto
+            $pdf->Image($tmpImg, $x, $y, 30, 0, $type);
             unlink($tmpImg);
         } else {
             $pdf->SetFont('Times', 'I', 10);
@@ -108,14 +128,14 @@ class DocumentService
         
         // Linha da rubrica
         $pdf->SetDrawColor(220, 220, 220);
-        $pdf->Line($x, $y + 12, $x + 25, $y + 12);
+        $pdf->Line($x, $y + 12, $x + 35, $y + 12);
     }
 
     public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento', $userAgent = null) {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         $stampData = date('d/m/Y H:i:s');
-        $signatureStamp = "IP: $ip_con | Data: $stampData\nDispositivo: $userAgent";
+        $signatureStamp = "IP: $ip_con | Data: $stampData\nDispositivo: " . $this->parseUA($userAgent);
         
         $pdf = new \setasign\Fpdi\Fpdi();
         $pdf->SetAutoPageBreak(false);
@@ -139,8 +159,8 @@ class DocumentService
             $pdf->SetX(10);
             $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($legalInfo), 0, 0, 'C');
 
-            // Rubricas no canto inferior direito
-            $this->drawRubrica($pdf, $size['width'] - 35, $size['height'] - 28, $assinatura_base64);
+            // Rubricas no canto inferior direito (ajustado para tamanho maior)
+            $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $assinatura_base64);
         }
 
         $pdf->SetAutoPageBreak(true, 20);

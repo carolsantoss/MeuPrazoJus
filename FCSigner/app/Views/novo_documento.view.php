@@ -82,6 +82,14 @@
             let fileName = e.target.files[0]?.name || 'Clique ou arraste o PDF aqui';
             document.getElementById('file-name').textContent = fileName;
         });
+
+        const inputCpf = document.querySelector('input[name="cpf_contratante"]');
+        if (inputCpf) {
+            inputCpf.addEventListener('input', function (e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+                e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' : '') + x[3] + (x[4] ? '-' + x[4] : '');
+            });
+        }
     </script>
 </body>
 </html>
