@@ -157,11 +157,17 @@ class DocumentService
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
+        
+        $dirDestino = __DIR__ . '/../../uploads/' . $doc_hash;
+        if (!is_dir($dirDestino)) {
+            mkdir($dirDestino, 0777, true);
+        }
         $info = pathinfo($titulo);
         $nomeBase = $info['filename'] ?: 'Documento';
         $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
-        $pdf->Output('F', __DIR__ . '/../../uploads/' . $nomeArquivoFinal);
+        $caminhoRelativo = $doc_hash . '/' . $nomeArquivoFinal;
+        $pdf->Output('F', $dirDestino . '/' . $nomeArquivoFinal);
         
-        return $nomeArquivoFinal;
+        return $caminhoRelativo;
     }
 }

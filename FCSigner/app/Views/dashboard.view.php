@@ -145,15 +145,21 @@
                                         if ($doc['status'] == 'Cancelado')
                                             $statusClass = 'bg-red-500/10 text-red-500';
                                         ?>
-                                        <span
-                                            class="px-3 py-1 rounded-full text-xs font-medium border <?php echo $statusClass; ?> border-current">
-                                            <?php echo htmlspecialchars($doc['status']); ?>
-                                        </span>
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="px-3 py-1 rounded-full text-xs font-medium border <?php echo $statusClass; ?> border-current">
+                                                <?php echo htmlspecialchars($doc['status']); ?>
+                                            </span>
+                                            <?php if ($doc['status'] === 'Assinado' && !empty($doc['file_path'])): ?>
+                                                <a href="<?php echo htmlspecialchars(ltrim($doc['file_path'], '/')); ?>" download 
+                                                   class="flex items-center gap-1 text-xs font-semibold text-green-500 hover:text-green-400 transition-colors bg-green-500/5 px-2 py-1 rounded border border-green-500/20">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                    Baixar
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-right flex justify-end gap-3">
-                                        <?php if ($doc['status'] === 'Assinado' && !empty($doc['file_path'])): ?>
-                                            <a href="<?php echo htmlspecialchars($doc['file_path']); ?>" download class="text-green-500 hover:text-green-400 hover:underline">Download</a>
-                                        <?php endif; ?>
                                         <a href="trilha_auditoria.php?doc_id=<?php echo $doc['id']; ?>"
                                             class="text-brand hover:text-blue-400 hover:underline">Auditoria</a>
                                         <a href="excluir_documento.php?id=<?php echo $doc['id']; ?>"
