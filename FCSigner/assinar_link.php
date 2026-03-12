@@ -35,7 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $celular = $_POST['celular'] ?? '';
     $contratado = $_POST['nome_signatario'] ?? 'Signatário';
     $assinatura_base64 = $_POST['signature_image'] ?? null;
-
+    
+    // O BunkerWeb/Cloudflare barra POSTs com strings muito longas. 
+    // Em vez de enviar o Base64 enorme todo pelo form hidden, 
+    // vamos criar um mecanismo pro backend pegar de um temp post futuro se o body estourar,
+    // ou garantir que ele aceite o base64 (que agora é jpeg e 90% menor).
     require 'vendor/autoload.php';
     require_once 'app/Services/DocumentService.php';
 
