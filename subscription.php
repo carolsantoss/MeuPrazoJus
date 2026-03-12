@@ -108,7 +108,7 @@
                 btn.innerText = "Cancelando...";
                 btn.disabled = true;
                 try {
-                    const res = await fetch('/api/auth.php?action=cancel_subscription');
+                    const res = await fetch('api/auth.php?action=cancel_subscription');
                     const data = await res.json();
                     if (data.success) {
                         alert("Assinatura cancelada com sucesso!");
@@ -130,7 +130,7 @@
         if (cancelBtnMensal) cancelBtnMensal.addEventListener('click', () => doCancelSubscription(cancelBtnMensal));
 
         async function logout() {
-            await fetch('/api/auth.php?action=logout');
+            await fetch('api/auth.php?action=logout');
             window.location.reload();
         }
     </script>
