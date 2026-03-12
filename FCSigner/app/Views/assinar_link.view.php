@@ -23,18 +23,17 @@
     <style>
         body { background-color: #0F172A; color: #F8FAFC; }
 
-        /* Modal scroll fix */
         body.modal-open {
             overflow: hidden;
-            position: fixed;
-            width: 100%;
         }
-        #coletaModal {
+        #modalScroll {
+            position: absolute;
+            inset: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            align-items: flex-start !important;
+            overscroll-behavior: contain;
         }
-        #coletaModal > div {
+        #modalScroll > div {
             margin: 1rem auto;
         }
     </style>
@@ -59,11 +58,13 @@
             <object data="data:application/pdf;base64,<?php echo $pdf_base64; ?>" type="application/pdf" class="w-full h-full border-none" title="Documento Original">
                 <iframe src="data:application/pdf;base64,<?php echo $pdf_base64; ?>" class="w-full h-full border-none" title="Documento Original"></iframe>
             </object>
-        <?php else: ?>
+        <?php
+else: ?>
             <div class="text-slate-400 flex flex-col items-center gap-3">
                 <p class="text-red-400 text-sm">Não foi possível carregar o documento fisico no servidor.</p>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
     </main>
 
     <footer class="bg-dark_card p-4 md:px-8 md:py-5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
@@ -88,8 +89,9 @@
         </button>
     </footer>
 
-    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col p-4" style="overflow-y:auto; -webkit-overflow-scrolling:touch;">
-        <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8">
+    <div id="coletaModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden">
+        <div id="modalScroll" class="p-4">
+        <div class="bg-dark_card border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-4 mx-auto">
             <div class="p-6 border-b border-slate-700">
                 <h3 class="text-lg font-bold text-white">Verificação de Identidade</h3>
                 <p class="text-sm text-slate-400 mt-1">Confirme seus dados para continuar.</p>
@@ -149,6 +151,7 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 
     <script>
@@ -168,9 +171,9 @@
         function mostrarModal() {
             const modal = document.getElementById('coletaModal');
             modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            modal.scrollTop = 0;
-            // Trava o scroll do body para o modal não rolar o fundo
+            // Reseta o scroll para o topo ao abrir
+            document.getElementById('modalScroll').scrollTop = 0;
+            // Trava o scroll do body para não rolar o fundo
             document.body.classList.add('modal-open');
             if (document.getElementById('signature_type').value === 'draw') {
                 setTimeout(resizeCanvas, 50);
@@ -180,7 +183,6 @@
         function fecharModal() {
             const modal = document.getElementById('coletaModal');
             modal.classList.add('hidden');
-            modal.classList.remove('flex');
             // Libera o scroll do body
             document.body.classList.remove('modal-open');
         }
