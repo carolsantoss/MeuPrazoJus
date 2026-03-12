@@ -18,8 +18,9 @@ $docHash = bin2hex(random_bytes(16));
 $urlValidacao = "meuprazojus.com.br/validar/" . $docHash;
 
 if (!is_dir(__DIR__ . '/uploads')) {
-    mkdir(__DIR__ . '/uploads');
+    mkdir(__DIR__ . '/uploads', 0777, true);
 }
+@chmod(__DIR__ . '/uploads', 0777);
 
 $nomeArquivoOriginal = "uploads/original_" . $docHash . ".pdf";
 $destinoCompleto = __DIR__ . '/uploads/original_' . $docHash . '.pdf';
