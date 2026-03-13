@@ -80,6 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ip_cli = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
         $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $ip_cli]);
 
+        if (file_exists($caminhoOriginal)) {
+            @unlink($caminhoOriginal);
+        }
+
         header("Location: index.php?novo_doc=" . urlencode("uploads/" . $nomeArquivoFinal));
         exit();
     } catch (\Throwable $e) {

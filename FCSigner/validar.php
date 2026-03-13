@@ -604,6 +604,19 @@ function actionIcon($action) {
             Baixar PDF
         </a>
     </div>
+
+    <?php elseif ($assinado && !$pdfUrl): ?>
+
+    <p class="section-title" style="color: var(--red);">Arquivo indisponível</p>
+    <div class="card" style="border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+            <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--red); flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <div style="font-weight: 600; font-size: 15px; color: var(--red); margin-bottom: 6px;">Arquivo Físico Removido</div>
+                <div style="font-size: 13px; color: var(--muted); line-height: 1.5;">O arquivo PDF assinado não está mais disponível para download devido à política de retenção do servidor (exclusão após 3 meses). No entanto, <strong>a autenticidade e validade jurídica deste documento permanecem garantidas</strong> através da trilha de auditoria e hashes registrados acima.</div>
+            </div>
+        </div>
+    </div>
     <?php endif; ?>
 
 <?php endif; ?>

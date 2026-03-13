@@ -105,6 +105,16 @@
                 </div>
             <?php endif; ?>
 
+            <div class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-xl flex items-start gap-4 shadow-lg">
+                <svg class="w-6 h-6 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div>
+                    <h3 class="font-bold mb-1">Aviso Importante: Retenção de Arquivos (3 meses)</h3>
+                    <p class="text-sm text-yellow-600/90 leading-relaxed max-w-2xl">
+                        A cada 3 meses da data de assinatura, o <strong>documento físico (PDF) é excluído</strong> dos nossos servidores para otimização de espaço. Por favor, lembre-se de <strong>baixar e salvar o PDF final</strong> seguro em sua máquina. A página do <strong>Validador (QR Code / Hash) permanecerá disponível para sempre</strong>, garantindo a integridade jurídica das assinaturas.
+                    </p>
+                </div>
+            </div>
+
             <div class="bg-dark_card rounded-xl border border-slate-700 overflow-hidden">
                 <table class="w-full text-left text-sm text-slate-300">
                     <thead class="bg-slate-800/50 text-slate-400 border-b border-slate-700">
