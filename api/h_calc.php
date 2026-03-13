@@ -35,6 +35,17 @@ try {
         $data = $manager->getByUser($userId, $page, $limit);
         if (ob_get_length()) ob_clean();
         echo json_encode($data);
+
+    } else if ($method === 'DELETE') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (empty($input['id'])) {
+            if (ob_get_length()) ob_clean();
+            echo json_encode(['error' => 'Missing ID']);
+            exit;
+        }
+        $success = $manager->delete($input['id'], $userId);
+        if (ob_get_length()) ob_clean();
+        echo json_encode(['success' => $success]);
     }
 } catch (Throwable $e) {
     if (ob_get_length()) ob_clean();

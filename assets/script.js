@@ -366,7 +366,7 @@ function renderHistory(items) {
     tbody.innerHTML = '';
 
     if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Nenhum histórico encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem;">Nenhum histórico encontrado.</td></tr>';
         return;
     }
 
@@ -381,15 +381,45 @@ function renderHistory(items) {
             '<span class="req-status status-completed">Finalizado</span>' :
             '<span class="req-status status-pending">Pendente</span>';
 
+        // Assuming item.id exists in the returned items
+        const idParam = item.id ? `'${item.id}'` : 'null';
+
         tr.innerHTML = `
             <td>${dateFmt}</td>
             <td>${item.description || '-'}</td>
             <td>${item.days}</td>
             <td>${item.cityName || item.location || '-'}</td>
             <td>${status}</td>
+            <td style="text-align:center;">
+                <button onclick="deleteDeadline(${idParam})" class="btn" style="background: none; border: none; color: #ef4444; font-size: 1.25rem; cursor: pointer; padding: 0.25rem 0.5rem;" title="Excluir">
+                    🗑️
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+async function deleteDeadline(id) {
+    if (!id) return;
+    if (!confirm("Tem certeza que deseja excluir este cálculo do histórico?")) return;
+    
+    try {
+        const res = await fetch('/api/deadlines', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            loadDeadlines();
+        } else {
+            alert('Erro ao excluir: ' + (data.error || 'Desconhecido'));
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Ocorreu um erro ao excluir.');
+    }
 }
 
 function renderList(elementId, items) {
@@ -984,7 +1014,10 @@ async function loadFeeHistory(page = 1) {
                 <td>${date}</td>
                 <td>${formatCurrency(item.total)}</td>
                 <td>${item.installments}x</td>
-                <td><button class="btn btn-ghost view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button></td>
+                <td style="display: flex; gap: 0.5rem; justify-content: center;">
+                    <button class="btn btn-ghost view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Ver</button>
+                    <button onclick="deleteFee(${item.id})" class="btn" style="background: none; border: none; color: #ef4444; font-size: 1.25rem; cursor: pointer; padding: 0.25rem 0.5rem;" title="Excluir">🗑️</button>
+                </td>
             `;
             tr.querySelector('.view-btn').onclick = () => loadFeeCalculation(item);
             tbody.appendChild(tr);
@@ -998,6 +1031,28 @@ async function loadFeeHistory(page = 1) {
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #f87171;">Erro ao carregar: ${e.message}</td></tr>`;
         }
+    }
+}
+
+async function deleteFee(id) {
+    if (!id) return;
+    if (!confirm("Tem certeza que deseja excluir este cálculo de honorário do histórico?")) return;
+    
+    try {
+        const res = await fetch('/api/h_calc', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            loadFeeHistory(1);
+        } else {
+            alert('Erro ao excluir: ' + (data.error || 'Desconhecido'));
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Ocorreu um erro ao excluir.');
     }
 }
 

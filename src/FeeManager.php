@@ -53,4 +53,9 @@ class FeeManager {
             'total_pages' => ceil($total / $limit)
         ];
     }
+
+    public function delete($id, $userId) {
+        $stmt = $this->db->prepare("DELETE FROM fees WHERE id = ? AND user_id = ?");
+        return $stmt->execute([$id, $userId]);
+    }
 }

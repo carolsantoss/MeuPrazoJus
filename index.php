@@ -408,6 +408,7 @@ if (isset($_SESSION['user_id'])) {
                                             <th>Dias</th>
                                             <th>Local</th>
                                             <th>Status</th>
+                                            <th style="text-align:center;">Ação</th>
                                         </tr>
                                     </thead>
                                     <tbody id="history-table-body">

@@ -53,4 +53,9 @@ class DeadlineManager {
         $stmt->execute([$userId, $today]);
         return $stmt->fetchAll();
     }
+
+    public function delete($id, $userId) {
+        $stmt = $this->db->prepare("DELETE FROM deadlines WHERE id = ? AND user_id = ?");
+        return $stmt->execute([$id, $userId]);
+    }
 }
