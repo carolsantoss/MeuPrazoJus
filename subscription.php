@@ -17,11 +17,13 @@
                 <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
                 <div>
                    <a href="index" class="btn btn-ghost">Calculadora</a>
-                   <?php if(isset($_SESSION['user_id'])): ?>
+                   <?php if (isset($_SESSION['user_id'])): ?>
                        <a href="#" class="btn btn-ghost" onclick="logout()">Sair</a>
-                   <?php else: ?>
+                   <?php
+else: ?>
                        <a href="login" class="btn btn-ghost">Entrar</a>
-                   <?php endif; ?>
+                   <?php
+endif; ?>
                 </div>
             </nav>
         </div>
@@ -42,11 +44,13 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Contagem Novo CPC</li>
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Integração Google Agenda</li>
                 </ul>
-                <?php if(isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
+                <?php if (isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed']): ?>
                     <button class="btn btn-ghost btn-block" disabled style="opacity: 0.5; cursor: not-allowed; border: 1px solid var(--glass-border)">Inativo</button>
-                <?php else: ?>
+                <?php
+else: ?>
                     <a href="index" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border)">Começar Agora</a>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
 
             <!-- Mensal -->
@@ -62,24 +66,27 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
                 <?php
-                $user_plan = $_SESSION['subscription_plan'] ?? '';
-                $is_subscribed = isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed'];
-                
-                // Fallback: se for assinado mas sem plano definido, assume anual
-                if ($is_subscribed && empty($user_plan)) {
-                    $user_plan = 'anual';
-                }
+$user_plan = $_SESSION['subscription_plan'] ?? '';
+$is_subscribed = isset($_SESSION['is_subscribed']) && $_SESSION['is_subscribed'];
 
-                $is_mensal_active = $is_subscribed && $user_plan === 'mensal';
-                ?>
-                <?php if($is_mensal_active): ?>
+// Fallback: se for assinado mas sem plano definido, assume anual
+if ($is_subscribed && empty($user_plan)) {
+    $user_plan = 'anual';
+}
+
+$is_mensal_active = $is_subscribed && $user_plan === 'mensal';
+?>
+                <?php if ($is_mensal_active): ?>
                     <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
                     <button id="cancel-sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
-                <?php elseif($is_subscribed): ?>
+                <?php
+elseif ($is_subscribed): ?>
                     <button class="btn btn-ghost btn-block" disabled style="opacity: 0.4; cursor: not-allowed; border: 1px solid var(--glass-border)">Assinar Mensal</button>
-                <?php else: ?>
+                <?php
+else: ?>
                     <button id="sub-btn-mensal" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border);" onclick="subscribePlan('mensal')">Assinar Mensal</button>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
 
             <!-- Anual -->
@@ -96,16 +103,19 @@
                     <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Suporte Prioritário</li>
                 </ul>
                 <?php
-                $is_anual_active = $is_subscribed && $user_plan === 'anual';
-                ?>
-                <?php if($is_anual_active): ?>
+$is_anual_active = $is_subscribed && $user_plan === 'anual';
+?>
+                <?php if ($is_anual_active): ?>
                     <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 15px;">Plano Ativo</button>
                     <button id="cancel-sub-btn" class="btn btn-ghost btn-block" style="border: 1px solid var(--glass-border); color: #f87171;">Cancelar Assinatura</button>
-                <?php elseif($is_subscribed): ?>
+                <?php
+elseif ($is_subscribed): ?>
                     <button class="btn btn-primary btn-block" disabled style="opacity: 0.4; cursor: not-allowed;">Assinar Anual</button>
-                <?php else: ?>
+                <?php
+else: ?>
                     <button id="sub-btn" class="btn btn-primary btn-block" onclick="subscribePlan('anual')">Assinar Anual</button>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
         </div>
     </main>
@@ -126,7 +136,8 @@
                 btn.innerText = "Cancelando...";
                 btn.disabled = true;
                 try {
-                    const res = await fetch('api/auth.php?action=cancel_subscription', {
+                    const res = await fetch('/api/auth.php?action=cancel_subscription', {
+                        method: 'POST',
                         credentials: 'same-origin'
                     });
                     
@@ -160,7 +171,7 @@
         if (cancelBtnMensal) cancelBtnMensal.addEventListener('click', () => doCancelSubscription(cancelBtnMensal));
 
         async function logout() {
-            await fetch('api/auth.php?action=logout');
+            await fetch('/api/auth.php?action=logout', { method: 'POST' });
             window.location.reload();
         }
     </script>
