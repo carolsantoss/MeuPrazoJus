@@ -12,24 +12,22 @@ if (!$data) {
 
 $event = $data['event'] ?? '';
 
-// Quando o pagamento via Pix ou Boleto compensar na conta
 if ($event === 'PAYMENT_CONFIRMED' || $event === 'PAYMENT_RECEIVED') {
     $payment = $data['payment'] ?? [];
-    
-    // O externalReference foi preenchido com o user_id na hora de gerar o pagamento
+
     if (!empty($payment['externalReference'])) {
-        $user_id = $payment['externalReference'];
-        
+        $ref_parts = explode('-', $payment['externalReference']);
+        $user_id = $ref_parts[0];
+        $plano = $ref_parts[1] ?? 'anual';
+
         $userManager = new UserManager();
-        
-        // Ativa a conta premium por 1 ano
-        $endDate = date('Y-m-d', strtotime('+1 year'));
-        $userManager->setSubscription($user_id, 'premium', $endDate);
-        
-        error_log("Webhook Processado [PIX/Boleto]: Assinatura renovada para User_ID: " . $user_id);
+
+        $endDate = ($plano === 'mensal') ? date('Y-m-d', strtotime('+1 month')) : date('Y-m-d', strtotime('+1 year'));
+        $userManager->setSubscription($user_id, 'premium', $endDate, $plano);
+
+        error_log("Webhook Processado [PIX/Boleto, Plano: {$plano}]: Assinatura renovada para User_ID: " . $user_id);
     }
 }
 
-// Retorna 200 OK para o Asaas saber que recebemos
 http_response_code(200);
 echo json_encode(['status' => 'received']);

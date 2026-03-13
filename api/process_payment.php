@@ -123,7 +123,7 @@ try {
         "value" => $plan_value,
         "dueDate" => $dueDate,
         "description" => "Assinatura $plan_label MeuPrazoJus - $billingType",
-        "externalReference" => $user_id
+        "externalReference" => "{$user_id}-{$plano}"
     ];
 
     if ($billingType === 'CREDIT_CARD') {
@@ -167,6 +167,32 @@ try {
 
     if (isset($result['status']) && in_array($result['status'], ['CONFIRMED', 'RECEIVED', 'PENDING', 'AWAITING_RISK_ANALYSIS'])) {
         
+        // Criar a assinatura para a próxima recorrência
+        $sub_data = [
+            "customer" => $customer_id,
+            "billingType" => $billingType,
+            "value" => $plan_value,
+            "nextDueDate" => $subscription_expiry, // Daqui a 1 mês ou 1 ano
+            "cycle" => ($plano === 'mensal') ? "MONTHLY" : "YEARLY",
+            "description" => "Assinatura $plan_label MeuPrazoJus",
+            "externalReference" => "{$user_id}-{$plano}"
+        ];
+        
+        if ($billingType === 'CREDIT_CARD') {
+            $sub_data["creditCard"] = $payment_data["creditCard"];
+            $sub_data["creditCardHolderInfo"] = $payment_data["creditCardHolderInfo"];
+            $sub_data["remoteIp"] = $remoteIp;
+        }
+        
+        $chSub = curl_init(ASAAS_URL . "/subscriptions");
+        curl_setopt($chSub, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chSub, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($chSub, CURLOPT_POST, true);
+        curl_setopt($chSub, CURLOPT_POSTFIELDS, json_encode($sub_data));
+        curl_setopt($chSub, CURLOPT_SSL_VERIFYPEER, false);
+        curl_exec($chSub);
+        curl_close($chSub);
+
         $response_data = [
             'success' => true,
             'status' => $result['status'],
