@@ -115,7 +115,7 @@
                 <p class="text-sm text-slate-400 mt-1">Confirme seus dados para continuar.</p>
             </div>
             
-            <form action="" method="POST" class="p-6">
+            <form id="formAssinatura" action="" method="POST" class="p-6">
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-slate-300 mb-2">Nome Completo do Signatário (*)</label>
                     <input type="text" name="nome_signatario" required placeholder="Digite seu nome completo" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
@@ -366,7 +366,7 @@
             }
         }
 
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.getElementById('formAssinatura').addEventListener('submit', function(e) {
             const sigType = document.getElementById('signature_type').value;
             const sigInput = document.getElementById('signature_image');
             
@@ -408,8 +408,13 @@
                 sigInput.value = offCanvas.toDataURL('image/jpeg', 0.2).split(',')[1];
             }
             
-            // Exibir a tela de loading após todas as validações e enquanto o form é enviado
-            document.getElementById('coletaModal').classList.add('hidden');
+            // Exibir a tela de loading em cima do modal ao iniciar a requisição (não esconder o form)
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if(submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Processando...';
+            }
+            
             const loadingOverlay = document.getElementById('loadingOverlay');
             loadingOverlay.classList.remove('hidden');
             loadingOverlay.classList.add('flex');
