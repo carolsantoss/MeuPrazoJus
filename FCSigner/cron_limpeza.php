@@ -29,12 +29,9 @@ try {
         $stmtUpdate = $pdo->prepare("UPDATE documents SET file_path = NULL WHERE id = ?");
         $stmtUpdate->execute([$doc['id']]);
         $excluidos++;
-        $stmtUpdate = $pdo->prepare("UPDATE documents SET file_path = NULL WHERE id = ?");
-        $stmtUpdate->execute([$doc['id']]);
-        $excluidos++;
     }
     
-    echo "Limpeza concluída. $excluidos PDF(s) com mais de 3 meses foram removidos fisicamente.\n";
+    echo "Limpeza concluída. $excluidos arquivo(s) com mais de 3 meses foram removidos fisicamente.\n";
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage() . "\n";
 }

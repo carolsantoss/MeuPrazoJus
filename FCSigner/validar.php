@@ -589,19 +589,25 @@ function actionIcon($action) {
         <div>
             <div style="font-weight:600; margin-bottom:4px;">
                 <?php 
-                $info = pathinfo($documento['title'] ?? 'Documento');
-                $nomeBase = $info['filename'] ?: 'Documento';
-                echo htmlspecialchars($nomeBase . "_Assinado.pdf");
+                $info = pathinfo($documento['file_path']);
+                $nomeBase = $info['basename'] ?: 'Documento_Assinado';
+                echo htmlspecialchars($nomeBase);
                 ?>
             </div>
-            <div style="font-size:13px; color:var(--muted);">Versão final com página de assinaturas e QR code de validação.</div>
+            <div style="font-size:13px; color:var(--muted);">
+                <?php if (strtolower($info['extension']) == 'zip'): ?>
+                Arquivo ZIP com todos os documentos separados, assinaturas e trilhas de auditoria.
+                <?php else: ?>
+                Versão final com página de assinaturas e QR code de validação.
+                <?php endif; ?>
+            </div>
         </div>
         <a href="<?= htmlspecialchars($pdfUrl) ?>" target="_blank" class="btn-download">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
-            Baixar PDF
+            <?php echo strtolower($info['extension']) == 'zip' ? 'Baixar Arquivos' : 'Baixar PDF'; ?>
         </a>
     </div>
 

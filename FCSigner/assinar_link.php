@@ -70,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $assinatura_base64,
             $docData['title'] ?? 'Documento',
             $_POST['client_ua'] ?? $_SERVER['HTTP_USER_AGENT'] ?? 'Não identificado',
-            $signaturePositions
+            $signaturePositions,
+            $metadataDocs
         );
 
         $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");

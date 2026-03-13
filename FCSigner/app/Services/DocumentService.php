@@ -129,7 +129,7 @@ class DocumentService
         $pdf->Line($x, $y + 12, $x + 35, $y + 12);
     }
 
-    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento', $userAgent = null, $signaturePositions = []) {
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento', $userAgent = null, $signaturePositions = [], $metadataDocs = []) {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         $stampData = date('d/m/Y H:i:s');
@@ -147,128 +147,177 @@ class DocumentService
             file_put_contents($tmpSigImg, $imgData);
         }
 
-        $pdf = new \setasign\Fpdi\Fpdi();
-        $pdf->SetAutoPageBreak(false);
-        $pageCount = $pdf->setSourceFile($caminhoOriginal);
+        $pdfSource = new \setasign\Fpdi\Fpdi();
+        $totalSourcePages = $pdfSource->setSourceFile($caminhoOriginal);
 
-        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-            $templateId = $pdf->importPage($pageNo);
-            $size = $pdf->getTemplateSize($templateId);
-            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-            $pdf->useTemplate($templateId);
-
-            $pdf->SetFont('Helvetica', '', 7);
-            $pdf->SetTextColor(100, 100, 100);
-            
-            $legalInfo = "Em conformidade com a MP nº 2.200-2/2001 e Lei nº 14.063/2020.";
-            $footerText = "Assinado por: $contratante e $contratado | Validar em $urlValidacao";
-            
-            $pdf->SetXY(10, $size['height'] - 12);
-            $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($footerText), 0, 1, 'C');
-            $pdf->SetX(10);
-            $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($legalInfo), 0, 0, 'C');
-
-            $hasDynamicSigs = false;
-            if (!empty($signaturePositions)) {
-                foreach ($signaturePositions as $pos) {
-                    if ($pos['page'] == $pageNo) {
-                        $hasDynamicSigs = true;
-                        $x = $pos['x'] * $size['width'];
-                        $y = $pos['y'] * $size['height'];
-                        $w = $pos['w'] * $size['width'];
-                        $h = $pos['h'] * $size['height'];
-
-                        if ($tmpSigImg) {
-                            $pdf->Image($tmpSigImg, $x, $y, $w, $h, $sigType);
-                        } else {
-                            $pdf->SetFont('Times', 'I', 12);
-                            $pdf->SetTextColor(0, 0, 0);
-                            $pdf->SetXY($x, $y + ($h / 2));
-                            $pdf->Cell($w, 10, $this->decodeTxt($contratado), 0, 0, 'C');
-                        }
-                    }
-                }
-            }
-
-            if (!$hasDynamicSigs && empty($signaturePositions)) {
-                $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $assinatura_base64);
-            }
+        if (empty($metadataDocs)) {
+            $metadataDocs = [[
+                'name' => $titulo,
+                'startPage' => 1,
+                'pageCount' => $totalSourcePages
+            ]];
         }
-
-        $pdf->SetAutoPageBreak(true, 20);
-        $pdf->AddPage();
-        
-        $pdf->SetFont('Helvetica', 'B', 24);
-        $pdf->SetTextColor(15, 23, 42); 
-        $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
-        $pdf->SetTextColor(59, 130, 246); 
-        $pdf->Cell(10, 10, '.', 0, 0, 'L');
-        
-        $pdf->SetFont('Helvetica', '', 8);
-        $pdf->SetTextColor(100, 100, 100);
-        $pdf->SetXY(75, 12);
-        $dtStr = date('d M Y \à\s H:i');
-        $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
-        
-        $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
-        if(!file_exists($qrPath)){
-            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
-            @file_put_contents($qrPath, @file_get_contents($qrUrl));
-        }
-        if(file_exists($qrPath) && filesize($qrPath) > 0) {
-            $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
-        }
-        
-        $pdf->SetDrawColor(200, 200, 200);
-        $pdf->Line(10, 32, 200, 32);
-        $pdf->SetY(32);
-        $pdf->Ln(10);
-        
-        $pdf->SetFont('Helvetica', 'B', 16);
-        $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(0, 15, $this->decodeTxt('Página de assinaturas'), 0, 1, 'C');
-        $pdf->Ln(10);
-        $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
-        
-        $cpfStr = empty($cpf_contratante) ? 'CPF Vinculado à Conta' : ("CPF: " . $cpf_contratante);
-        $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
-        $this->drawSignatureBlock($pdf, $contratado, "CPF: " . $cpf, $assinatura_base64, $signatureStamp);
-        
-        $pdf->Ln(5);
-        $pdf->SetFont('Helvetica', 'B', 10);
-        $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
-        $pdf->SetDrawColor(200, 200, 200);
-        $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
-        $pdf->Ln(5);
-
-        $d = date('d M Y');
-        $t = date('H:i:s');
-        $this->drawHistoryItem($pdf, $d, $t, 'create', $contratante, "criou este documento.");
-        $this->drawHistoryItem($pdf, $d, $t, 'view', $contratante, "(Titular da Conta) visualizou este documento por meio do IP $ip_con.");
-        $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
-        $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
-        $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
-        
-        $pdf->SetY(-28); 
-        $pdf->SetFont('Helvetica', 'I', 7.5);
-        $pdf->SetTextColor(120, 120, 120);
-        $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
 
         $dirDestino = __DIR__ . '/../../uploads/' . $doc_hash;
         if (!is_dir($dirDestino)) {
             mkdir($dirDestino, 0777, true);
         }
-        $info = pathinfo($titulo);
-        $nomeBase = $info['filename'] ?: 'Documento';
-        $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
-        $caminhoRelativo = $doc_hash . '/' . $nomeArquivoFinal;
-        $pdf->Output('F', $dirDestino . '/' . $nomeArquivoFinal);
-        
+
+        $generatedFiles = [];
+
+        foreach ($metadataDocs as $index => $docMeta) {
+            $pdf = new \setasign\Fpdi\Fpdi();
+            $pdf->SetAutoPageBreak(false);
+            $pdf->setSourceFile($caminhoOriginal);
+
+            $start = $docMeta['startPage'];
+            $end = $start + $docMeta['pageCount'] - 1;
+
+            for ($pageNo = $start; $pageNo <= $end; $pageNo++) {
+                $templateId = $pdf->importPage($pageNo);
+                $size = $pdf->getTemplateSize($templateId);
+                $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                $pdf->useTemplate($templateId);
+
+                $pdf->SetFont('Helvetica', '', 7);
+                $pdf->SetTextColor(100, 100, 100);
+                
+                $legalInfo = "Em conformidade com a MP nº 2.200-2/2001 e Lei nº 14.063/2020.";
+                $footerText = "Assinado por: $contratante e $contratado | Validar em $urlValidacao";
+                
+                $pdf->SetXY(10, $size['height'] - 12);
+                $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($footerText), 0, 1, 'C');
+                $pdf->SetX(10);
+                $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($legalInfo), 0, 0, 'C');
+
+                $hasDynamicSigs = false;
+                if (!empty($signaturePositions)) {
+                    foreach ($signaturePositions as $pos) {
+                        if ($pos['page'] == $pageNo) {
+                            $hasDynamicSigs = true;
+                            $x = $pos['x'] * $size['width'];
+                            $y = $pos['y'] * $size['height'];
+                            $w = $pos['w'] * $size['width'];
+                            $h = $pos['h'] * $size['height'];
+
+                            if ($tmpSigImg) {
+                                $pdf->Image($tmpSigImg, $x, $y, $w, $h, $sigType);
+                            } else {
+                                $pdf->SetFont('Times', 'I', 12);
+                                $pdf->SetTextColor(0, 0, 0);
+                                $pdf->SetXY($x, $y + ($h / 2));
+                                $pdf->Cell($w, 10, $this->decodeTxt($contratado), 0, 0, 'C');
+                            }
+                        }
+                    }
+                }
+
+                if (!$hasDynamicSigs && empty($signaturePositions)) {
+                    $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $assinatura_base64);
+                }
+            }
+
+            // Append Audit Trail
+            $pdf->SetAutoPageBreak(true, 20);
+            $pdf->AddPage();
+            
+            $pdf->SetFont('Helvetica', 'B', 24);
+            $pdf->SetTextColor(15, 23, 42); 
+            $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+            $pdf->SetTextColor(59, 130, 246); 
+            $pdf->Cell(10, 10, '.', 0, 0, 'L');
+            
+            $pdf->SetFont('Helvetica', '', 8);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->SetXY(75, 12);
+            $dtStr = date('d M Y \à\s H:i');
+            $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+            
+            $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
+            if(!file_exists($qrPath)){
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
+                @file_put_contents($qrPath, @file_get_contents($qrUrl));
+            }
+            if(file_exists($qrPath) && filesize($qrPath) > 0) {
+                $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
+            }
+            
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->Line(10, 32, 200, 32);
+            $pdf->SetY(32);
+            $pdf->Ln(10);
+            
+            $pdf->SetFont('Helvetica', 'B', 16);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 15, $this->decodeTxt('Página de assinaturas'), 0, 1, 'C');
+            $pdf->Ln(10);
+            $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
+            
+            $cpfStr = empty($cpf_contratante) ? 'CPF Vinculado à Conta' : ("CPF: " . $cpf_contratante);
+            $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
+            $this->drawSignatureBlock($pdf, $contratado, "CPF: " . $cpf, $assinatura_base64, $signatureStamp);
+            
+            $pdf->Ln(5);
+            $pdf->SetFont('Helvetica', 'B', 10);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+            $pdf->Ln(5);
+
+            $d = date('d M Y');
+            $t = date('H:i:s');
+            $this->drawHistoryItem($pdf, $d, $t, 'create', $contratante, "criou este documento.");
+            $this->drawHistoryItem($pdf, $d, $t, 'view', $contratante, "(Titular da Conta) visualizou este documento por meio do IP $ip_con.");
+            $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratante, "(Titular da Conta) assinou eletronicamente este documento por meio do IP $ip_con.");
+            $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
+            $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
+            
+            $pdf->SetY(-28); 
+            $pdf->SetFont('Helvetica', 'I', 7.5);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
+
+            $info = pathinfo($docMeta['name']);
+            $nomeBase = preg_replace('/[^A-Za-z0-9_]/', '_', $info['filename']);
+            if (!$nomeBase) $nomeBase = 'Documento_' . ($index + 1);
+            
+            $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
+            // Ensure unique names inside the directory to avoid overwriting identical filenames
+            $savePath = $dirDestino . '/' . $nomeArquivoFinal;
+            
+            // se já existe um arquivo com mesmo nome, adiciona index
+            if (file_exists($savePath)) {
+                $nomeArquivoFinal = $nomeBase . '_' . ($index + 1) . "_Assinado.pdf";
+                $savePath = $dirDestino . '/' . $nomeArquivoFinal;
+            }
+
+            $pdf->Output('F', $savePath);
+            $generatedFiles[] = [
+                'name' => $nomeArquivoFinal,
+                'path' => $savePath
+            ];
+        }
+
         if ($tmpSigImg && file_exists($tmpSigImg)) {
             unlink($tmpSigImg);
         }
+
+        if (count($generatedFiles) > 1 && class_exists('ZipArchive')) {
+            $zipName = "Documentos_Assinados_" . substr($doc_hash, 0, 8) . ".zip";
+            $zipPath = $dirDestino . '/' . $zipName;
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+                foreach ($generatedFiles as $f) {
+                    $zip->addFile($f['path'], $f['name']);
+                }
+                $zip->close();
+                
+                return $doc_hash . '/' . $zipName;
+            }
+        }
         
-        return $caminhoRelativo;
+        // Se houver só 1 arquivo ou falha no ZIP, retornar o primeiro PDF
+        return $doc_hash . '/' . $generatedFiles[0]['name'];
     }
 }
