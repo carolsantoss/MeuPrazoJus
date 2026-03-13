@@ -31,9 +31,30 @@
         </button>
     </header>
 
-    <main class="flex-1 overflow-auto bg-slate-900 p-4" id="pdf-viewer">
-        <div class="flex flex-col items-center gap-4" id="pages-container"></div>
-    </main>
+    <div class="flex-1 overflow-hidden bg-slate-900 flex relative">
+        <?php if (!empty($metadataDocs) && count($metadataDocs) > 1): ?>
+        <aside class="w-64 bg-dark_card border-r border-slate-700 flex flex-col flex-shrink-0 z-10 overflow-y-auto hidden md:flex">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="font-semibold text-slate-200">Arquivos do Envelope</h3>
+                <p class="text-xs text-slate-400 mt-1">Navegue pelas páginas correspondentes.</p>
+            </div>
+            <ul class="flex-1 p-2 space-y-1">
+                <?php foreach($metadataDocs as $index => $meta): ?>
+                    <li>
+                        <button onclick="mudarPaginaScroll(<?php echo $meta['startPage']; ?>, this)" class="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-colors pdf-item <?php echo $index === 0 ? 'bg-brand/10 text-brand' : 'text-slate-400 hover:bg-slate-800'; ?>">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm truncate" title="<?php echo htmlspecialchars($meta['name']); ?>"><?php echo htmlspecialchars($meta['name']); ?></span>
+                        </button>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </aside>
+        <?php endif; ?>
+
+        <main class="flex-1 overflow-auto p-4 w-full" id="pdf-viewer">
+            <div class="flex flex-col items-center gap-4" id="pages-container"></div>
+        </main>
+    </div>
 
     <script>
         const pdfData = atob('<?php echo $pdf_base64; ?>');
@@ -45,38 +66,54 @@
         let isDragging = false, isResizing = false, currentMarker = null;
         let startX, startY, startLeft, startTop, startW, startH;
 
-        async function renderPDF() {
+        function renderPDF() {
             const loadingTask = pdfjsLib.getDocument({data: pdfData});
-            const pdf = await loadingTask.promise;
-            const scale = 1.5;
+            loadingTask.promise.then(async (pdf) => {
+                const scale = 1.5;
 
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale });
-                
-                const wrapper = document.createElement('div');
-                wrapper.className = 'pdf-page-container';
-                wrapper.style.width = viewport.width + 'px';
-                wrapper.style.height = viewport.height + 'px';
-                wrapper.dataset.page = i;
-                wrapper.dataset.width = viewport.width;
-                wrapper.dataset.height = viewport.height;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale });
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'pdf-page-container';
+                    wrapper.id = 'page-container-' + i;
+                    wrapper.style.width = viewport.width + 'px';
+                    wrapper.style.height = viewport.height + 'px';
+                    wrapper.dataset.page = i;
+                    wrapper.dataset.width = viewport.width;
+                    wrapper.dataset.height = viewport.height;
 
-                const canvas = document.createElement('canvas');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                canvas.style.display = 'block';
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    canvas.style.display = 'block';
 
-                const ctx = canvas.getContext('2d');
-                await page.render({ canvasContext: ctx, viewport }).promise;
+                    const ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport }).promise;
 
-                wrapper.appendChild(canvas);
-                
-                wrapper.addEventListener('click', (e) => {
-                    if(e.target === canvas) addMarker(e, wrapper, i);
-                });
+                    wrapper.appendChild(canvas);
+                    
+                    wrapper.addEventListener('click', (e) => {
+                        if(e.target === canvas) addMarker(e, wrapper, i);
+                    });
 
-                container.appendChild(wrapper);
+                    container.appendChild(wrapper);
+                }
+            });
+        }
+        
+        function mudarPaginaScroll(pagina, btn) {
+            document.querySelectorAll('.pdf-item').forEach(el => {
+                el.classList.remove('bg-brand/10', 'text-brand');
+                el.classList.add('text-slate-400', 'hover:bg-slate-800');
+            });
+            btn.classList.add('bg-brand/10', 'text-brand');
+            btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
+
+            const targetPage = document.getElementById('page-container-' + pagina);
+            if (targetPage) {
+                targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
         

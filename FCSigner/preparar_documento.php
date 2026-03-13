@@ -14,9 +14,14 @@ if (!$doc_hash) {
     die("Hash não fornecido.");
 }
 
-$stmtId = $pdo->prepare("SELECT id, document_hash, status, user_id FROM documents WHERE document_hash = ?");
+$stmtId = $pdo->prepare("SELECT id, document_hash, status, user_id, metadata FROM documents WHERE document_hash = ?");
 $stmtId->execute([$doc_hash]);
 $docData = $stmtId->fetch();
+
+$metadataDocs = [];
+if (!empty($docData['metadata'])) {
+    $metadataDocs = json_decode($docData['metadata'], true) ?: [];
+}
 
 if (!$docData || $docData['user_id'] != $_SESSION['user_id']) {
     die("Documento não encontrado ou sem permissão.");

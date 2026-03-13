@@ -205,7 +205,11 @@
             btn.classList.add('bg-brand/10', 'text-brand');
             btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
 
-            document.getElementById('pdfIframe').src = pdfBlobUrl + "#page=" + pagina;
+            // Recriar o iframe força o navegador (como o Chrome) a pular para a página certa do PDF
+            const frame = document.getElementById('pdfIframe');
+            const newFrame = frame.cloneNode(true);
+            newFrame.src = pdfBlobUrl + "#page=" + pagina;
+            frame.parentNode.replaceChild(newFrame, frame);
         }
         <?php endif; ?>
 
