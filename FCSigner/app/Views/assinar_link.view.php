@@ -53,18 +53,36 @@
         </div>
     </header>
 
-    <main class="flex-1 bg-slate-900 border-b border-slate-700 relative flex items-center justify-center">
-        <?php if (!empty($pdf_base64)): ?>
-            <object data="data:application/pdf;base64,<?php echo $pdf_base64; ?>" type="application/pdf" class="w-full h-full border-none" title="Documento Original">
-                <iframe src="data:application/pdf;base64,<?php echo $pdf_base64; ?>" class="w-full h-full border-none" title="Documento Original"></iframe>
-            </object>
-        <?php
-else: ?>
-            <div class="text-slate-400 flex flex-col items-center gap-3">
-                <p class="text-red-400 text-sm">Não foi possível carregar o documento fisico no servidor.</p>
+    <main class="flex-1 bg-slate-900 border-b border-slate-700 relative flex overflow-hidden">
+        
+        <?php if (!empty($metadataDocs) && count($metadataDocs) > 1): ?>
+        <aside class="w-64 bg-dark_card border-r border-slate-700 flex flex-col flex-shrink-0 z-10 overflow-y-auto">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="font-semibold text-slate-200">Arquivos do Envelope</h3>
+                <p class="text-xs text-slate-400 mt-1">Sua assinatura será aplicada a todos os documentos abaixo.</p>
             </div>
-        <?php
-endif; ?>
+            <ul class="flex-1 p-2 space-y-1">
+                <?php foreach($metadataDocs as $index => $meta): ?>
+                    <li>
+                        <button onclick="mudarPaginaPdf(<?php echo $meta['startPage']; ?>, this)" class="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-colors pdf-item <?php echo $index === 0 ? 'bg-brand/10 text-brand' : 'text-slate-400 hover:bg-slate-800'; ?>">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm truncate" title="<?php echo htmlspecialchars($meta['name']); ?>"><?php echo htmlspecialchars($meta['name']); ?></span>
+                        </button>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </aside>
+        <?php endif; ?>
+
+        <div class="flex-1 bg-slate-900 relative">
+            <?php if (!empty($pdf_base64)): ?>
+                <iframe id="pdfIframe" class="w-full h-full border-none bg-slate-900" title="Documento Original"></iframe>
+            <?php else: ?>
+                <div class="text-slate-400 flex flex-col items-center justify-center h-full gap-3">
+                    <p class="text-red-400 text-sm">Não foi possível carregar o documento físico no servidor.</p>
+                </div>
+            <?php endif; ?>
+        </div>
     </main>
 
     <footer class="bg-dark_card p-4 md:px-8 md:py-5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
@@ -156,6 +174,34 @@ endif; ?>
     </div>
 
     <script>
+        <?php if (!empty($pdf_base64)): ?>
+        // Transforma o base64 num Blob local para que #page funcione nos iframes do Chrome/Firefox/Safari
+        const b64Data = '<?php echo $pdf_base64; ?>';
+        const byteCharacters = atob(b64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const pdfBlob = new Blob([byteArray], {type: 'application/pdf'});
+        const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('pdfIframe').src = pdfBlobUrl;
+        });
+
+        function mudarPaginaPdf(pagina, btn) {
+            document.querySelectorAll('.pdf-item').forEach(el => {
+                el.classList.remove('bg-brand/10', 'text-brand');
+                el.classList.add('text-slate-400', 'hover:bg-slate-800');
+            });
+            btn.classList.add('bg-brand/10', 'text-brand');
+            btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
+
+            document.getElementById('pdfIframe').src = pdfBlobUrl + "#page=" + pagina;
+        }
+        <?php endif; ?>
+
         function toggleBotaoAssinar() {
             const checkbox = document.getElementById('checkConcordo');
             const btn = document.getElementById('btnAssinar');

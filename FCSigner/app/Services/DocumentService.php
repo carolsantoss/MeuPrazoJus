@@ -117,7 +117,6 @@ class DocumentService
             $tmpImg = sys_get_temp_dir() . '/' . uniqid('rub_') . '.' . $ext;
             file_put_contents($tmpImg, $imgData);
             
-            // Desenha a rubrica um pouco maior no canto
             $pdf->Image($tmpImg, $x, $y, 30, 0, $type);
             unlink($tmpImg);
         } else {
@@ -126,17 +125,28 @@ class DocumentService
             $pdf->Text($x + 2, $y + 10, $this->decodeTxt("Assinado"));
         }
         
-        // Linha da rubrica
         $pdf->SetDrawColor(220, 220, 220);
         $pdf->Line($x, $y + 12, $x + 35, $y + 12);
     }
 
-    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento', $userAgent = null) {
+    public function assinarDocumento($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $contratado, $cpf, $celular, $assinatura_base64 = null, $titulo = 'Documento', $userAgent = null, $signaturePositions = []) {
         $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
         $ip_con = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconhecido';
         $stampData = date('d/m/Y H:i:s');
         $signatureStamp = "IP: $ip_con | Data: $stampData\nDispositivo: " . $this->parseUA($userAgent);
         
+        $tmpSigImg = null;
+        $sigType = 'PNG';
+        if ($assinatura_base64 && strpos($assinatura_base64, 'data:image') === 0) {
+            $data = explode(',', $assinatura_base64);
+            $imgData = base64_decode(end($data));
+            $isJpeg = strpos($assinatura_base64, 'data:image/jpeg') === 0;
+            $ext = $isJpeg ? 'jpg' : 'png';
+            $sigType = $isJpeg ? 'JPEG' : 'PNG';
+            $tmpSigImg = sys_get_temp_dir() . '/' . uniqid('sig_main_') . '.' . $ext;
+            file_put_contents($tmpSigImg, $imgData);
+        }
+
         $pdf = new \setasign\Fpdi\Fpdi();
         $pdf->SetAutoPageBreak(false);
         $pageCount = $pdf->setSourceFile($caminhoOriginal);
@@ -147,7 +157,6 @@ class DocumentService
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templateId);
 
-            // Rodapé com conformidade legal
             $pdf->SetFont('Helvetica', '', 7);
             $pdf->SetTextColor(100, 100, 100);
             
@@ -159,8 +168,31 @@ class DocumentService
             $pdf->SetX(10);
             $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($legalInfo), 0, 0, 'C');
 
-            // Rubricas no canto inferior direito (ajustado para tamanho maior)
-            $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $assinatura_base64);
+            $hasDynamicSigs = false;
+            if (!empty($signaturePositions)) {
+                foreach ($signaturePositions as $pos) {
+                    if ($pos['page'] == $pageNo) {
+                        $hasDynamicSigs = true;
+                        $x = $pos['x'] * $size['width'];
+                        $y = $pos['y'] * $size['height'];
+                        $w = $pos['w'] * $size['width'];
+                        $h = $pos['h'] * $size['height'];
+
+                        if ($tmpSigImg) {
+                            $pdf->Image($tmpSigImg, $x, $y, $w, $h, $sigType);
+                        } else {
+                            $pdf->SetFont('Times', 'I', 12);
+                            $pdf->SetTextColor(0, 0, 0);
+                            $pdf->SetXY($x, $y + ($h / 2));
+                            $pdf->Cell($w, 10, $this->decodeTxt($contratado), 0, 0, 'C');
+                        }
+                    }
+                }
+            }
+
+            if (!$hasDynamicSigs && empty($signaturePositions)) {
+                $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $assinatura_base64);
+            }
         }
 
         $pdf->SetAutoPageBreak(true, 20);
@@ -178,7 +210,6 @@ class DocumentService
         $dtStr = date('d M Y \à\s H:i');
         $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
         
-        // Colocar o QR code já no cabeçalho superior direito da Página de Assinaturas
         $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
         if(!file_exists($qrPath)){
             $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
@@ -190,7 +221,6 @@ class DocumentService
         
         $pdf->SetDrawColor(200, 200, 200);
         $pdf->Line(10, 32, 200, 32);
-        // Garante que o cursor do PDF desça a partir da nova linha antes de começar o título
         $pdf->SetY(32);
         $pdf->Ln(10);
         
@@ -220,7 +250,6 @@ class DocumentService
         $this->drawHistoryItem($pdf, $d, $t, 'view', $contratado, "(Celular: $celular, CPF: $cpf) visualizou este documento por meio do IP $ip_con.");
         $this->drawHistoryItem($pdf, $d, $t, 'sign', $contratado, "(Celular: $celular, CPF: $cpf) assinou eletronicamente este documento por meio do IP $ip_con.");
         
-        // Texto de conformidade na trilha final (Fixo no rodapé para não quebrar página)
         $pdf->SetY(-28); 
         $pdf->SetFont('Helvetica', 'I', 7.5);
         $pdf->SetTextColor(120, 120, 120);
@@ -235,6 +264,10 @@ class DocumentService
         $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
         $caminhoRelativo = $doc_hash . '/' . $nomeArquivoFinal;
         $pdf->Output('F', $dirDestino . '/' . $nomeArquivoFinal);
+        
+        if ($tmpSigImg && file_exists($tmpSigImg)) {
+            unlink($tmpSigImg);
+        }
         
         return $caminhoRelativo;
     }

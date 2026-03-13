@@ -43,12 +43,12 @@
             <div class="mb-5">
                 <label class="block text-sm font-medium text-slate-300 mb-2">Selecione o PDF (*)</label>
                 <div class="border-2 border-dashed border-slate-600 rounded-xl p-6 text-center hover:border-brand transition-colors relative cursor-pointer group">
-                    <input type="file" name="documento_pdf" accept="application/pdf" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <input type="file" name="documento_pdf[]" accept="application/pdf" multiple required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                     <div class="text-slate-400 group-hover:text-brand transition-colors pointer-events-none">
                         <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
-                        <span id="file-name">Clique ou arraste o PDF aqui</span>
+                        <span id="file-name">Clique ou arraste um ou mais PDFs aqui</span>
                     </div>
                 </div>
             </div>
@@ -79,8 +79,14 @@
 
     <script>
         document.querySelector('input[type="file"]').addEventListener('change', function(e) {
-            let fileName = e.target.files[0]?.name || 'Clique ou arraste o PDF aqui';
-            document.getElementById('file-name').textContent = fileName;
+            let files = e.target.files;
+            if (files.length === 0) {
+                document.getElementById('file-name').textContent = 'Clique ou arraste um ou mais PDFs aqui';
+            } else if (files.length === 1) {
+                document.getElementById('file-name').textContent = files[0].name;
+            } else {
+                document.getElementById('file-name').textContent = files.length + ' documentos selecionados';
+            }
         });
 
         const inputCpf = document.querySelector('input[name="cpf_contratante"]');

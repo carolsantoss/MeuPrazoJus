@@ -9,12 +9,10 @@ $contratante = $_POST['nome_contratante'] ?? 'Contratante';
 $cpf_contratante = $_POST['cpf_contratante'] ?? null;
 $contratado = $_POST['nome_contratado'] ?? 'Contratado';
 
-if (!isset($_FILES['documento_pdf']) || $_FILES['documento_pdf']['error'] !== UPLOAD_ERR_OK) {
-    die("Erro no upload do PDF. (Código: " . ($_FILES['documento_pdf']['error'] ?? 'desconhecido') . ")");
+if (!isset($_FILES['documento_pdf']) || empty($_FILES['documento_pdf']['tmp_name'][0])) {
+    die("Erro no upload do PDF.");
 }
 
-$tmpPath = $_FILES['documento_pdf']['tmp_name'];
-$originalHash = hash_file('sha256', $tmpPath);
 $docHash = bin2hex(random_bytes(16));
 $urlValidacao = "meuprazojus.com.br/validar/" . $docHash;
 
@@ -24,32 +22,56 @@ if (!is_dir(__DIR__ . '/uploads')) {
 @chmod(__DIR__ . '/uploads', 0777);
 
 $nomeArquivoOriginal = "uploads/original_" . $docHash . ".pdf";
-$destinoCompleto = __DIR__ . '/uploads/original_' . $docHash . '.pdf';
+$destinoCompleto = __DIR__ . '/' . $nomeArquivoOriginal;
 
-if (!@move_uploaded_file($tmpPath, $destinoCompleto)) {
-    $content = @file_get_contents($tmpPath);
-    if ($content !== false) {
-        $putResult = @file_put_contents($destinoCompleto, $content);
-        if ($putResult === false) {
-            $e = error_get_last();
-            require_once __DIR__ . '/../src/Database.php';
-            die("<div style='padding:20px; font-family:sans-serif; max-width:600px; margin: 40px auto; border: 1px solid #ccc; border-radius:10px;'>
-                 <h2 style='color:#b91c1c;'>Acesso Negado à Pasta de Uploads</h2>
-                 <p>O servidor Linux (BunkerWeb / Ubuntu) em que este sistema está hospedado <strong>cortou as permissões do PHP ({$_SERVER['USER']})</strong> para guardar imagens ou PDFs na pasta <code>/FCSigner/uploads</code>.</p>
-                 <p>Como resolver definitivamente:<br>Peça ao administrador para acessar o terminal (SSH) do servidor e digitar os seguintes comandos como Root:</p>
-                 <div style='background:#1e293b; color:#fff; padding:15px; border-radius:5px; font-family:monospace; margin: 10px 0;'>
-                 sudo chown -R www-data:www-data " . __DIR__ . "/uploads<br>
-                 sudo chmod -R 777 " . __DIR__ . "/uploads
-                 </div>
-                 <p style='font-size:12px; color:#666;'>Detalhes Técnicos: " . htmlspecialchars(print_r($e, true)) . "</p>
-                 </div>");
-        }
-        @unlink($tmpPath);
+require_once __DIR__ . '/vendor/autoload.php';
+$pdf = new \setasign\Fpdi\Fpdi();
+$metadata = [];
+$startPage = 1;
+
+$firstContentHash = '';
+
+// Reorganiza array $_FILES caso seja múltiplo
+$filesData = $_FILES['documento_pdf'];
+$fileCount = is_array($filesData['tmp_name']) ? count($filesData['tmp_name']) : 1;
+
+for ($i = 0; $i < $fileCount; $i++) {
+    $tmpName = is_array($filesData['tmp_name']) ? $filesData['tmp_name'][$i] : $filesData['tmp_name'];
+    $err = is_array($filesData['error']) ? $filesData['error'][$i] : $filesData['error'];
+    $fName = is_array($filesData['name']) ? $filesData['name'][$i] : $filesData['name'];
+
+    if ($err !== UPLOAD_ERR_OK || !$tmpName) continue;
+
+    if ($i === 0) {
+        $firstContentHash = hash_file('sha256', $tmpName);
     }
-    else {
-        die("Falha extrema ao acessar o arquivo do upload temporário. Verifique o PHP temp_dir.");
+
+    try {
+        $pageCount = $pdf->setSourceFile($tmpName);
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $tplId = $pdf->importPage($pageNo);
+            $size = $pdf->getTemplateSize($tplId);
+            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+            $pdf->useTemplate($tplId);
+        }
+
+        $metadata[] = [
+            'name' => htmlspecialchars($fName),
+            'startPage' => $startPage,
+            'pageCount' => $pageCount
+        ];
+        $startPage += $pageCount;
+    } catch (\Exception $e) {
+        // Ignora PDFs que não puderam ser lidos, mas idealmente você pode logar isso
     }
 }
+
+if (empty($metadata)) {
+    die("Nenhum PDF válido foi enviado ou ocorreu um erro na leitura dos arquivos.");
+}
+
+$pdf->Output($destinoCompleto, 'F');
+@chmod($destinoCompleto, 0666);
 
 require_once __DIR__ . '/../src/Database.php';
 $pdo = Database::getInstance()->getConnection();
@@ -59,15 +81,18 @@ try {
 } catch (\Throwable $t) {}
 
 $user_id = $_SESSION['user_id'] ?? 1;
+$metadataJson = json_encode($metadata);
+$mainTitle = $fileCount > 1 ? $fileCount . ' Documentos' : $metadata[0]['name'];
 
-$stmt = $pdo->prepare("INSERT INTO documents (user_id, contratante_cpf, document_hash, title, status, original_hash, file_path) VALUES (?, ?, ?, ?, 'Pendente', ?, ?)");
+$stmt = $pdo->prepare("INSERT INTO documents (user_id, contratante_cpf, document_hash, title, status, original_hash, file_path, metadata) VALUES (?, ?, ?, ?, 'Pendente', ?, ?, ?)");
 $stmt->execute([
     $user_id,
     $cpf_contratante,
     $docHash,
-    $_FILES['documento_pdf']['name'] ?? 'Documento sem título',
-    $originalHash,
-    '/' . $nomeArquivoOriginal
+    $mainTitle,
+    $firstContentHash,
+    '/' . $nomeArquivoOriginal,
+    $metadataJson
 ]);
 
 $document_id = $pdo->lastInsertId();
@@ -78,9 +103,7 @@ $stmtLog->execute([$document_id, $contratante, $ip_cli]);
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
-$base_dir = dirname($_SERVER['REQUEST_URI']);
+$base_dir = rtrim(dirname($_SERVER['REQUEST_URI']), '/');
 
-$linkSimulado = $protocol . "://" . $host . $base_dir . "/assinar_link.php?hash=" . $docHash;
-
-header("Location: index.php?link_assinatura=" . urlencode($linkSimulado));
+header("Location: preparar_documento.php?hash=" . $docHash);
 exit();

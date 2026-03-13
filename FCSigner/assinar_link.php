@@ -9,9 +9,17 @@ if (!$doc_hash) {
     die("Link inválido.");
 }
 
-$stmtId = $pdo->prepare("SELECT d.id, d.status, d.title, d.contratante_cpf, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
+$stmtId = $pdo->prepare("SELECT d.id, d.status, d.title, d.metadata, d.signature_positions, d.contratante_cpf, u.name as contratante FROM documents d JOIN users u ON d.user_id = u.id WHERE d.document_hash = ?");
 $stmtId->execute([$doc_hash]);
 $docData = $stmtId->fetch();
+$metadataDocs = [];
+if (!empty($docData['metadata'])) {
+    $metadataDocs = json_decode($docData['metadata'], true) ?: [];
+}
+$signaturePositions = [];
+if (!empty($docData['signature_positions'])) {
+    $signaturePositions = json_decode($docData['signature_positions'], true) ?: [];
+}
 
 if (!$docData) {
     die("Documento não encontrado.");
@@ -61,7 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $celular,
             $assinatura_base64,
             $docData['title'] ?? 'Documento',
-            $_POST['client_ua'] ?? $_SERVER['HTTP_USER_AGENT'] ?? 'Não identificado'
+            $_POST['client_ua'] ?? $_SERVER['HTTP_USER_AGENT'] ?? 'Não identificado',
+            $signaturePositions
         );
 
         $stmtUpdate = $pdo->prepare("UPDATE documents SET status = 'Assinado', file_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
