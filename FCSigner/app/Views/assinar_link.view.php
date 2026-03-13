@@ -171,6 +171,13 @@
             </form>
         </div>
         </div>
+    <div id="loadingOverlay" class="fixed inset-0 bg-dark/95 backdrop-blur-md z-[60] flex-col items-center justify-center hidden">
+        <svg class="w-16 h-16 text-brand animate-spin mb-6" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-white mb-2 text-center">Processando Assinatura...</h2>
+        <p class="text-slate-400 text-sm text-center max-w-sm">Aplicando carimbo do tempo e finalizando a auditoria. Isso pode levar alguns instantes.</p>
     </div>
 
     <script>
@@ -396,6 +403,12 @@
 
                 sigInput.value = offCanvas.toDataURL('image/jpeg', 0.2).split(',')[1];
             }
+            
+            // Exibir a tela de loading após todas as validações e enquanto o form é enviado
+            document.getElementById('coletaModal').classList.add('hidden');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
         });
     </script>
 </body>
