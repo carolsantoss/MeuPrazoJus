@@ -200,13 +200,45 @@ class DocumentService
                             $w = $pos['w'] * $size['width'];
                             $h = $pos['h'] * $size['height'];
 
-                            if ($tmpSigImg) {
-                                $pdf->Image($tmpSigImg, $x, $y, $w, $h, $sigType);
+                            $signerType = $pos['signer'] ?? 'signer_1';
+
+                            if ($signerType === 'owner') {
+                                $pdf->SetFont('Times', 'I', 14);
+                                $pdf->SetTextColor(30, 30, 30);
+                                $pdf->SetXY($x, $y + ($h / 2) - 3);
+                                $pdf->Cell($w, 8, $this->decodeTxt($contratante), 0, 0, 'C');
+                                
+                                if (!empty($cpf_contratante)) {
+                                    $pdf->SetFont('Helvetica', '', 8);
+                                    $pdf->SetTextColor(100, 100, 100);
+                                    $pdf->SetXY($x, $y + ($h / 2) + 5);
+                                    $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $cpf_contratante), 0, 0, 'C');
+                                }
+                            } else if ($signerType === 'signer_1' || $signerType === 'signer') {
+                                if ($tmpSigImg) {
+                                    $pdf->Image($tmpSigImg, $x, $y, $w, $h, $sigType);
+                                } else {
+                                    $pdf->SetFont('Times', 'I', 14);
+                                    $pdf->SetTextColor(0, 0, 0);
+                                    $pdf->SetXY($x, $y + ($h / 2) - 3);
+                                    $pdf->Cell($w, 8, $this->decodeTxt($contratado), 0, 0, 'C');
+                                    
+                                    if (!empty($cpf)) {
+                                        $pdf->SetFont('Helvetica', '', 8);
+                                        $pdf->SetTextColor(100, 100, 100);
+                                        $pdf->SetXY($x, $y + ($h / 2) + 5);
+                                        $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $cpf), 0, 0, 'C');
+                                    }
+                                }
                             } else {
+                                $label = str_replace('signer_', 'Signatário ', $signerType);
                                 $pdf->SetFont('Times', 'I', 12);
-                                $pdf->SetTextColor(0, 0, 0);
+                                $pdf->SetTextColor(150, 150, 150);
                                 $pdf->SetXY($x, $y + ($h / 2));
-                                $pdf->Cell($w, 10, $this->decodeTxt($contratado), 0, 0, 'C');
+                                $pdf->Cell($w, 10, $this->decodeTxt($label . " (Pendente)"), 0, 0, 'C');
+                                
+                                $pdf->SetDrawColor(200, 200, 200);
+                                $pdf->Rect($x, $y, $w, $h);
                             }
                         }
                     }
@@ -217,7 +249,6 @@ class DocumentService
                 }
             }
 
-            // Append Audit Trail
             $pdf->SetAutoPageBreak(true, 20);
             $pdf->AddPage();
             
@@ -283,10 +314,8 @@ class DocumentService
             if (!$nomeBase) $nomeBase = 'Documento_' . ($index + 1);
             
             $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
-            // Ensure unique names inside the directory to avoid overwriting identical filenames
             $savePath = $dirDestino . '/' . $nomeArquivoFinal;
             
-            // se já existe um arquivo com mesmo nome, adiciona index
             if (file_exists($savePath)) {
                 $nomeArquivoFinal = $nomeBase . '_' . ($index + 1) . "_Assinado.pdf";
                 $savePath = $dirDestino . '/' . $nomeArquivoFinal;
@@ -317,7 +346,6 @@ class DocumentService
             }
         }
         
-        // Se houver só 1 arquivo ou falha no ZIP, retornar o primeiro PDF
         return $doc_hash . '/' . $generatedFiles[0]['name'];
     }
 }

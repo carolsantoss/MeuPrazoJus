@@ -54,6 +54,51 @@
         <main class="flex-1 overflow-auto p-4 w-full" id="pdf-viewer">
             <div class="flex flex-col items-center gap-4" id="pages-container"></div>
         </main>
+
+        <!-- Right sidebar for Signer selection -->
+        <aside class="w-64 bg-dark_card border-l border-slate-700 flex flex-col flex-shrink-0 z-10 overflow-y-auto hidden md:flex">
+            <div class="p-4 border-b border-slate-700">
+                <h3 class="font-semibold text-slate-200">Signatários</h3>
+                <p class="text-xs text-slate-400 mt-1">Selecione de quem é a assinatura que deseja posicionar.</p>
+            </div>
+            <div class="flex-1 p-4 space-y-3">
+                <label class="block cursor-pointer">
+                    <input type="radio" name="active_signer" value="owner" class="peer sr-only" checked>
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:text-blue-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span class="text-sm font-medium">Assinante Real (Dono)</span>
+                    </div>
+                </label>
+                <label class="block cursor-pointer">
+                    <input type="radio" name="active_signer" value="signer_1" class="peer sr-only">
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-red-600/20 peer-checked:border-red-500 peer-checked:text-red-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <span class="text-sm font-medium">Signatário 1</span>
+                    </div>
+                </label>
+                <label class="block cursor-pointer">
+                    <input type="radio" name="active_signer" value="signer_2" class="peer sr-only">
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-green-600/20 peer-checked:border-green-500 peer-checked:text-green-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-sm font-medium">Signatário 2</span>
+                    </div>
+                </label>
+                <label class="block cursor-pointer">
+                    <input type="radio" name="active_signer" value="signer_3" class="peer sr-only">
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-yellow-600/20 peer-checked:border-yellow-500 peer-checked:text-yellow-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <span class="text-sm font-medium">Signatário 3</span>
+                    </div>
+                </label>
+                <label class="block cursor-pointer">
+                    <input type="radio" name="active_signer" value="signer_4" class="peer sr-only">
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-purple-600/20 peer-checked:border-purple-500 peer-checked:text-purple-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                        <span class="text-sm font-medium">Signatário 4</span>
+                    </div>
+                </label>
+            </div>
+        </aside>
     </div>
 
     <script>
@@ -117,6 +162,24 @@
             }
         }
         
+        function getActiveSigner() {
+            const checked = document.querySelector('input[name="active_signer"]:checked');
+            if (!checked) return { value: 'owner', label: 'Assinante Real', color: '#3b82f6' };
+            
+            const value = checked.value;
+            let label = 'Signatário';
+            let color = '#ef4444'; // default red
+            let bg = 'rgba(239, 68, 68, 0.2)';
+            
+            if (value === 'owner') { label = 'Assinante Real'; color = '#3b82f6'; bg = 'rgba(59, 130, 246, 0.2)'; }
+            else if (value === 'signer_1') { label = 'Signatário 1'; color = '#ef4444'; bg = 'rgba(239, 68, 68, 0.2)'; }
+            else if (value === 'signer_2') { label = 'Signatário 2'; color = '#22c55e'; bg = 'rgba(34, 197, 94, 0.2)'; }
+            else if (value === 'signer_3') { label = 'Signatário 3'; color = '#eab308'; bg = 'rgba(234, 179, 8, 0.2)'; }
+            else if (value === 'signer_4') { label = 'Signatário 4'; color = '#a855f7'; bg = 'rgba(168, 85, 247, 0.2)'; }
+            
+            return { value, label, color, bg };
+        }
+
         function addMarker(e, wrapper, pageIndex) {
             const rect = wrapper.getBoundingClientRect();
             // width ~150px, height ~50px default
@@ -129,6 +192,8 @@
             if (left + w > rect.width) left = rect.width - w;
             if (top + h > rect.height) top = rect.height - h;
 
+            const signerInfo = getActiveSigner();
+
             const id = 'marker_' + Date.now();
             const markerDiv = document.createElement('div');
             markerDiv.className = 'marker';
@@ -137,10 +202,13 @@
             markerDiv.style.top = top + 'px';
             markerDiv.style.width = w + 'px';
             markerDiv.style.height = h + 'px';
+            markerDiv.style.borderColor = signerInfo.color;
+            markerDiv.style.backgroundColor = signerInfo.bg;
 
             const title = document.createElement('div');
             title.className = 'marker-title';
-            title.textContent = 'Assinatura Signatário';
+            title.style.backgroundColor = signerInfo.color;
+            title.textContent = 'Assinatura: ' + signerInfo.label;
             
             const btnClose = document.createElement('div');
             btnClose.className = 'marker-remove';
@@ -166,7 +234,7 @@
                 initDrag(ev, markerDiv, wrapper);
             };
 
-            markers.push({ id, page: pageIndex, markerEl: markerDiv, wrapper });
+            markers.push({ id, page: pageIndex, markerEl: markerDiv, wrapper, signer: signerInfo.value });
         }
 
         function initDrag(e, el, wrapper) {
@@ -258,7 +326,8 @@
                     x: l / wrapperW,
                     y: t / wrapperH,
                     w: w / wrapperW,
-                    h: h / wrapperH
+                    h: h / wrapperH,
+                    signer: m.signer
                 };
             });
 
