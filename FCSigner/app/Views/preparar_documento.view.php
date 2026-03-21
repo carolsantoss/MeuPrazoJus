@@ -61,7 +61,7 @@
                 <h3 class="font-semibold text-slate-200">Signatários</h3>
                 <p class="text-xs text-slate-400 mt-1">Selecione de quem é a assinatura que deseja posicionar.</p>
             </div>
-            <div class="flex-1 p-4 space-y-3">
+            <div class="flex-1 p-4 space-y-3" id="signer-list-container">
                 <label class="block cursor-pointer">
                     <input type="radio" name="active_signer" value="owner" class="peer sr-only" checked>
                     <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:text-blue-400 transition-colors flex items-center gap-2">
@@ -76,27 +76,12 @@
                         <span class="text-sm font-medium">Signatário 1</span>
                     </div>
                 </label>
-                <label class="block cursor-pointer">
-                    <input type="radio" name="active_signer" value="signer_2" class="peer sr-only">
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-green-600/20 peer-checked:border-green-500 peer-checked:text-green-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span class="text-sm font-medium">Signatário 2</span>
-                    </div>
-                </label>
-                <label class="block cursor-pointer">
-                    <input type="radio" name="active_signer" value="signer_3" class="peer sr-only">
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-yellow-600/20 peer-checked:border-yellow-500 peer-checked:text-yellow-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <span class="text-sm font-medium">Signatário 3</span>
-                    </div>
-                </label>
-                <label class="block cursor-pointer">
-                    <input type="radio" name="active_signer" value="signer_4" class="peer sr-only">
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-purple-600/20 peer-checked:border-purple-500 peer-checked:text-purple-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-purple-500"></div>
-                        <span class="text-sm font-medium">Signatário 4</span>
-                    </div>
-                </label>
+            </div>
+            <div class="p-4 border-t border-slate-700">
+                <button type="button" onclick="adicionarSignatario()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Adicionar Signatário
+                </button>
             </div>
         </aside>
     </div>
@@ -107,7 +92,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         
         const container = document.getElementById('pages-container');
-        let markers = []; // { id, page, left, top, width, height }
+        let markers = [];
         let isDragging = false, isResizing = false, currentMarker = null;
         let startX, startY, startLeft, startTop, startW, startH;
 
@@ -162,22 +147,60 @@
             }
         }
         
+        let signerCount = 1;
+        const colorPalette = [
+            { val: 'red', hex: '#ef4444' },
+            { val: 'green', hex: '#22c55e' },
+            { val: 'yellow', hex: '#eab308' },
+            { val: 'purple', hex: '#a855f7' },
+            { val: 'orange', hex: '#f97316' },
+            { val: 'pink', hex: '#ec4899' },
+            { val: 'teal', hex: '#14b8a6' },
+            { val: 'rose', hex: '#f43f5e' }
+        ];
+
+        function adicionarSignatario() {
+            signerCount++;
+            const id = 'signer_' + signerCount;
+            const container = document.getElementById('signer-list-container');
+            const colorObj = colorPalette[(signerCount - 1) % colorPalette.length];
+            const c = colorObj.val;
+            
+            const html = `
+                <label class="block cursor-pointer mt-3">
+                    <input type="radio" name="active_signer" value="${id}" class="peer sr-only" checked>
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-${c}-600/20 peer-checked:border-${c}-500 peer-checked:text-${c}-400 transition-colors flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-${c}-500"></div>
+                        <span class="text-sm font-medium">Signatário ${signerCount}</span>
+                    </div>
+                </label>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
         function getActiveSigner() {
             const checked = document.querySelector('input[name="active_signer"]:checked');
-            if (!checked) return { value: 'owner', label: 'Assinante Real', color: '#3b82f6' };
+            if (!checked) return { value: 'owner', label: 'Assinante Real', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' };
             
             const value = checked.value;
-            let label = 'Signatário';
-            let color = '#ef4444'; // default red
-            let bg = 'rgba(239, 68, 68, 0.2)';
+            if (value === 'owner') { 
+                return { value: 'owner', label: 'Assinante Real', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' }; 
+            }
             
-            if (value === 'owner') { label = 'Assinante Real'; color = '#3b82f6'; bg = 'rgba(59, 130, 246, 0.2)'; }
-            else if (value === 'signer_1') { label = 'Signatário 1'; color = '#ef4444'; bg = 'rgba(239, 68, 68, 0.2)'; }
-            else if (value === 'signer_2') { label = 'Signatário 2'; color = '#22c55e'; bg = 'rgba(34, 197, 94, 0.2)'; }
-            else if (value === 'signer_3') { label = 'Signatário 3'; color = '#eab308'; bg = 'rgba(234, 179, 8, 0.2)'; }
-            else if (value === 'signer_4') { label = 'Signatário 4'; color = '#a855f7'; bg = 'rgba(168, 85, 247, 0.2)'; }
+            const index = parseInt(value.split('_')[1], 10) || 1;
+            const c = colorPalette[(index - 1) % colorPalette.length];
             
-            return { value, label, color, bg };
+            const hex = c.hex;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            
+            return {
+                value: value,
+                label: 'Signatário ' + index,
+                color: hex,
+                bg: `rgba(${r}, ${g}, ${b}, 0.2)`
+            };
         }
 
         function addMarker(e, wrapper, pageIndex) {
