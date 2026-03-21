@@ -64,16 +64,23 @@
             <div class="flex-1 p-4 space-y-3" id="signer-list-container">
                 <label class="block cursor-pointer">
                     <input type="radio" name="active_signer" value="owner" class="peer sr-only" checked>
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:text-blue-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span class="text-sm font-medium">Assinante Real (Dono)</span>
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:text-blue-400 transition-colors flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <span class="text-sm font-medium">Assinante Real (Dono)</span>
+                        </div>
                     </div>
                 </label>
-                <label class="block cursor-pointer">
+                <label class="block cursor-pointer" id="label_signer_1">
                     <input type="radio" name="active_signer" value="signer_1" class="peer sr-only">
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-red-600/20 peer-checked:border-red-500 peer-checked:text-red-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                        <span class="text-sm font-medium">Signatário 1</span>
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-red-600/20 peer-checked:border-red-500 peer-checked:text-red-400 transition-colors flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span class="text-sm font-medium">Signatário 1</span>
+                        </div>
+                        <button type="button" onclick="removerSignatario('signer_1', event)" class="text-slate-500 hover:text-red-500 transition-colors" title="Remover Signatário">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </div>
                 </label>
             </div>
@@ -167,15 +174,40 @@
             const c = colorObj.val;
             
             const html = `
-                <label class="block cursor-pointer mt-3">
+                <label class="block cursor-pointer mt-3" id="label_${id}">
                     <input type="radio" name="active_signer" value="${id}" class="peer sr-only" checked>
-                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-${c}-600/20 peer-checked:border-${c}-500 peer-checked:text-${c}-400 transition-colors flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-${c}-500"></div>
-                        <span class="text-sm font-medium">Signatário ${signerCount}</span>
+                    <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-${c}-600/20 peer-checked:border-${c}-500 peer-checked:text-${c}-400 transition-colors flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-${c}-500"></div>
+                            <span class="text-sm font-medium">Signatário ${signerCount}</span>
+                        </div>
+                        <button type="button" onclick="removerSignatario('${id}', event)" class="text-slate-500 hover:text-red-500 transition-colors" title="Remover Signatário">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </div>
                 </label>
             `;
             container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removerSignatario(id, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const el = document.getElementById('label_' + id);
+            if (el) el.remove();
+            
+            markers.forEach(m => {
+                if (m.signer === id) {
+                    m.markerEl.remove();
+                }
+            });
+            markers = markers.filter(m => m.signer !== id);
+            
+            const checked = document.querySelector('input[name="active_signer"]:checked');
+            if (!checked) {
+                document.querySelector('input[value="owner"]').checked = true;
+            }
         }
 
         function getActiveSigner() {

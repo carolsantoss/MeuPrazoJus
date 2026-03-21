@@ -348,4 +348,239 @@ class DocumentService
         
         return $doc_hash . '/' . $generatedFiles[0]['name'];
     }
+    public function assinarDocumentoMulti($caminhoOriginal, $doc_hash, $contratante, $cpf_contratante, $collectedSignatures, $titulo = 'Documento', $signaturePositions = [], $metadataDocs = []) {
+        $urlValidacao = "meuprazojus.com.br/validar/" . $doc_hash;
+        
+        $tmpFiles = [];
+        foreach ($collectedSignatures as $sigId => &$sigData) {
+            $sigData['_tmpPath'] = null;
+            if (!empty($sigData['sig']) && strpos($sigData['sig'], 'data:image') === 0) {
+                $data = explode(',', $sigData['sig']);
+                $imgData = base64_decode(end($data));
+                $isJpeg = strpos($sigData['sig'], 'data:image/jpeg') === 0;
+                $ext = $isJpeg ? 'jpg' : 'png';
+                $sigData['_sigType'] = $isJpeg ? 'JPEG' : 'PNG';
+                $tmpPath = sys_get_temp_dir() . '/' . uniqid("sig_{$sigId}_") . '.' . $ext;
+                file_put_contents($tmpPath, $imgData);
+                $sigData['_tmpPath'] = $tmpPath;
+                $tmpFiles[] = $tmpPath;
+            }
+        }
+        
+        $pdfSource = new \setasign\Fpdi\Fpdi();
+        $totalSourcePages = $pdfSource->setSourceFile($caminhoOriginal);
+
+        if (empty($metadataDocs)) {
+            $metadataDocs = [[
+                'name' => $titulo,
+                'startPage' => 1,
+                'pageCount' => $totalSourcePages
+            ]];
+        }
+
+        $dirDestino = __DIR__ . '/../../uploads/' . $doc_hash;
+        if (!is_dir($dirDestino)) {
+            mkdir($dirDestino, 0777, true);
+        }
+
+        $generatedFiles = [];
+
+        foreach ($metadataDocs as $index => $docMeta) {
+            $pdf = new \setasign\Fpdi\Fpdi();
+            $pdf->SetAutoPageBreak(false);
+            $pdf->setSourceFile($caminhoOriginal);
+
+            $start = $docMeta['startPage'];
+            $end = $start + $docMeta['pageCount'] - 1;
+
+            for ($pageNo = $start; $pageNo <= $end; $pageNo++) {
+                $templateId = $pdf->importPage($pageNo);
+                $size = $pdf->getTemplateSize($templateId);
+                $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                $pdf->useTemplate($templateId);
+
+                $pdf->SetFont('Helvetica', '', 7);
+                $pdf->SetTextColor(100, 100, 100);
+                
+                $legalInfo = "Em conformidade com a MP nº 2.200-2/2001 e Lei nº 14.063/2020.";
+                
+                $allNames = array_column($collectedSignatures, 'name');
+                if (count($allNames) > 2) {
+                    $footerText = "Assinado digitalmente por múltiplas partes | Validar em $urlValidacao";
+                } else {
+                    $nomesStr = implode(' e ', $allNames);
+                    $footerText = "Assinado por: $contratante e $nomesStr | Validar em $urlValidacao";
+                }
+                
+                $pdf->SetXY(10, $size['height'] - 12);
+                $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($footerText), 0, 1, 'C');
+                $pdf->SetX(10);
+                $pdf->Cell($size['width'] - 20, 4, $this->decodeTxt($legalInfo), 0, 0, 'C');
+
+                $hasDynamicSigs = false;
+                if (!empty($signaturePositions)) {
+                    foreach ($signaturePositions as $pos) {
+                        if ($pos['page'] == $pageNo) {
+                            $hasDynamicSigs = true;
+                            $x = $pos['x'] * $size['width'];
+                            $y = $pos['y'] * $size['height'];
+                            $w = $pos['w'] * $size['width'];
+                            $h = $pos['h'] * $size['height'];
+
+                            $signerType = $pos['signer'] ?? 'signer_1';
+
+                            if ($signerType === 'owner') {
+                                $pdf->SetFont('Times', 'I', 14);
+                                $pdf->SetTextColor(30, 30, 30);
+                                $pdf->SetXY($x, $y + ($h / 2) - 3);
+                                $pdf->Cell($w, 8, $this->decodeTxt($contratante), 0, 0, 'C');
+                                
+                                if (!empty($cpf_contratante)) {
+                                    $pdf->SetFont('Helvetica', '', 8);
+                                    $pdf->SetTextColor(100, 100, 100);
+                                    $pdf->SetXY($x, $y + ($h / 2) + 5);
+                                    $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $cpf_contratante), 0, 0, 'C');
+                                }
+                            } else {
+                                if (isset($collectedSignatures[$signerType])) {
+                                    $sigData = &$collectedSignatures[$signerType];
+                                    if (!empty($sigData['_tmpPath'])) {
+                                        $pdf->Image($sigData['_tmpPath'], $x, $y, $w, $h, $sigData['_sigType']);
+                                    } else {
+                                        $pdf->SetFont('Times', 'I', 14);
+                                        $pdf->SetTextColor(0, 0, 0);
+                                        $pdf->SetXY($x, $y + ($h / 2) - 3);
+                                        $pdf->Cell($w, 8, $this->decodeTxt($sigData['name']), 0, 0, 'C');
+                                        
+                                        if (!empty($sigData['cpf'])) {
+                                            $pdf->SetFont('Helvetica', '', 8);
+                                            $pdf->SetTextColor(100, 100, 100);
+                                            $pdf->SetXY($x, $y + ($h / 2) + 5);
+                                            $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $sigData['cpf']), 0, 0, 'C');
+                                        }
+                                    }
+                                } else {
+                                    $label = str_replace('signer_', 'Signatário ', $signerType);
+                                    $pdf->SetFont('Times', 'I', 12);
+                                    $pdf->SetTextColor(150, 150, 150);
+                                    $pdf->SetXY($x, $y + ($h / 2));
+                                    $pdf->Cell($w, 10, $this->decodeTxt($label . " (Pendente)"), 0, 0, 'C');
+                                    $pdf->SetDrawColor(200, 200, 200);
+                                    $pdf->Rect($x, $y, $w, $h);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!$hasDynamicSigs && empty($signaturePositions)) {
+                    $firstSig = reset($collectedSignatures);
+                    $rubImg = $firstSig['sig'] ?? null;
+                    $this->drawRubrica($pdf, $size['width'] - 45, $size['height'] - 28, $rubImg);
+                }
+            }
+
+            $pdf->SetAutoPageBreak(true, 20);
+            $pdf->AddPage();
+            
+            $pdf->SetFont('Helvetica', 'B', 24);
+            $pdf->SetTextColor(15, 23, 42); 
+            $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+            $pdf->SetTextColor(59, 130, 246); 
+            $pdf->Cell(10, 10, '.', 0, 0, 'L');
+            
+            $pdf->SetFont('Helvetica', '', 8);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->SetXY(75, 12);
+            $dtStr = date('d M Y \à\s H:i');
+            $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+            
+            $qrPath = __DIR__ . "/../../uploads/qr_$doc_hash.png";
+            if(!file_exists($qrPath)){
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode("https://meuprazojus.com.br/validar/$doc_hash");
+                @file_put_contents($qrPath, @file_get_contents($qrUrl));
+            }
+            if(file_exists($qrPath) && filesize($qrPath) > 0) {
+                $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
+            }
+            
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->Line(10, 32, 200, 32);
+            $pdf->SetY(32);
+            $pdf->Ln(10);
+            
+            $pdf->SetFont('Helvetica', 'B', 16);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 15, $this->decodeTxt('Página de assinaturas'), 0, 1, 'C');
+            $pdf->Ln(10);
+            
+            $cpfStr = empty($cpf_contratante) ? 'CPF Vinculado à Conta' : ("CPF: " . $cpf_contratante);
+            $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
+            
+            foreach ($collectedSignatures as $sigData) {
+                $stamp = "IP: {$sigData['ip']} | Data: {$sigData['date']}\nDispositivo: " . $this->parseUA($sigData['ua']);
+                $this->drawSignatureBlock($pdf, $sigData['name'], "CPF: " . $sigData['cpf'], $sigData['sig'], $stamp);
+            }
+            
+            $pdf->Ln(5);
+            $pdf->SetFont('Helvetica', 'B', 10);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+            $pdf->Ln(5);
+
+            $this->drawHistoryItem($pdf, date('d M Y'), date('H:i:s'), 'create', $contratante, "criou este documento.");
+            
+            foreach ($collectedSignatures as $sigData) {
+                $ts = strtotime($sigData['date']);
+                $dSig = date('d M Y', $ts);
+                $tSig = date('H:i:s', $ts);
+                $this->drawHistoryItem($pdf, $dSig, $tSig, 'view', $sigData['name'], "(Celular: {$sigData['phone']}, CPF: {$sigData['cpf']}) acessou este documento por meio do IP {$sigData['ip']}.");
+                $this->drawHistoryItem($pdf, $dSig, $tSig, 'sign', $sigData['name'], "(Celular: {$sigData['phone']}, CPF: {$sigData['cpf']}) assinou eletronicamente este documento por meio do IP {$sigData['ip']}.");
+            }
+            
+            $pdf->SetY(-28); 
+            $pdf->SetFont('Helvetica', 'I', 7.5);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
+
+            $info = pathinfo($docMeta['name']);
+            $nomeBase = preg_replace('/[^A-Za-z0-9_]/', '_', $info['filename']);
+            if (!$nomeBase) $nomeBase = 'Documento_' . ($index + 1);
+            
+            $nomeArquivoFinal = $nomeBase . "_Assinado.pdf";
+            $savePath = $dirDestino . '/' . $nomeArquivoFinal;
+            
+            if (file_exists($savePath)) {
+                $nomeArquivoFinal = $nomeBase . '_' . ($index + 1) . "_Assinado.pdf";
+                $savePath = $dirDestino . '/' . $nomeArquivoFinal;
+            }
+
+            $pdf->Output('F', $savePath);
+            $generatedFiles[] = [
+                'name' => $nomeArquivoFinal,
+                'path' => $savePath
+            ];
+        }
+
+        foreach ($tmpFiles as $t) {
+            if (file_exists($t)) unlink($t);
+        }
+
+        if (count($generatedFiles) > 1 && class_exists('ZipArchive')) {
+            $zipName = "Documentos_Assinados_" . substr($doc_hash, 0, 8) . ".zip";
+            $zipPath = $dirDestino . '/' . $zipName;
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+                foreach ($generatedFiles as $f) {
+                    $zip->addFile($f['path'], $f['name']);
+                }
+                $zip->close();
+                return $doc_hash . '/' . $zipName;
+            }
+        }
+        
+        return $doc_hash . '/' . $generatedFiles[0]['name'];
+    }
 }
