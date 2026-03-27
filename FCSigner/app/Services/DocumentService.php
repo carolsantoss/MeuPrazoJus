@@ -232,6 +232,9 @@ class DocumentService
                                 }
                             } else {
                                 $label = str_replace('signer_', 'Signatário ', $signerType);
+                                if (isset($pos['signer_name']) && trim($pos['signer_name']) !== '') {
+                                    $label = $pos['signer_name'];
+                                }
                                 $pdf->SetFont('Times', 'I', 12);
                                 $pdf->SetTextColor(150, 150, 150);
                                 $pdf->SetXY($x, $y + ($h / 2));
@@ -461,6 +464,9 @@ class DocumentService
                                     }
                                 } else {
                                     $label = str_replace('signer_', 'Signatário ', $signerType);
+                                    if (isset($pos['signer_name']) && trim($pos['signer_name']) !== '') {
+                                        $label = $pos['signer_name'];
+                                    }
                                     $pdf->SetFont('Times', 'I', 12);
                                     $pdf->SetTextColor(150, 150, 150);
                                     $pdf->SetXY($x, $y + ($h / 2));

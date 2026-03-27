@@ -29,6 +29,22 @@ if (!empty($docData['collected_signatures'])) {
     $collectedSignatures = json_decode($docData['collected_signatures'], true) ?: [];
 }
 
+$externalSigners = [];
+foreach ($signaturePositions as $pos) {
+    if (isset($pos['signer']) && $pos['signer'] !== 'owner') {
+        if (!isset($externalSigners[$pos['signer']])) {
+            $externalSigners[$pos['signer']] = $pos['signer_name'] ?? ('Signatário ' . str_replace('signer_', '', $pos['signer']));
+        }
+    }
+}
+
+$pendingSigners = [];
+foreach ($externalSigners as $sigId => $name) {
+    if (!isset($collectedSignatures[$sigId])) {
+        $pendingSigners[$sigId] = $name;
+    }
+}
+
 if (!$docData) {
     die("Documento não encontrado.");
 }
@@ -66,28 +82,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("Arquivo original não encontrado para gerar a assinatura.");
         }
 
-        $externalSigners = [];
-        foreach ($signaturePositions as $pos) {
-            if (isset($pos['signer']) && $pos['signer'] !== 'owner') {
-                $externalSigners[$pos['signer']] = true;
-            }
-        }
         $neededCount = count($externalSigners);
         if ($neededCount === 0) $neededCount = 1;
 
         $assignedSignerId = null;
-        if (!empty($externalSigners)) {
-            foreach ($externalSigners as $sigId => $_) {
-                if (!isset($collectedSignatures[$sigId])) {
-                    $assignedSignerId = $sigId;
-                    break;
-                }
+        if (isset($_POST['signer_id']) && isset($externalSigners[$_POST['signer_id']])) {
+            $assignedSignerId = $_POST['signer_id'];
+            if (isset($collectedSignatures[$assignedSignerId])) {
+                die("Esta assinatura já foi coletada.");
             }
-        } else {
+        } else if (!empty($pendingSigners)) {
+            $assignedSignerId = array_key_first($pendingSigners);
+        } else if (empty($externalSigners)) {
             $assignedSignerId = 'signer_' . (count($collectedSignatures) + 1);
         }
 
-        if (!$assignedSignerId || count($collectedSignatures) >= $neededCount) {
+        if (!$assignedSignerId || (count($collectedSignatures) >= $neededCount && count($externalSigners) > 0)) {
              die("Todas as assinaturas permitidas já foram coletadas para este documento.");
         }
 

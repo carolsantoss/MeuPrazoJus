@@ -116,6 +116,18 @@
             </div>
             
             <form id="formAssinatura" action="" method="POST" class="p-6">
+                <?php if (!empty($pendingSigners) && count($pendingSigners) >= 1): ?>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Quem é você neste documento? (*)</label>
+                    <select name="signer_id" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                        <option value="" disabled selected>Selecione sua identificação...</option>
+                        <?php foreach($pendingSigners as $sigId => $sName): ?>
+                            <option value="<?php echo htmlspecialchars($sigId); ?>"><?php echo htmlspecialchars($sName); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-slate-300 mb-2">Nome Completo do Signatário (*)</label>
                     <input type="text" name="nome_signatario" required placeholder="Digite seu nome completo" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">

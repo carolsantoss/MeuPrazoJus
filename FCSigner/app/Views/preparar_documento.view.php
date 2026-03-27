@@ -71,15 +71,15 @@
                         </div>
                     </div>
                 </label>
-                <label class="block cursor-pointer" id="label_signer_1">
+                <label class="block cursor-pointer mt-3" id="label_signer_1">
                     <input type="radio" name="active_signer" value="signer_1" class="peer sr-only">
                     <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-red-600/20 peer-checked:border-red-500 peer-checked:text-red-400 transition-colors flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <span class="text-sm font-medium">Signatário 1</span>
+                        <div class="flex items-center gap-2 w-full mr-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500 shrink-0"></div>
+                            <input type="text" id="name_signer_1" value="Signatário 1" class="bg-transparent border-none text-sm font-medium focus:ring-0 w-full text-slate-200" onclick="this.closest('label').querySelector('input[type=radio]').checked = true" onfocus="this.closest('label').querySelector('input[type=radio]').checked = true" onkeydown="event.stopPropagation()">
                         </div>
-                        <button type="button" onclick="removerSignatario('signer_1', event)" class="text-slate-500 hover:text-red-500 transition-colors" title="Remover Signatário">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <button type="button" onclick="removerSignatario('signer_1', event)" class="text-slate-500 hover:text-red-500 transition-colors shrink-0 flex items-center justify-center p-1" title="Remover Signatário">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
                 </label>
@@ -177,12 +177,12 @@
                 <label class="block cursor-pointer mt-3" id="label_${id}">
                     <input type="radio" name="active_signer" value="${id}" class="peer sr-only" checked>
                     <div class="w-full text-left px-3 py-3 rounded-lg border border-slate-700 text-slate-300 peer-checked:bg-${c}-600/20 peer-checked:border-${c}-500 peer-checked:text-${c}-400 transition-colors flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-${c}-500"></div>
-                            <span class="text-sm font-medium">Signatário ${signerCount}</span>
+                        <div class="flex items-center gap-2 w-full mr-2">
+                            <div class="w-3 h-3 rounded-full bg-${c}-500 shrink-0"></div>
+                            <input type="text" id="name_${id}" value="Signatário ${signerCount}" class="bg-transparent border-none text-sm font-medium focus:ring-0 w-full text-slate-200" onclick="this.closest('label').querySelector('input[type=radio]').checked = true" onfocus="this.closest('label').querySelector('input[type=radio]').checked = true" onkeydown="event.stopPropagation()">
                         </div>
-                        <button type="button" onclick="removerSignatario('${id}', event)" class="text-slate-500 hover:text-red-500 transition-colors" title="Remover Signatário">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <button type="button" onclick="removerSignatario('${id}', event)" class="text-slate-500 hover:text-red-500 transition-colors shrink-0 flex items-center justify-center p-1" title="Remover Signatário">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
                 </label>
@@ -227,9 +227,12 @@
             const g = parseInt(hex.slice(3, 5), 16);
             const b = parseInt(hex.slice(5, 7), 16);
             
+            const nameInput = document.getElementById('name_' + value);
+            const label = nameInput ? nameInput.value : ('Signatário ' + index);
+
             return {
                 value: value,
-                label: 'Signatário ' + index,
+                label: label,
                 color: hex,
                 bg: `rgba(${r}, ${g}, ${b}, 0.2)`
             };
@@ -289,7 +292,7 @@
                 initDrag(ev, markerDiv, wrapper);
             };
 
-            markers.push({ id, page: pageIndex, markerEl: markerDiv, wrapper, signer: signerInfo.value });
+            markers.push({ id, page: pageIndex, markerEl: markerDiv, wrapper, signer: signerInfo.value, signerName: signerInfo.label });
         }
 
         function initDrag(e, el, wrapper) {
@@ -382,7 +385,8 @@
                     y: t / wrapperH,
                     w: w / wrapperW,
                     h: h / wrapperH,
-                    signer: m.signer
+                    signer: m.signer,
+                    signer_name: m.signerName
                 };
             });
 
