@@ -26,7 +26,22 @@ class DocumentService
         return "$os - $browser";
     }
 
+    private function checkPageBreak($pdf, $space) {
+        if ($pdf->GetY() + $space > 260) {
+            $pdf->AddPage();
+            $pdf->SetFont('Helvetica', 'B', 24);
+            $pdf->SetTextColor(15, 23, 42); 
+            $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+            $pdf->SetTextColor(59, 130, 246); 
+            $pdf->Cell(10, 10, '.', 0, 0, 'L');
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->Line(10, 25, 200, 25);
+            $pdf->SetY(30);
+        }
+    }
+
     private function drawSignatureBlock($pdf, $name, $cpf, $assinatura_base64 = null, $extraInfo = null) {
+        $this->checkPageBreak($pdf, 45);
         $y = $pdf->GetY();
         if ($assinatura_base64 && strpos($assinatura_base64, 'data:image') === 0) {
             $data = explode(',', $assinatura_base64);
@@ -75,6 +90,7 @@ class DocumentService
     }
 
     private function drawHistoryItem($pdf, $date, $time, $iconType, $name, $actionText) {
+        $this->checkPageBreak($pdf, 15);
         $yStart = $pdf->GetY();
         
         $pdf->SetFont('Helvetica', '', 9);

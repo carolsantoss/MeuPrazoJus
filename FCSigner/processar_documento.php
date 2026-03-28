@@ -95,11 +95,26 @@ $stmt->execute([
     $metadataJson
 ]);
 
+function getGeolocationFromIP($ip) {
+    if ($ip == '127.0.0.1' || $ip == '::1') return 'Localhost';
+    $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+    $res = @file_get_contents("http://ip-api.com/json/{$ip}?lang=pt-BR", false, $ctx);
+    if ($res) {
+        $data = @json_decode($res, true);
+        if ($data && isset($data['status']) && $data['status'] === 'success') {
+            return $data['city'] . ' - ' . $data['region'];
+        }
+    }
+    return 'Sistema';
+}
+
 $document_id = $pdo->lastInsertId();
 
-$stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, ip_address, geolocation) VALUES (?, 'Criou', ?, ?, 'Sistema')");
 $ip_cli = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
-$stmtLog->execute([$document_id, $contratante, $ip_cli]);
+$geo = getGeolocationFromIP($ip_cli);
+
+$stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, ip_address, geolocation) VALUES (?, 'Criou', ?, ?, ?)");
+$stmtLog->execute([$document_id, $contratante, $ip_cli, $geo]);
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];

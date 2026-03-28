@@ -114,11 +114,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'date' => date('Y-m-d H:i:s')
         ];
 
+        function getGeolocationFromIP($ip) {
+            if ($ip == '127.0.0.1' || $ip == '::1') return 'Localhost';
+            $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+            $res = @file_get_contents("http://ip-api.com/json/{$ip}?lang=pt-BR", false, $ctx);
+            if ($res) {
+                $data = @json_decode($res, true);
+                if ($data && isset($data['status']) && $data['status'] === 'success') {
+                    return $data['city'] . ' - ' . $data['region'];
+                }
+            }
+            return 'Sistema';
+        }
+
+        $geo = getGeolocationFromIP($ip_cli);
+
         $stmtUpdateJson = $pdo->prepare("UPDATE documents SET collected_signatures = ? WHERE id = ?");
         $stmtUpdateJson->execute([json_encode($collectedSignatures), $docData['id']]);
 
-        $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, 'Sistema')");
-        $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $ip_cli]);
+        $stmtLog = $pdo->prepare("INSERT INTO audit_logs (document_id, action_type, actor_name, actor_cpf, actor_phone, ip_address, geolocation) VALUES (?, 'Assinou', ?, ?, ?, ?, ?)");
+        $stmtLog->execute([$docData['id'], $contratado, $cpf, $celular, $ip_cli, $geo]);
 
         if (count($collectedSignatures) >= $neededCount) {
             $documentService = new \App\Services\DocumentService();
