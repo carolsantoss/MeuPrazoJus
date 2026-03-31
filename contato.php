@@ -1,19 +1,5 @@
 <?php
 session_start();
-$success = false;
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $subject = $_POST['subject'] ?? '';
-    $message = $_POST['message'] ?? '';
-
-    if (!empty($name) && !empty($email) && !empty($message) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $success = true;
-    } else {
-        $error = "Preencha todos os campos obrigatórios com e-mail válido.";
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -105,21 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1>Fale Conosco</h1>
             <p class="subtitle">Dúvidas, suporte, ou sugestões empresariais? Envie sua mensagem.</p>
 
-            <?php if ($success): ?>
-                <div
-                    style="background: rgba(40, 167, 69, 0.1); border-left: 4px solid #28a745; padding: 1rem; border-radius: 4px; color: #fff; margin-bottom: 1.5rem;">
-                    ✅ Mensagem registrada com sucesso! Em breve um de nossos consultores responderá através do e-mail.
-                </div>
-            <?php endif; ?>
-
-            <?php if ($error): ?>
-                <div
-                    style="background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545; padding: 1rem; border-radius: 4px; color: #fff; margin-bottom: 1.5rem;">
-                    ❌ <?php echo $error; ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="POST" action="contato">
+            <form id="contactForm">
                 <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label for="name" style="display:block; margin-bottom:0.5rem; color:#fff;">Seu Nome</label>
                     <input type="text" id="name" name="name" required
@@ -163,6 +135,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn btn-primary"
                     style="width:100%; padding:1rem; font-size:1.05rem;">Enviar Mensagem</button>
             </form>
+
+            <script>
+                document.getElementById('contactForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const subjectSelect = document.getElementById('subject');
+                    const subjectText = subjectSelect.options[subjectSelect.selectedIndex].text;
+                    const message = document.getElementById('message').value;
+
+                    const mailtoLink = `mailto:fc.contato@outlook.com.br?subject=${encodeURIComponent('Contato Site - ' + subjectText)}&body=${encodeURIComponent(
+                        'Nome: ' + name + '\n' +
+                        'E-mail: ' + email + '\n\n' +
+                        'Mensagem:\n' + message
+                    )}`;
+
+                    window.location.href = mailtoLink;
+                });
+            </script>
 
             <div
                 style="margin-top:2.5rem; text-align:center; padding-top:2rem; border-top:1px solid rgba(255,255,255,0.05);">
