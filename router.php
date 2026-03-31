@@ -19,7 +19,6 @@ if (file_exists(__DIR__ . '/' . $path . '.php')) {
     return true;
 }
 
-// Otherwise return 404 header and let it handle naturally
 header("HTTP/1.0 404 Not Found");
-echo "404 Not Found.";
+require '404.php';
 return true;

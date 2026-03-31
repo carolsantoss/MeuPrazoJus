@@ -3,6 +3,9 @@ RewriteEngine On
 RewriteBase /
 
 RewriteRule ^validar/([a-zA-Z0-9_\-]+)$ FCSigner/validar.php?hash=$1 [QSA,L]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+ErrorDocument 404 /404.php
 
 <IfModule mod_headers.c>
     Header set Cross-Origin-Opener-Policy "same-origin"

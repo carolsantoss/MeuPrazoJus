@@ -32,12 +32,22 @@ if (isset($_SESSION['user_id'])) {
         <div class="max-w-7xl">
             <nav>
                 <a href="index" class="logo" style="text-decoration: none;">MeuPrazoJus</a>
-                <div>
+                <div style="display:flex; align-items:center; gap:1.5rem;">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="subscription" class="btn btn-ghost">Planos</a>
                         <a href="#" class="btn btn-primary" onclick="logout()">Sair</a>
                     <?php else: ?>
-                        <a href="login" class="btn btn-ghost">Entrar</a>
+                        <div class="nav-links" style="display:none; gap:1.5rem; color:#fff;" id="top-nav-links">
+                            <a href="index" style="color:#dfc690; text-decoration:none; font-weight:500;">Calculadora</a>
+                            <a href="blog" style="color:white; text-decoration:none; opacity:0.8;">Blog</a>
+                            <a href="sobre" style="color:white; text-decoration:none; opacity:0.8;">Sobre</a>
+                            <a href="contato" style="color:white; text-decoration:none; opacity:0.8;">Contato</a>
+                        </div>
+                        <style>@media(min-width: 768px){ #top-nav-links { display:flex !important; } }</style>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 24px;" class="hide-mobile"></div>
+                        <a href="login" class="btn btn-ghost hide-mobile">Entrar</a>
+                        <a href="register" class="btn btn-primary">Criar Conta</a>
+                        <style>@media(max-width: 768px){ .hide-mobile { display:none !important; } }</style>
                     <?php endif; ?>
                 </div>
             </nav>
@@ -166,6 +176,10 @@ if (isset($_SESSION['user_id'])) {
                             Adicionar ao Google Agenda
                         </a>
                          <button id="btn-pdf" class="btn btn-secondary" style="width:100%; margin-top:10px;">📄 Baixar PDF Detalhado</button>
+                    </div>
+                    
+                    <div class="disclaimer-box" style="border:1px solid #ffa500; padding:16px; border-radius:8px; background:rgba(255,165,0,0.1); margin-top: 1.5rem; text-align: left;">
+                        <p style="margin: 0; color: #dfc690; font-size: 0.9rem; line-height: 1.5;"><strong style="color: #ffa500;">⚠ Aviso Legal:</strong> Os cálculos realizados têm caráter meramente estimativo e informativo. Não substituem a análise de um advogado. Sempre confira os prazos nos sistemas oficiais do Poder Judiciário (PJe, e-SAJ, PROJUDI, etc.). O MeuPrazoJus não se responsabiliza por perdas de prazo.</p>
                     </div>
                 </div>
 
