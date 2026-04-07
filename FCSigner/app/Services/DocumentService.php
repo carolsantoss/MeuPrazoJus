@@ -307,12 +307,37 @@ class DocumentService
             $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
             $this->drawSignatureBlock($pdf, $contratado, "CPF: " . $cpf, $assinatura_base64, $signatureStamp);
             
-            $pdf->Ln(5);
-            $pdf->SetFont('Helvetica', 'B', 10);
-            $pdf->SetTextColor(15, 23, 42);
-            $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
+            $pdf->SetY(-28); 
+            $pdf->SetFont('Helvetica', 'I', 7.5);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
+
+            $pdf->AddPage();
+            
+            $pdf->SetFont('Helvetica', 'B', 24);
+            $pdf->SetTextColor(15, 23, 42); 
+            $pdf->SetXY(10, 10);
+            $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+            $pdf->SetTextColor(59, 130, 246); 
+            $pdf->Cell(10, 10, '.', 0, 0, 'L');
+            
+            $pdf->SetFont('Helvetica', '', 8);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->SetXY(75, 12);
+            $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+            
+            if(file_exists($qrPath) && filesize($qrPath) > 0) {
+                $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
+            }
+            
             $pdf->SetDrawColor(200, 200, 200);
-            $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+            $pdf->Line(10, 32, 200, 32);
+            $pdf->SetY(32);
+            $pdf->Ln(10);
+            
+            $pdf->SetFont('Helvetica', 'B', 16);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 15, $this->decodeTxt('Histórico do documento'), 0, 1, 'C');
             $pdf->Ln(5);
 
             $d = date('d M Y');
@@ -545,12 +570,37 @@ class DocumentService
                 $this->drawSignatureBlock($pdf, $signerInfo['name'], "CPF: " . $signerInfo['cpf'], $signerInfo['sig'], $stamp);
             }
             
-            $pdf->Ln(5);
-            $pdf->SetFont('Helvetica', 'B', 10);
-            $pdf->SetTextColor(15, 23, 42);
-            $pdf->Cell(0, 8, $this->decodeTxt("HISTÓRICO"), 0, 1, 'L');
+            $pdf->SetY(-28); 
+            $pdf->SetFont('Helvetica', 'I', 7.5);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->MultiCell(0, 3.2, $this->decodeTxt("Este documento foi assinado por meio de assinaturas eletrônicas avançadas e está em plena conformidade com a Medida Provisória nº 2.200-2/2001 e com a Lei nº 14.063/2020, possuindo validade jurídica e integridade garantida por criptografia."), 0, 'C');
+
+            $pdf->AddPage();
+            
+            $pdf->SetFont('Helvetica', 'B', 24);
+            $pdf->SetTextColor(15, 23, 42); 
+            $pdf->SetXY(10, 10);
+            $pdf->Cell(12, 10, 'FC', 0, 0, 'L');
+            $pdf->SetTextColor(59, 130, 246); 
+            $pdf->Cell(10, 10, '.', 0, 0, 'L');
+            
+            $pdf->SetFont('Helvetica', '', 8);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->SetXY(75, 12);
+            $pdf->MultiCell(100, 4, $this->decodeTxt("Data e horários em GMT -3:00\nÚltima atualização em $dtStr\nIdentificador: $doc_hash"), 0, 'R');
+            
+            if(file_exists($qrPath) && filesize($qrPath) > 0) {
+                $pdf->Image($qrPath, 178, 10, 20, 20, 'PNG');
+            }
+            
             $pdf->SetDrawColor(200, 200, 200);
-            $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+            $pdf->Line(10, 32, 200, 32);
+            $pdf->SetY(32);
+            $pdf->Ln(10);
+            
+            $pdf->SetFont('Helvetica', 'B', 16);
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->Cell(0, 15, $this->decodeTxt('Histórico do documento'), 0, 1, 'C');
             $pdf->Ln(5);
 
             $this->drawHistoryItem($pdf, date('d M Y'), date('H:i:s'), 'create', $contratante, "criou este documento.");
