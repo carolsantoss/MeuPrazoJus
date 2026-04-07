@@ -6,7 +6,7 @@ $doc_id = isset($_GET['doc_id']) ? (int) $_GET['doc_id'] : 0;
 require_once __DIR__ . '/../src/Database.php';
 $pdo = Database::getInstance()->getConnection();
 
-$stmtDoc = $pdo->prepare("SELECT document_hash, original_hash, updated_at FROM documents WHERE id = ?");
+$stmtDoc = $pdo->prepare("SELECT document_hash, original_hash, updated_at, contratante_cpf FROM documents WHERE id = ?");
 $stmtDoc->execute([$doc_id]);
 $documento = $stmtDoc->fetch();
 
@@ -31,6 +31,13 @@ foreach ($signatarios as $sig) {
     }
 }
 $signatarios = $uniqueSignatarios;
+
+foreach ($signatarios as &$sig) {
+    if (empty($sig['cpf']) && !empty($documento['contratante_cpf'])) {
+        $sig['cpf'] = $documento['contratante_cpf'];
+    }
+}
+unset($sig);
 
 
 function formatCpf($cpf)
