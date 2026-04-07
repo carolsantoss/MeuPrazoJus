@@ -18,7 +18,7 @@ $stmtLogs = $pdo->prepare("SELECT * FROM audit_logs WHERE document_id = ? ORDER 
 $stmtLogs->execute([$doc_id]);
 $logs = $stmtLogs->fetchAll();
 
-$stmtSigners = $pdo->prepare("SELECT DISTINCT actor_name as name, actor_cpf as cpf, 'Assinado' as status FROM audit_logs WHERE document_id = ? AND action_type IN ('Criou', 'Assinou') ORDER BY id ASC");
+$stmtSigners = $pdo->prepare("SELECT actor_name as name, actor_cpf as cpf, 'Assinado' as status FROM audit_logs WHERE document_id = ? AND action_type IN ('Criou', 'Assinou') ORDER BY id ASC");
 $stmtSigners->execute([$doc_id]);
 $signatarios = $stmtSigners->fetchAll();
 
