@@ -385,6 +385,7 @@ class DocumentService
                 $tmpFiles[] = $tmpPath;
             }
         }
+        unset($sigData);
         
         $pdfSource = new \setasign\Fpdi\Fpdi();
         $totalSourcePages = $pdfSource->setSourceFile($caminhoOriginal);
@@ -462,20 +463,20 @@ class DocumentService
                                 }
                             } else {
                                 if (isset($collectedSignatures[$signerType])) {
-                                    $sigData = &$collectedSignatures[$signerType];
-                                    if (!empty($sigData['_tmpPath'])) {
-                                        $pdf->Image($sigData['_tmpPath'], $x, $y, $w, $h, $sigData['_sigType']);
+                                    $sigDataInfo = $collectedSignatures[$signerType];
+                                    if (!empty($sigDataInfo['_tmpPath'])) {
+                                        $pdf->Image($sigDataInfo['_tmpPath'], $x, $y, $w, $h, $sigDataInfo['_sigType']);
                                     } else {
                                         $pdf->SetFont('Times', 'I', 14);
                                         $pdf->SetTextColor(0, 0, 0);
                                         $pdf->SetXY($x, $y + ($h / 2) - 3);
-                                        $pdf->Cell($w, 8, $this->decodeTxt($sigData['name']), 0, 0, 'C');
+                                        $pdf->Cell($w, 8, $this->decodeTxt($sigDataInfo['name']), 0, 0, 'C');
                                         
-                                        if (!empty($sigData['cpf'])) {
+                                        if (!empty($sigDataInfo['cpf'])) {
                                             $pdf->SetFont('Helvetica', '', 8);
                                             $pdf->SetTextColor(100, 100, 100);
                                             $pdf->SetXY($x, $y + ($h / 2) + 5);
-                                            $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $sigData['cpf']), 0, 0, 'C');
+                                            $pdf->Cell($w, 6, $this->decodeTxt("CPF: " . $sigDataInfo['cpf']), 0, 0, 'C');
                                         }
                                     }
                                 } else {
@@ -539,9 +540,9 @@ class DocumentService
             $cpfStr = empty($cpf_contratante) ? 'CPF Vinculado à Conta' : ("CPF: " . $cpf_contratante);
             $this->drawSignatureBlock($pdf, $contratante, $cpfStr); 
             
-            foreach ($collectedSignatures as $sigData) {
-                $stamp = "IP: {$sigData['ip']} | Data: {$sigData['date']}\nDispositivo: " . $this->parseUA($sigData['ua']);
-                $this->drawSignatureBlock($pdf, $sigData['name'], "CPF: " . $sigData['cpf'], $sigData['sig'], $stamp);
+            foreach ($collectedSignatures as $signerInfo) {
+                $stamp = "IP: {$signerInfo['ip']} | Data: {$signerInfo['date']}\nDispositivo: " . $this->parseUA($signerInfo['ua']);
+                $this->drawSignatureBlock($pdf, $signerInfo['name'], "CPF: " . $signerInfo['cpf'], $signerInfo['sig'], $stamp);
             }
             
             $pdf->Ln(5);
@@ -554,12 +555,12 @@ class DocumentService
 
             $this->drawHistoryItem($pdf, date('d M Y'), date('H:i:s'), 'create', $contratante, "criou este documento.");
             
-            foreach ($collectedSignatures as $sigData) {
-                $ts = strtotime($sigData['date']);
+            foreach ($collectedSignatures as $signerInfo) {
+                $ts = strtotime($signerInfo['date']);
                 $dSig = date('d M Y', $ts);
                 $tSig = date('H:i:s', $ts);
-                $this->drawHistoryItem($pdf, $dSig, $tSig, 'view', $sigData['name'], "(Celular: {$sigData['phone']}, CPF: {$sigData['cpf']}) acessou este documento por meio do IP {$sigData['ip']}.");
-                $this->drawHistoryItem($pdf, $dSig, $tSig, 'sign', $sigData['name'], "(Celular: {$sigData['phone']}, CPF: {$sigData['cpf']}) assinou eletronicamente este documento por meio do IP {$sigData['ip']}.");
+                $this->drawHistoryItem($pdf, $dSig, $tSig, 'view', $signerInfo['name'], "(Celular: {$signerInfo['phone']}, CPF: {$signerInfo['cpf']}) acessou este documento por meio do IP {$signerInfo['ip']}.");
+                $this->drawHistoryItem($pdf, $dSig, $tSig, 'sign', $signerInfo['name'], "(Celular: {$signerInfo['phone']}, CPF: {$signerInfo['cpf']}) assinou eletronicamente este documento por meio do IP {$signerInfo['ip']}.");
             }
             
             $pdf->SetY(-28); 
