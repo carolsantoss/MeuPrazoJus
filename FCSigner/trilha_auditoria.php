@@ -18,14 +18,29 @@ $stmtLogs = $pdo->prepare("SELECT * FROM audit_logs WHERE document_id = ? ORDER 
 $stmtLogs->execute([$doc_id]);
 $logs = $stmtLogs->fetchAll();
 
-$stmtSigners = $pdo->prepare("SELECT DISTINCT actor_name as name, actor_cpf as cpf, 'Assinado' as status FROM audit_logs WHERE document_id = ? AND action_type = 'Assinou'");
+$stmtSigners = $pdo->prepare("SELECT DISTINCT actor_name as name, actor_cpf as cpf, 'Assinado' as status FROM audit_logs WHERE document_id = ? AND action_type IN ('Criou', 'Assinou') ORDER BY id ASC");
 $stmtSigners->execute([$doc_id]);
 $signatarios = $stmtSigners->fetchAll();
+
+$uniqueSignatarios = [];
+$vistos = [];
+foreach ($signatarios as $sig) {
+    if (!in_array($sig['name'], $vistos)) {
+        $uniqueSignatarios[] = $sig;
+        $vistos[] = $sig['name'];
+    }
+}
+$signatarios = $uniqueSignatarios;
 
 
 function formatCpf($cpf)
 {
-    return preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", preg_replace("/\D/", "", $cpf));
+    if (empty($cpf)) return 'CPF Vinculado à Conta';
+    $cpfF = preg_replace("/\D/", "", $cpf);
+    if (strlen($cpfF) === 11) {
+        return preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", $cpfF);
+    }
+    return $cpf;
 }
 
 function formatPhone($phone)

@@ -85,7 +85,10 @@
                             <?php echo htmlspecialchars($sig['name']); ?>
                         </div>
                         <div class="text-sm font-semibold text-slate-800">
-                            <?php echo formatCpf($sig['cpf']); ?>
+                            <?php 
+                            $fCpf = formatCpf($sig['cpf']); 
+                            echo (strpos($fCpf, 'Vinculado') !== false) ? $fCpf : "CPF: " . $fCpf;
+                            ?>
                         </div>
                         <div class="text-xs text-slate-600">Signatário</div>
                     </div>
